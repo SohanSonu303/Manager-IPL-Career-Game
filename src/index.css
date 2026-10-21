@@ -2142,3 +2142,12 @@ select.input {
   margin-top: 8px;
   border-color: var(--line);
 }
+
+.version-tag {
+  display: inline-block;
+  margin: 0 0 8px;
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--gold);
+}

@@ -52,6 +52,9 @@ export function Settings() {
   return (
     <Screen>
       <h1>Settings</h1>
+      <p className="version-tag">
+        <strong>Version {__APP_VERSION__}</strong>
+      </p>
       <p>
         <Link to="/debug">Sim debug</Link> · <Link to="/gallery">Identity gallery</Link>
       </p>
@@ -112,9 +115,6 @@ export function Settings() {
       >
         Reset career
       </button>
-      <p className="dim" style={{ marginTop: 24 }}>
-        Prototype build · {__APP_VERSION__}
-      </p>
     </Screen>
   )
 }
