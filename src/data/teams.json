@@ -10,9 +10,9 @@
     },
     "ground": "Deccan Park",
     "crest": {
-      "shape": "diamond",
+      "shape": "hexagon",
       "glyph": "wing",
-      "band": true
+      "band": false
     }
   },
   {
@@ -26,9 +26,9 @@
     },
     "ground": "Marina Ground",
     "crest": {
-      "shape": "pennant",
+      "shape": "diamond",
       "glyph": "star",
-      "band": true
+      "band": false
     }
   },
   {
@@ -42,7 +42,7 @@
     },
     "ground": "Harbour Stadium",
     "crest": {
-      "shape": "diamond",
+      "shape": "shield",
       "glyph": "wave",
       "band": true
     }
@@ -58,9 +58,9 @@
     },
     "ground": "Garden City Oval",
     "crest": {
-      "shape": "pennant",
+      "shape": "hexagon",
       "glyph": "bolt",
-      "band": true
+      "band": false
     }
   },
   {
@@ -74,7 +74,7 @@
     },
     "ground": "Hooghly Park",
     "crest": {
-      "shape": "shield",
+      "shape": "pennant",
       "glyph": "flame",
       "band": true
     }
@@ -90,9 +90,9 @@
     },
     "ground": "Yamuna Ground",
     "crest": {
-      "shape": "circle",
+      "shape": "hexagon",
       "glyph": "star",
-      "band": false
+      "band": true
     }
   },
   {
@@ -106,7 +106,7 @@
     },
     "ground": "Five Rivers Stadium",
     "crest": {
-      "shape": "shield",
+      "shape": "diamond",
       "glyph": "peak",
       "band": false
     }
@@ -122,7 +122,7 @@
     },
     "ground": "Pink City Park",
     "crest": {
-      "shape": "pennant",
+      "shape": "hexagon",
       "glyph": "sun",
       "band": true
     }
@@ -140,7 +140,7 @@
     "crest": {
       "shape": "pennant",
       "glyph": "leaf",
-      "band": false
+      "band": true
     }
   },
   {
@@ -154,9 +154,9 @@
     },
     "ground": "Sabarmati Arena",
     "crest": {
-      "shape": "circle",
+      "shape": "diamond",
       "glyph": "bolt",
-      "band": true
+      "band": false
     }
   }
 ]

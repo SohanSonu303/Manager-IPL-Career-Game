@@ -1,0 +1,301 @@
+# IPL 2026 squads, from Wikipedia "2026 <franchise> season" pages (squad tables).
+# Format: name | nationality | date of birth | bowling style | salary (INR crore) | status | flags
+# status: A = in the squad, R = in-season replacement (in the squad), W = withdrawn (becomes a free agent)
+# flags: wk = wicketkeeper
+# Our franchise ids (see teams.ts): che=CSK mum=MI blr=RCB kol=KKR del=DC pun=PBKS raj=RR luc=LSG guj=GT hyd=SRH
+# Known data issues: Lungi Ngidi (DC, auction buy) was missing from the fetched DC table and is added below;
+# Mangesh Yadav's page birth year (2022) is a typo, set to 2002.
+
+@che
+Matthew Short | Australia | 1995-11-08 | off break | 1.5 | A
+MS Dhoni | India | 1981-07-07 | medium | 4.0 | A | wk
+Gurjapneet Singh | India | 1998-11-08 | fast-medium | 2.2 | A
+Kuldip Yadav | India | 1996-10-15 | fast-medium | 0.30 | R
+Sanju Samson | India | 1994-11-11 | none | 18.0 | A | wk
+Dewald Brevis | South Africa | 2003-04-29 | leg spin | 2.2 | A
+Prashant Veer | India | 2005-11-24 | orthodox | 14.2 | A
+Dian Forrester | South Africa | 2000-06-07 | fast-medium | 0.75 | R
+Noor Ahmad | Afghanistan | 2005-01-03 | wrist spin | 10.0 | A
+Akash Madhwal | India | 1993-11-25 | fast-medium | 0.30 | R
+Rahul Chahar | India | 1999-08-04 | leg spin | 5.2 | A
+Shreyas Gopal | India | 1993-09-04 | leg spin | 0.30 | A
+Akeal Hosein | West Indies | 1993-04-25 | orthodox | 2.0 | A
+Aman Hakim Khan | India | 1996-11-23 | fast-medium | 0.40 | A
+Matt Henry | New Zealand | 1991-12-14 | fast-medium | 2.0 | A
+Shivam Dube | India | 1993-06-26 | medium | 12.0 | A
+Kartik Sharma | India | 2006-04-26 | none | 14.2 | A | wk
+Macneil Noronha | India | 2001-09-23 | off break | 0.30 | R
+Ruturaj Gaikwad | India | 1997-01-31 | off break | 18.0 | A
+Zak Foulkes | New Zealand | 2002-06-05 | fast-medium | 0.75 | A
+Urvil Patel | India | 1998-10-17 | none | 0.30 | A | wk
+Spencer Johnson | Australia | 1995-12-16 | fast | 1.5 | R
+Anshul Kamboj | India | 2000-12-06 | fast-medium | 3.4 | A
+Mukesh Choudhary | India | 1996-07-06 | fast-medium | 0.30 | A
+Sarfaraz Khan | India | 1997-10-22 | leg spin | 0.75 | A
+Ramakrishna Ghosh | India | 1997-08-28 | fast-medium | 0.30 | W
+Ayush Mhatre | India | 2007-07-16 | off break | 0.30 | W
+Khaleel Ahmed | India | 1997-12-05 | fast-medium | 4.8 | W
+Nathan Ellis | Australia | 1994-09-22 | fast-medium | 2.0 | W
+Jamie Overton | England | 1994-04-10 | fast-medium | 1.5 | W
+
+@mum
+Krish Bhagat | India | 2004-11-06 | medium | 0.30 | R
+Tilak Varma | India | 2002-11-08 | off break | 8.00 | A
+Robin Minz | India | 2002-09-13 | none | 0.65 | A | wk
+Trent Boult | New Zealand | 1989-07-22 | fast-medium | 12.50 | A
+Naman Dhir | India | 1999-12-31 | off break | 5.25 | A
+Will Jacks | England | 1998-11-21 | off break | 5.25 | A
+Hardik Pandya | India | 1993-10-11 | fast-medium | 16.35 | A
+Corbin Bosch | South Africa | 1994-09-10 | fast-medium | 0.75 | A
+Ashwani Kumar | India | 2001-08-29 | fast-medium | 0.30 | A
+Ryan Rickelton | South Africa | 1996-07-11 | none | 1.00 | A | wk
+Rohit Sharma | India | 1987-04-30 | off break | 16.30 | A
+Shardul Thakur | India | 1991-10-16 | medium | 2.00 | A
+Deepak Chahar | India | 1992-08-07 | fast-medium | 9.25 | A
+Suryakumar Yadav | India | 1990-09-14 | off break | 16.35 | A
+Sherfane Rutherford | West Indies | 1998-08-15 | fast-medium | 2.60 | A
+Jasprit Bumrah | India | 1993-12-06 | fast-medium | 18.00 | A
+Ruchit Ahir | India | 2000-10-28 | fast-medium | 0.30 | R
+Allah Ghazanfar | Afghanistan | 2006-03-20 | off break | 4.80 | A
+Mohammad Izhar | India | 2004-01-01 | medium | 0.30 | A
+Mahipal Lomror | India | 1999-11-16 | orthodox | 0.50 | R
+Keshav Maharaj | South Africa | 1990-02-07 | orthodox | 0.75 | R
+Danish Malewar | India | 2003-10-08 | leg spin | 0.30 | A
+Mayank Markande | India | 1997-11-11 | leg spin | 0.30 | A
+Mayank Rawat | India | 1999-12-04 | off break | 0.30 | A
+Raghu Sharma | India | 1993-03-11 | leg spin | 0.30 | A
+Raj Angad Bawa | India | 2002-11-12 | fast-medium | 0.30 | W
+Mitchell Santner | New Zealand | 1992-02-05 | orthodox | 2.00 | W
+Atharva Ankolekar | India | 2000-09-26 | orthodox | 0.30 | W
+Quinton de Kock | South Africa | 1992-12-17 | none | 1.00 | W | wk
+
+@blr
+Suyash Sharma | India | 2003-05-15 | leg spin | 2.6 | A
+Krunal Pandya | India | 1991-03-24 | orthodox | 5.75 | A
+Tim David | Australia | 1996-03-16 | off break | 3 | A
+Abhinandan Singh | India | 1997-03-30 | fast-medium | 0.30 | A
+Bhuvneshwar Kumar | India | 1990-02-05 | medium | 10.75 | A
+Virat Kohli | India | 1988-11-05 | medium | 21 | A
+Jordan Cox | England | 2000-10-21 | off break | 0.75 | A | wk
+Swapnil Singh | India | 1991-01-22 | orthodox | 0.50 | A
+Venkatesh Iyer | India | 1994-12-25 | medium | 7 | A
+Jacob Duffy | New Zealand | 1994-08-02 | fast-medium | 2 | A
+Phil Salt | England | 1996-08-28 | none | 11.5 | A | wk
+Devdutt Padikkal | India | 2000-07-07 | off break | 2 | A
+Josh Hazlewood | Australia | 1991-01-08 | fast-medium | 12.5 | A
+Rasikh Salam | India | 2000-04-05 | medium | 6 | A
+Romario Shepherd | West Indies | 1994-11-26 | fast-medium | 1.5 | A
+Jitesh Sharma | India | 1993-10-22 | none | 11 | A | wk
+Rajat Patidar | India | 1993-06-01 | off break | 11 | A
+Kanishk Chouhan | India | 2006-09-23 | off break | 0.30 | A
+Satvik Deswal | India | 2007-03-23 | orthodox | 0.30 | A
+Vihaan Malhotra | India | 2007-01-01 | off break | 0.30 | A
+Richard Gleeson | England | 1987-12-02 | fast-medium | 1.6 | R
+Vicky Ostwal | India | 2002-09-01 | orthodox | 0.30 | A
+Mangesh Yadav | India | 2002-10-10 | fast | 5.2 | A
+Jacob Bethell | England | 2003-10-23 | orthodox | 2.6 | W
+Yash Dayal | India | 1997-12-13 | fast-medium | 5 | W
+Nuwan Thushara | Sri Lanka | 1994-08-06 | fast-medium | 1.6 | W
+
+@kol
+Ajinkya Rahane | India | 1988-06-06 | medium | 1.5 | A
+Sarthak Ranjan | India | 1996-09-25 | leg spin | 0.30 | A
+Rachin Ravindra | New Zealand | 1999-11-18 | orthodox | 2.0 | A
+Manish Pandey | India | 1989-09-10 | medium | 0.75 | A
+Vaibhav Arora | India | 1997-12-14 | fast-medium | 1.8 | A
+Finn Allen | New Zealand | 1999-04-22 | off break | 2.0 | A | wk
+Angkrish Raghuvanshi | India | 2004-06-05 | off break | 3.0 | A
+Ramandeep Singh | India | 1997-04-13 | medium | 4.0 | A
+Tejasvi Singh | India | 2002-04-18 | none | 3.0 | A | wk
+Navdeep Saini | India | 1992-11-23 | fast | 0.75 | R
+Umran Malik | India | 1999-11-22 | fast | 0.75 | A
+Kartik Tyagi | India | 2000-11-08 | fast-medium | 0.30 | A
+Rahul Tripathi | India | 1991-03-02 | medium | 0.75 | A
+Varun Chakravarthy | India | 1991-08-29 | leg spin | 12 | A
+Saurabh Dubey | India | 1998-01-23 | fast-medium | 0.30 | R
+Rinku Singh | India | 1997-10-12 | off break | 13 | A
+Blessing Muzarabani | Zimbabwe | 1996-10-02 | fast-medium | 0.75 | R
+Cameron Green | Australia | 1999-06-03 | fast-medium | 25.2 | A
+Tim Seifert | New Zealand | 1994-12-14 | none | 1.5 | A | wk
+Anukul Roy | India | 1998-11-30 | orthodox | 0.40 | A
+Rovman Powell | West Indies | 1993-07-23 | medium | 1.5 | A
+Daksh Kamra | India | 2003-01-09 | leg spin | 0.30 | A
+Sunil Narine | West Indies | 1988-05-26 | off break | 12 | A
+Luvnith Sisodia | India | 2000-01-15 | medium | 0.30 | R | wk
+Prashant Solanki | India | 2000-02-22 | leg spin | 0.30 | A
+Harshit Rana | India | 2001-12-22 | fast-medium | 4.0 | W
+Matheesha Pathirana | Sri Lanka | 2002-12-18 | fast | 18 | W
+Akash Deep | India | 1996-12-15 | fast-medium | 1.0 | W
+Mustafizur Rahman | Bangladesh | 1995-09-06 | fast-medium | 9.2 | W
+
+@del
+KL Rahul | India | 1992-04-18 | medium | 14 | A | wk
+Sameer Rizvi | India | 2003-12-06 | off break | 0.95 | A
+David Miller | South Africa | 1989-06-10 | off break | 2 | A
+Axar Patel | India | 1994-01-20 | orthodox | 16.5 | A
+Kuldeep Yadav | India | 1994-12-14 | wrist spin | 13.25 | A
+Abhishek Porel | India | 2002-10-17 | none | 4 | A | wk
+Vipraj Nigam | India | 2004-07-28 | leg spin | 0.5 | A
+Tristan Stubbs | South Africa | 2000-08-14 | none | 10 | A | wk
+Nitish Rana | India | 1993-12-27 | off break | 4.2 | A
+Mukesh Kumar | India | 1993-10-12 | medium | 8 | A
+Tripurana Vijay | India | 2001-09-05 | off break | 0.3 | A
+Mitchell Starc | Australia | 1990-01-30 | fast | 11.75 | A
+Ashutosh Sharma | India | 1998-09-15 | none | 3.8 | A
+Rehan Ahmed | England | 2004-08-13 | leg spin | 0.75 | R
+Dushmantha Chameera | Sri Lanka | 1992-01-11 | fast | 0.75 | A
+Kyle Jamieson | New Zealand | 1994-12-30 | fast-medium | 2 | A
+Ajay Mandal | India | 1996-02-25 | orthodox | 0.3 | A
+Pathum Nissanka | Sri Lanka | 1998-03-29 | fast-medium | 4 | A
+Auqib Nabi | India | 1996-11-04 | medium | 8.4 | A
+Karun Nair | India | 1991-12-06 | off break | 0.5 | A
+T Natarajan | India | 1991-04-04 | medium | 10.75 | A
+Sahil Parakh | India | 2007-06-07 | leg spin | 0.3 | A
+Prithvi Shaw | India | 1999-11-09 | off break | 0.75 | A
+Madhav Tiwari | India | 2003-09-28 | medium | 0.4 | A
+Lungi Ngidi | South Africa | 1996-03-29 | fast-medium | 2.0 | A
+Ben Duckett | England | 1994-10-17 | off break | 2 | W
+
+@pun
+Arshdeep Singh | India | 1999-02-05 | fast-medium | 18 | A
+Yuzvendra Chahal | India | 1990-07-23 | leg spin | 18 | A
+Vishnu Vinod | India | 1993-12-02 | none | 0.95 | A | wk
+Suryansh Shedge | India | 2003-01-29 | fast-medium | 0.30 | A
+Cooper Connolly | Australia | 2003-08-22 | orthodox | 3 | A
+Azmatullah Omarzai | Afghanistan | 2000-03-24 | fast-medium | 2.4 | A
+Harpreet Brar | India | 1995-09-16 | orthodox | 1.5 | A
+Xavier Bartlett | Australia | 1998-12-17 | fast | 0.80 | A
+Mitchell Owen | Australia | 2001-09-11 | medium | 3 | A
+Marcus Stoinis | Australia | 1989-08-16 | fast-medium | 11 | A
+Priyansh Arya | India | 2001-01-18 | off break | 3.8 | A
+Nehal Wadhera | India | 2000-09-04 | leg spin | 4.2 | A
+Praveen Dubey | India | 1993-07-01 | leg spin | 0.30 | A
+Shashank Singh | India | 1991-11-21 | fast-medium | 5.5 | A
+Yash Thakur | India | 1998-12-28 | fast-medium | 1.6 | A
+Vishal Nishad | India | 2005-04-01 | leg spin | 0.30 | A
+Vijaykumar Vyshak | India | 1997-01-31 | fast-medium | 1.8 | A
+Lockie Ferguson | New Zealand | 1991-06-13 | fast-medium | 2 | A
+Marco Jansen | South Africa | 2000-05-01 | fast-medium | 7 | A
+Prabhsimran Singh | India | 2000-08-10 | none | 4 | A | wk
+Shreyas Iyer | India | 1994-12-06 | leg spin | 26.75 | A
+Musheer Khan | India | 2005-02-27 | orthodox | 0.30 | A
+Pyla Avinash | India | 2000-07-07 | fast-medium | 0.30 | A
+Ben Dwarshuis | Australia | 1994-06-23 | fast-medium | 4.4 | A
+Harnoor Singh | India | 2003-01-30 | leg spin | 0.30 | A
+
+@raj
+Donovan Ferreira | South Africa | 1998-07-21 | off break | 1.00 | A | wk
+Vignesh Puthur | India | 2001-03-02 | orthodox | 0.30 | A
+Riyan Parag | India | 2001-11-10 | leg spin | 14.00 | A
+Lhuan-dre Pretorius | South Africa | 2006-03-28 | none | 0.30 | A | wk
+Dasun Shanaka | Sri Lanka | 1991-09-09 | medium | 2.00 | R
+Ravindra Jadeja | India | 1988-12-06 | orthodox | 14.00 | A
+Kwena Maphaka | South Africa | 2006-04-08 | fast-medium | 1.50 | A
+Vaibhav Sooryavanshi | India | 2011-03-27 | orthodox | 1.10 | A
+Yash Raj Punja | India | 2006-06-26 | medium | 0.90 | A
+Brijesh Sharma | India | 1998-12-16 | medium | 0.30 | A
+Nandre Burger | South Africa | 1995-08-11 | fast-medium | 3.50 | A
+Kuldeep Sen | India | 1996-10-22 | fast-medium | 0.75 | A
+Sandeep Sharma | India | 1993-05-18 | fast-medium | 4.00 | A
+Dhruv Jurel | India | 2001-01-21 | fast-medium | 14.00 | A | wk
+Jofra Archer | England | 1995-04-01 | fast | 12.50 | A
+Adam Milne | New Zealand | 1992-04-13 | fast | 2.40 | A
+Tushar Deshpande | India | 1995-05-15 | fast-medium | 6.50 | A
+Shubham Dubey | India | 1994-08-27 | off break | 0.80 | A
+Yudhvir Singh | India | 1997-09-13 | fast-medium | 0.35 | A
+Sushant Mishra | India | 2000-12-23 | fast-medium | 0.30 | A
+Ravi Bishnoi | India | 2000-09-05 | leg spin | 7.20 | A
+Yashasvi Jaiswal | India | 2001-12-28 | leg spin | 18.00 | A
+Shimron Hetmyer | West Indies | 1996-12-26 | leg spin | 11.00 | A
+Emanjot Chahal | India | 2004-08-17 | orthodox | 0.30 | R
+Aman Rao | India | 2004-06-02 | none | 0.30 | A
+Sam Curran | England | 1998-06-03 | fast-medium | 2.40 | W
+Ravi Singh | India | 2001-05-25 | leg spin | 0.95 | W | wk
+
+@luc
+Abdul Samad | India | 2001-10-28 | leg spin | 4.2 | A
+Ayush Badoni | India | 1999-12-03 | off break | 4.0 | A
+Avesh Khan | India | 1996-12-13 | fast-medium | 9.75 | A
+Mohammed Shami | India | 1990-09-03 | fast | 10.0 | A
+Rishabh Pant | India | 1997-10-04 | none | 27.0 | A | wk
+Matthew Breetzke | South Africa | 1998-11-03 | medium | 0.75 | A
+Anrich Nortje | South Africa | 1993-11-16 | fast | 2.0 | A
+Shahbaz Ahmed | India | 1994-12-11 | orthodox | 2.4 | A
+Arjun Tendulkar | India | 1999-09-24 | fast-medium | 0.30 | A
+Prince Yadav | India | 2001-12-12 | fast-medium | 0.30 | A
+Nicholas Pooran | West Indies | 1995-10-02 | none | 21.0 | A | wk
+Manimaran Siddharth | India | 1998-07-03 | orthodox | 0.75 | A
+Arshin Kulkarni | India | 2005-02-15 | fast-medium | 0.30 | A
+Naman Tiwari | India | 2005-11-08 | fast-medium | 1.0 | A
+Mayank Yadav | India | 2002-06-17 | fast-medium | 11.0 | A
+Akshat Raghuwanshi | India | 2003-09-15 | off break | 2.2 | A
+Mohsin Khan | India | 1998-07-15 | fast-medium | 4.0 | A
+Himmat Singh | India | 1996-11-08 | off break | 0.30 | A
+Akash Singh | India | 2002-04-26 | fast-medium | 0.30 | A
+Digvesh Rathi | India | 1999-12-15 | leg spin | 0.30 | A
+Aiden Markram | South Africa | 1994-10-04 | off break | 2.0 | A
+Josh Inglis | Australia | 1995-03-04 | none | 8.6 | A | wk
+Mukul Choudhary | India | 2004-08-06 | none | 2.6 | A | wk
+George Linde | South Africa | 1991-12-04 | orthodox | 1.0 | R
+Mitchell Marsh | Australia | 1991-10-20 | fast-medium | 3.4 | W
+Wanindu Hasaranga | Sri Lanka | 1997-07-29 | leg spin | 2.0 | W
+
+@guj
+Manav Suthar | India | 2002-08-03 | orthodox | 0.30 | A
+Kulwant Khejroliya | India | 1992-03-13 | fast-medium | 0.30 | R
+Washington Sundar | India | 1999-10-05 | off break | 3.2 | A
+Shubman Gill | India | 1999-09-08 | off break | 16.5 | A
+Jayant Yadav | India | 1990-01-22 | off break | 0.75 | A
+Jason Holder | West Indies | 1991-11-05 | fast-medium | 7 | A
+Rashid Khan | Afghanistan | 1998-09-20 | leg spin | 18 | A
+Arshad Khan | India | 1997-12-20 | fast-medium | 1.3 | A
+Sai Sudharsan | India | 2001-10-15 | leg spin | 8.5 | A
+Kagiso Rabada | South Africa | 1995-05-25 | fast-medium | 10.75 | A
+Ishant Sharma | India | 1988-09-02 | fast-medium | 0.75 | A
+Shahrukh Khan | India | 1995-05-27 | off break | 4 | A
+Prasidh Krishna | India | 1996-02-19 | fast-medium | 9.5 | A
+Rahul Tewatia | India | 1993-05-20 | leg spin | 4 | A
+Sai Kishore | India | 1996-11-06 | orthodox | 2 | A
+Jos Buttler | England | 1990-09-08 | none | 15.75 | A | wk
+Mohammed Siraj | India | 1994-03-13 | fast-medium | 12.25 | A
+Gurnoor Brar | India | 2000-05-25 | fast-medium | 1.3 | A
+Connor Esterhuizen | South Africa | 2001-05-31 | none | 0.75 | R | wk
+Kumar Kushagra | India | 2004-10-23 | none | 0.65 | A | wk
+Glenn Phillips | New Zealand | 1996-12-06 | off break | 2 | A
+Anuj Rawat | India | 1999-10-17 | none | 0.30 | A | wk
+Ashok Sharma | India | 2002-06-17 | fast-medium | 0.90 | A
+Nishant Sindhu | India | 2004-04-09 | orthodox | 0.30 | A
+Luke Wood | England | 1995-08-02 | fast-medium | 0.75 | A
+Tom Banton | England | 1998-11-11 | off break | 2 | W | wk
+Prithvi Raj | India | 1998-02-20 | medium | 0.30 | W
+
+@hyd
+Abhishek Sharma | India | 2000-09-04 | orthodox | 14 | A
+Harsh Dubey | India | 2002-05-23 | orthodox | 0.3 | A
+Smaran Ravichandran | India | 2003-05-05 | off break | 0.3 | A
+Salil Arora | India | 2002-11-07 | none | 1.5 | A | wk
+Harshal Patel | India | 1990-11-23 | fast-medium | 8 | A
+Praful Hinge | India | 2002-01-18 | fast-medium | 0.3 | A
+Kamindu Mendis | Sri Lanka | 1998-09-30 | off break | 0.75 | A
+Ishan Kishan | India | 1998-07-18 | none | 11.25 | A | wk
+Zeeshan Ansari | India | 1999-12-16 | leg spin | 0.4 | A
+Pat Cummins | Australia | 1993-03-08 | fast | 18 | A
+Krains Fuletra | India | 2004-06-19 | unorthodox | 0.3 | A
+Heinrich Klaasen | South Africa | 1991-07-30 | off break | 23 | A | wk
+Sakib Hussain | India | 2004-12-14 | fast | 0.3 | A
+Travis Head | Australia | 1993-12-29 | off break | 14 | A
+Shivang Kumar | India | 2002-05-26 | unorthodox | 0.3 | A
+Amit Kumar | India | 2002-11-02 | leg spin | 0.3 | A
+Nitish Kumar Reddy | India | 2003-05-26 | fast-medium | 6 | A
+Jaydev Unadkat | India | 1991-10-18 | fast-medium | 1 | A
+Onkar Tarmale | India | 2002-08-22 | fast-medium | 0.3 | A
+Eshan Malinga | Sri Lanka | 2001-02-04 | fast-medium | 1.2 | A
+Aniket Verma | India | 2002-02-05 | fast-medium | 0.3 | A
+RS Ambrish | India | 2007-05-28 | medium | 0.45 | R
+Gerald Coetzee | South Africa | 2000-10-02 | fast | 2 | R
+Liam Livingstone | England | 1993-08-04 | leg spin | 13 | A
+Dilshan Madushanka | Sri Lanka | 2000-09-18 | fast-medium | 0.75 | R
+Shivam Mavi | India | 1998-11-26 | fast-medium | 0.75 | W
+Jack Edwards | Australia | 2000-04-19 | medium | 3 | W
+Brydon Carse | England | 1995-07-31 | fast | 1 | W
+David Payne | England | 1991-02-15 | fast-medium | 1.5 | W

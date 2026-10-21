@@ -30,6 +30,7 @@ import {
   releasePlayer,
   requiredSalary,
   SALARY_CAP,
+  SQUAD_MIN,
   salaryFor,
   squadOf,
   tradeValue,
@@ -229,10 +230,23 @@ describe('a full season', () => {
   })
 })
 
+/** Real squads start at 23–25 players; release the weakest few so there is room to sign. */
+function withRoom(career: Career, n = 4): Career {
+  let c = career
+  const worst = squadOf(c.players, c.manager.teamId)
+    .sort((a, b) => overallRating(a) - overallRating(b))
+    .slice(0, n)
+  for (const p of worst) c = releasePlayer(c, p.id)
+  return c
+}
+
 describe('market', () => {
-  const c = start()
+  const c = withRoom(start())
   const me = c.manager.teamId
-  const best = freeAgents(c.players).sort((a, b) => overallRating(b) - overallRating(a))[0]!
+  // The best domestic free agent: an overseas signing would be blocked (8 overseas already).
+  const best = freeAgents(c.players)
+    .filter((p) => !p.overseas)
+    .sort((a, b) => overallRating(b) - overallRating(a))[0]!
 
   it('salary and asking price follow ability', () => {
     expect(salaryFor(85)).toBeGreaterThan(salaryFor(70))
@@ -263,7 +277,8 @@ describe('market', () => {
     )
     expect(low.answer.kind).toBe('reject')
     const offered = Math.floor(need * 0.82)
-    const near = makeOffer(low.career, best.id, { salary: offered, years: 2 }, TEAM_IDS)
+    // A fresh negotiation: the lowball above may have used up a short-tempered agent's patience.
+    const near = makeOffer(c, best.id, { salary: offered, years: 2 }, TEAM_IDS)
     if (near.answer.kind === 'accept') return // a very keen player may take it
     expect(near.answer.kind).toBe('counter')
     if (near.answer.kind !== 'counter') return
@@ -310,10 +325,13 @@ describe('market', () => {
   })
 
   it('release keeps the squad minimum', () => {
-    const mine = squadOf(c.players, me)
-    const worst = [...mine].sort((a, b) => overallRating(a) - overallRating(b))[0]!
-    // Squads start at exactly 18, the minimum.
-    expect(releasePlayer(c, worst.id)).toBe(c)
+    let x = start()
+    while (squadOf(x.players, me).length > SQUAD_MIN) x = withRoom(x, 1)
+    const worst = [...squadOf(x.players, me)].sort(
+      (a, b) => overallRating(a) - overallRating(b),
+    )[0]!
+    expect(squadOf(x.players, me)).toHaveLength(SQUAD_MIN)
+    expect(releasePlayer(x, worst.id)).toBe(x)
   })
 
   it('trades: fair value accepted and executed, a bad deal refused', () => {

@@ -11,7 +11,7 @@ export const MODEL = {
   base: {
     powerplay: { wicket: 0.039, dot: 0.375, four: 0.188, six: 0.066 },
     middle: { wicket: 0.045, dot: 0.262, four: 0.11, six: 0.065 },
-    death: { wicket: 0.06, dot: 0.205, four: 0.165, six: 0.114 },
+    death: { wicket: 0.06, dot: 0.2, four: 0.17, six: 0.122 },
   } satisfies Record<Phase, { wicket: number; dot: number; four: number; six: number }>,
   /** Skill = (batting − bowling − center) / 10. Center = the average matchup. */
   skillCenter: -3,
@@ -189,7 +189,7 @@ export function ballOdds(ctx: BallContext): Odds {
   }
 
   // Pitch.
-  b *= 1 + 0.1 * pitch.flat
+  b *= 1 + 0.16 * pitch.flat
   w *= 1 - 0.05 * pitch.flat
   if (bowler.bowlingType === 'pace') w *= 1 + 0.12 * pitch.pace
   if (bowler.bowlingType === 'spin') w *= 1 + 0.12 * pitch.spin

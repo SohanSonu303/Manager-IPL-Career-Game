@@ -27,7 +27,7 @@ export const BOWLING_TRAITS = [
 export const TRAITS = [...BATTING_TRAITS, ...BOWLING_TRAITS] as const
 export type Trait = (typeof TRAITS)[number]
 
-export const NATIONALITIES = ['IND', 'AUS', 'ENG', 'RSA', 'NZ', 'WI', 'AFG', 'SL', 'BAN'] as const
+export const NATIONALITIES = ['IND', 'AUS', 'ENG', 'RSA', 'NZ', 'WI', 'AFG', 'SL', 'BAN', 'ZIM'] as const
 export type Nationality = (typeof NATIONALITIES)[number]
 
 /** All ratings are 1–99. */

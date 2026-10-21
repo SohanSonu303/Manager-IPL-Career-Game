@@ -24,3 +24,12 @@ dist-ssr
 *.sw?
 .vercel
 dev-dist
+
+# Tooling and local-only folders
+.claude/
+.code-review-graph/
+.design-directions/
+.env
+.env.*
+*.tsbuildinfo
+coverage

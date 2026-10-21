@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { autoPickXI, autoTeamSheet, validateSheet } from '../sim/match/selection'
 import { overallRating } from '../sim/player'
 import { shortName } from './names'
 import { players, playersByTeam, teams } from './index'
@@ -33,25 +34,59 @@ describe('players.json', () => {
 })
 
 describe('squads', () => {
-  it('every team has a playable 18-man squad', () => {
+  it('every team has a real-sized squad that can field a legal XI', () => {
     for (const t of teams) {
-      const squad = playersByTeam(t.id)
-      expect(squad).toHaveLength(18)
+      const squad = playersByTeam(t.id).map((p) => ({ ...p, fitness: 100, form: 50 }))
+      expect(squad.length).toBeGreaterThanOrEqual(18)
+      expect(squad.length).toBeLessThanOrEqual(25)
       expect(squad.filter((p) => p.overseas).length).toBeLessThanOrEqual(8)
-      expect(squad.filter((p) => p.role === 'wicketkeeper').length).toBeGreaterThanOrEqual(2)
-      expect(squad.filter((p) => p.role === 'bowler').length).toBeGreaterThanOrEqual(5)
-      expect(
-        squad.filter((p) => p.bowlingType === 'spin' && p.role !== 'batter').length,
-      ).toBeGreaterThanOrEqual(3)
+      expect(squad.some((p) => p.role === 'wicketkeeper')).toBe(true)
+      const sheet = autoTeamSheet(t.id, squad, true)
+      expect(validateSheet(sheet, squad), t.id).toEqual([])
     }
   })
 
-  it('teams are roughly balanced', () => {
+  it('teams are roughly balanced (best XI)', () => {
     const avgs = teams.map((t) => {
-      const sq = playersByTeam(t.id)
-      return sq.reduce((s, p) => s + overallRating(p), 0) / sq.length
+      const squad = playersByTeam(t.id).map((p) => ({ ...p, fitness: 100, form: 50 }))
+      const xi = autoPickXI(squad)
+      return xi.reduce((s, p) => s + overallRating(p), 0) / xi.length
     })
-    expect(Math.max(...avgs) - Math.min(...avgs)).toBeLessThan(3)
+    expect(Math.max(...avgs) - Math.min(...avgs)).toBeLessThan(7)
+  })
+
+  it('well-known players are at their real 2026 clubs', () => {
+    const club = (n: string) => players.find((p) => p.name === n)?.teamId
+    const expected: Record<string, string> = {
+      'Virat Kohli': 'blr',
+      'Rohit Sharma': 'mum',
+      'Jasprit Bumrah': 'mum',
+      'MS Dhoni': 'che',
+      'Sanju Samson': 'che',
+      'Ravindra Jadeja': 'raj',
+      'Shubman Gill': 'guj',
+      'Rishabh Pant': 'luc',
+      'Shreyas Iyer': 'pun',
+      'Heinrich Klaasen': 'hyd',
+      'Sunil Narine': 'kol',
+      'KL Rahul': 'del',
+      'Rashid Khan': 'guj',
+      'Yashasvi Jaiswal': 'raj',
+    }
+    for (const [name, id] of Object.entries(expected)) expect(club(name), name).toBe(id)
+  })
+
+  it('real contracts: salary in lakh, from the auction prices', () => {
+    const kohli = players.find((p) => p.name === 'Virat Kohli')
+    expect(kohli?.contract?.salary).toBe(2100)
+    expect(players.find((p) => p.name === 'Rishabh Pant')?.contract?.salary).toBe(2700)
+  })
+
+  it('there is a market: unsigned and withdrawn players are free agents', () => {
+    const free = players.filter((p) => p.teamId === null)
+    expect(free.length).toBeGreaterThanOrEqual(40)
+    expect(free.some((p) => p.role === 'wicketkeeper')).toBe(true)
+    expect(free.some((p) => p.role === 'bowler')).toBe(true)
   })
 })
 

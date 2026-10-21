@@ -74,6 +74,7 @@ const REGION: Record<Nationality, Region> = {
   ENG: 'anglo',
   NZ: 'anglo',
   RSA: 'southAfrica',
+  ZIM: 'southAfrica',
   WI: 'caribbean',
 }
 
