@@ -11,14 +11,13 @@
       "bowling": 14,
       "fielding": 59
     },
-    "traits": [
-      "anchor"
-    ],
+    "potential": 81,
+    "traits": [],
     "overseas": false,
-    "teamId": "hyd",
+    "teamId": "raj",
     "contract": {
       "salary": 1390,
-      "years": 1
+      "years": 3
     }
   },
   {
@@ -29,18 +28,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 81,
-      "bowling": 30,
-      "fielding": 71
+      "batting": 80,
+      "bowling": 33,
+      "fielding": 48
     },
-    "traits": [
-      "big-hitter"
-    ],
+    "potential": 79,
+    "traits": [],
     "overseas": false,
-    "teamId": "luc",
+    "teamId": "pun",
     "contract": {
-      "salary": 1390,
-      "years": 2
+      "salary": 1100,
+      "years": 3
     }
   },
   {
@@ -51,18 +49,19 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 90,
-      "bowling": 17,
-      "fielding": 69
+      "batting": 84,
+      "bowling": 20,
+      "fielding": 79
     },
+    "potential": 86,
     "traits": [
       "anchor"
     ],
     "overseas": false,
-    "teamId": "guj",
+    "teamId": "luc",
     "contract": {
-      "salary": 1980,
-      "years": 3
+      "salary": 1630,
+      "years": 1
     }
   },
   {
@@ -73,18 +72,19 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 88,
-      "bowling": 31,
-      "fielding": 66
+      "batting": 85,
+      "bowling": 26,
+      "fielding": 72
     },
+    "potential": 88,
     "traits": [
-      "finisher"
+      "big-hitter"
     ],
     "overseas": false,
-    "teamId": "blr",
+    "teamId": "che",
     "contract": {
-      "salary": 1800,
-      "years": 3
+      "salary": 1630,
+      "years": 2
     }
   },
   {
@@ -95,18 +95,19 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 84,
-      "bowling": 13,
-      "fielding": 58
+      "batting": 76,
+      "bowling": 19,
+      "fielding": 73
     },
+    "potential": 76,
     "traits": [
-      "anchor"
+      "big-hitter"
     ],
     "overseas": false,
-    "teamId": "raj",
+    "teamId": "mum",
     "contract": {
-      "salary": 1465,
-      "years": 3
+      "salary": 1100,
+      "years": 1
     }
   },
   {
@@ -117,18 +118,19 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 72,
-      "bowling": 17,
-      "fielding": 54
+      "batting": 75,
+      "bowling": 34,
+      "fielding": 56
     },
+    "potential": 74,
     "traits": [
       "big-hitter"
     ],
     "overseas": false,
-    "teamId": "mum",
+    "teamId": "raj",
     "contract": {
-      "salary": 740,
-      "years": 1
+      "salary": 910,
+      "years": 3
     }
   },
   {
@@ -139,17 +141,16 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 81,
-      "bowling": 15,
-      "fielding": 60
+      "batting": 83,
+      "bowling": 32,
+      "fielding": 76
     },
-    "traits": [
-      "big-hitter"
-    ],
+    "potential": 83,
+    "traits": [],
     "overseas": false,
-    "teamId": "blr",
+    "teamId": "pun",
     "contract": {
-      "salary": 1240,
+      "salary": 1545,
       "years": 3
     }
   },
@@ -161,17 +162,16 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 83,
-      "bowling": 32,
-      "fielding": 76
+      "batting": 78,
+      "bowling": 34,
+      "fielding": 63
     },
-    "traits": [
-      "anchor"
-    ],
+    "potential": 80,
+    "traits": [],
     "overseas": false,
-    "teamId": "luc",
+    "teamId": "kol",
     "contract": {
-      "salary": 1545,
+      "salary": 1100,
       "years": 1
     }
   },
@@ -183,18 +183,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 82,
-      "bowling": 17,
-      "fielding": 82
+      "batting": 69,
+      "bowling": 29,
+      "fielding": 65
     },
-    "traits": [
-      "anchor"
-    ],
+    "potential": 70,
+    "traits": [],
     "overseas": false,
-    "teamId": "hyd",
+    "teamId": "pun",
     "contract": {
-      "salary": 1545,
-      "years": 2
+      "salary": 685,
+      "years": 3
     }
   },
   {
@@ -205,13 +204,16 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 75,
-      "bowling": 22,
-      "fielding": 53
+      "batting": 72,
+      "bowling": 28,
+      "fielding": 74
     },
-    "traits": [],
+    "potential": 75,
+    "traits": [
+      "finisher"
+    ],
     "overseas": false,
-    "teamId": "che",
+    "teamId": "blr",
     "contract": {
       "salary": 850,
       "years": 1
@@ -225,18 +227,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 76,
-      "bowling": 27,
-      "fielding": 73
+      "batting": 78,
+      "bowling": 17,
+      "fielding": 81
     },
-    "traits": [
-      "anchor"
-    ],
+    "potential": 81,
+    "traits": [],
     "overseas": false,
-    "teamId": "raj",
+    "teamId": "del",
     "contract": {
-      "salary": 1100,
-      "years": 2
+      "salary": 1240,
+      "years": 1
     }
   },
   {
@@ -247,18 +248,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 67,
-      "bowling": 30,
-      "fielding": 71
+      "batting": 71,
+      "bowling": 13,
+      "fielding": 74
     },
-    "traits": [
-      "anchor"
-    ],
+    "potential": 71,
+    "traits": [],
     "overseas": false,
-    "teamId": "raj",
+    "teamId": "pun",
     "contract": {
-      "salary": 585,
-      "years": 1
+      "salary": 795,
+      "years": 3
     }
   },
   {
@@ -269,16 +269,19 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 69,
-      "bowling": 18,
+      "batting": 73,
+      "bowling": 33,
       "fielding": 84
     },
-    "traits": [],
+    "potential": 74,
+    "traits": [
+      "big-hitter"
+    ],
     "overseas": false,
-    "teamId": "guj",
+    "teamId": "che",
     "contract": {
-      "salary": 795,
-      "years": 2
+      "salary": 970,
+      "years": 1
     }
   },
   {
@@ -289,15 +292,18 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 67,
-      "bowling": 12,
-      "fielding": 71
+      "batting": 72,
+      "bowling": 28,
+      "fielding": 53
     },
-    "traits": [],
+    "potential": 71,
+    "traits": [
+      "big-hitter"
+    ],
     "overseas": false,
-    "teamId": "che",
+    "teamId": "hyd",
     "contract": {
-      "salary": 585,
+      "salary": 740,
       "years": 1
     }
   },
@@ -309,17 +315,18 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 74,
-      "bowling": 35,
-      "fielding": 56
+      "batting": 67,
+      "bowling": 17,
+      "fielding": 80
     },
+    "potential": 70,
     "traits": [
-      "big-hitter"
+      "finisher"
     ],
     "overseas": false,
-    "teamId": "hyd",
+    "teamId": "luc",
     "contract": {
-      "salary": 850,
+      "salary": 685,
       "years": 1
     }
   },
@@ -331,18 +338,19 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 72,
-      "bowling": 28,
-      "fielding": 58
+      "batting": 66,
+      "bowling": 22,
+      "fielding": 73
     },
+    "potential": 69,
     "traits": [
       "anchor"
     ],
     "overseas": false,
     "teamId": "mum",
     "contract": {
-      "salary": 740,
-      "years": 1
+      "salary": 585,
+      "years": 3
     }
   },
   {
@@ -353,15 +361,16 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 61,
+      "batting": 66,
       "bowling": 32,
-      "fielding": 59
+      "fielding": 63
     },
+    "potential": 68,
     "traits": [],
     "overseas": false,
-    "teamId": "hyd",
+    "teamId": "mum",
     "contract": {
-      "salary": 335,
+      "salary": 540,
       "years": 3
     }
   },
@@ -373,18 +382,19 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 67,
-      "bowling": 35,
-      "fielding": 63
+      "batting": 63,
+      "bowling": 21,
+      "fielding": 65
     },
+    "potential": 65,
     "traits": [
       "big-hitter"
     ],
     "overseas": false,
-    "teamId": "pun",
+    "teamId": "raj",
     "contract": {
-      "salary": 585,
-      "years": 2
+      "salary": 410,
+      "years": 1
     }
   },
   {
@@ -395,15 +405,16 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 68,
-      "bowling": 27,
-      "fielding": 66
+      "batting": 66,
+      "bowling": 20,
+      "fielding": 62
     },
+    "potential": 68,
     "traits": [],
     "overseas": false,
-    "teamId": "pun",
+    "teamId": "kol",
     "contract": {
-      "salary": 635,
+      "salary": 540,
       "years": 2
     }
   },
@@ -415,18 +426,19 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 69,
-      "bowling": 32,
-      "fielding": 71
+      "batting": 67,
+      "bowling": 34,
+      "fielding": 68
     },
+    "potential": 74,
     "traits": [
       "big-hitter"
     ],
     "overseas": false,
-    "teamId": "luc",
+    "teamId": "pun",
     "contract": {
-      "salary": 685,
-      "years": 1
+      "salary": 585,
+      "years": 2
     }
   },
   {
@@ -437,17 +449,18 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 63,
-      "bowling": 12,
-      "fielding": 57
+      "batting": 62,
+      "bowling": 24,
+      "fielding": 79
     },
+    "potential": 67,
     "traits": [
-      "finisher"
+      "poor-vs-spin"
     ],
     "overseas": false,
-    "teamId": "blr",
+    "teamId": "kol",
     "contract": {
-      "salary": 375,
+      "salary": 450,
       "years": 3
     }
   },
@@ -459,13 +472,16 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 62,
-      "bowling": 22,
-      "fielding": 68
+      "batting": 63,
+      "bowling": 31,
+      "fielding": 61
     },
-    "traits": [],
+    "potential": 63,
+    "traits": [
+      "finisher"
+    ],
     "overseas": false,
-    "teamId": "che",
+    "teamId": "raj",
     "contract": {
       "salary": 410,
       "years": 3
@@ -479,19 +495,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 67,
-      "bowling": 34,
-      "fielding": 68
+      "batting": 64,
+      "bowling": 27,
+      "fielding": 74
     },
-    "traits": [
-      "big-hitter",
-      "poor-vs-spin"
-    ],
+    "potential": 67,
+    "traits": [],
     "overseas": false,
     "teamId": "guj",
     "contract": {
-      "salary": 585,
-      "years": 1
+      "salary": 495,
+      "years": 2
     }
   },
   {
@@ -502,16 +516,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 66,
-      "bowling": 15,
-      "fielding": 69
+      "batting": 71,
+      "bowling": 31,
+      "fielding": 71
     },
+    "potential": 89,
     "traits": [],
     "overseas": false,
-    "teamId": "raj",
+    "teamId": "mum",
     "contract": {
-      "salary": 540,
-      "years": 2
+      "salary": 795,
+      "years": 1
     }
   },
   {
@@ -522,15 +537,16 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 64,
-      "bowling": 21,
-      "fielding": 62
+      "batting": 66,
+      "bowling": 20,
+      "fielding": 74
     },
+    "potential": 79,
     "traits": [],
     "overseas": false,
-    "teamId": "pun",
+    "teamId": "luc",
     "contract": {
-      "salary": 450,
+      "salary": 585,
       "years": 2
     }
   },
@@ -542,15 +558,18 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 61,
-      "bowling": 27,
-      "fielding": 58
+      "batting": 71,
+      "bowling": 28,
+      "fielding": 54
     },
-    "traits": [],
+    "potential": 70,
+    "traits": [
+      "big-hitter"
+    ],
     "overseas": false,
-    "teamId": "mum",
+    "teamId": "luc",
     "contract": {
-      "salary": 335,
+      "salary": 685,
       "years": 3
     }
   },
@@ -562,15 +581,18 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 66,
-      "bowling": 28,
-      "fielding": 54
+      "batting": 62,
+      "bowling": 20,
+      "fielding": 56
     },
-    "traits": [],
+    "potential": 61,
+    "traits": [
+      "big-hitter"
+    ],
     "overseas": false,
-    "teamId": "del",
+    "teamId": "kol",
     "contract": {
-      "salary": 495,
+      "salary": 335,
       "years": 3
     }
   },
@@ -582,16 +604,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 61,
-      "bowling": 25,
-      "fielding": 76
+      "batting": 53,
+      "bowling": 29,
+      "fielding": 63
     },
+    "potential": 56,
     "traits": [],
     "overseas": false,
-    "teamId": "hyd",
+    "teamId": "del",
     "contract": {
-      "salary": 410,
-      "years": 2
+      "salary": 140,
+      "years": 1
     }
   },
   {
@@ -602,18 +625,19 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 58,
-      "bowling": 20,
-      "fielding": 67
+      "batting": 64,
+      "bowling": 28,
+      "fielding": 74
     },
+    "potential": 66,
     "traits": [
-      "poor-vs-spin"
+      "finisher"
     ],
     "overseas": false,
     "teamId": "del",
     "contract": {
-      "salary": 270,
-      "years": 2
+      "salary": 495,
+      "years": 3
     }
   },
   {
@@ -624,16 +648,17 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 77,
-      "bowling": 8,
-      "fielding": 83
+      "batting": 71,
+      "bowling": 11,
+      "fielding": 82
     },
+    "potential": 76,
     "traits": [],
     "overseas": false,
-    "teamId": "kol",
+    "teamId": "hyd",
     "contract": {
-      "salary": 1240,
-      "years": 3
+      "salary": 910,
+      "years": 2
     }
   },
   {
@@ -644,18 +669,19 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 74,
-      "bowling": 5,
-      "fielding": 58
+      "batting": 76,
+      "bowling": 9,
+      "fielding": 76
     },
+    "potential": 79,
     "traits": [
-      "big-hitter"
+      "finisher"
     ],
     "overseas": false,
-    "teamId": "guj",
+    "teamId": "blr",
     "contract": {
-      "salary": 795,
-      "years": 1
+      "salary": 1100,
+      "years": 3
     }
   },
   {
@@ -666,18 +692,19 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 73,
-      "bowling": 4,
-      "fielding": 63
+      "batting": 78,
+      "bowling": 9,
+      "fielding": 77
     },
+    "potential": 79,
     "traits": [
-      "finisher"
+      "big-hitter"
     ],
     "overseas": false,
     "teamId": "blr",
     "contract": {
-      "salary": 795,
-      "years": 1
+      "salary": 1240,
+      "years": 3
     }
   },
   {
@@ -688,15 +715,16 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 68,
-      "bowling": 10,
-      "fielding": 73
+      "batting": 70,
+      "bowling": 12,
+      "fielding": 86
     },
+    "potential": 73,
     "traits": [],
     "overseas": false,
-    "teamId": "del",
+    "teamId": "hyd",
     "contract": {
-      "salary": 685,
+      "salary": 910,
       "years": 1
     }
   },
@@ -708,18 +736,17 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 71,
+      "batting": 60,
       "bowling": 9,
-      "fielding": 87
+      "fielding": 69
     },
-    "traits": [
-      "anchor"
-    ],
+    "potential": 69,
+    "traits": [],
     "overseas": false,
-    "teamId": "kol",
+    "teamId": "del",
     "contract": {
-      "salary": 970,
-      "years": 1
+      "salary": 375,
+      "years": 2
     }
   },
   {
@@ -730,15 +757,18 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 65,
-      "bowling": 9,
-      "fielding": 85
+      "batting": 64,
+      "bowling": 7,
+      "fielding": 75
     },
-    "traits": [],
+    "potential": 67,
+    "traits": [
+      "big-hitter"
+    ],
     "overseas": false,
-    "teamId": "blr",
+    "teamId": "del",
     "contract": {
-      "salary": 685,
+      "salary": 540,
       "years": 1
     }
   },
@@ -750,16 +780,17 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 64,
-      "bowling": 6,
-      "fielding": 67
+      "batting": 60,
+      "bowling": 12,
+      "fielding": 78
     },
+    "potential": 66,
     "traits": [],
     "overseas": false,
-    "teamId": "del",
+    "teamId": "luc",
     "contract": {
-      "salary": 495,
-      "years": 3
+      "salary": 450,
+      "years": 1
     }
   },
   {
@@ -770,15 +801,18 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 71,
-      "bowling": 9,
-      "fielding": 81
+      "batting": 67,
+      "bowling": 5,
+      "fielding": 74
     },
-    "traits": [],
+    "potential": 70,
+    "traits": [
+      "anchor"
+    ],
     "overseas": false,
-    "teamId": "luc",
+    "teamId": "guj",
     "contract": {
-      "salary": 910,
+      "salary": 635,
       "years": 3
     }
   },
@@ -790,10 +824,11 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 51,
-      "bowling": 9,
-      "fielding": 65
+      "batting": 50,
+      "bowling": 3,
+      "fielding": 68
     },
+    "potential": 55,
     "traits": [],
     "overseas": false,
     "teamId": null,
@@ -807,19 +842,20 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 83,
-      "bowling": 79,
-      "fielding": 56
+      "batting": 78,
+      "bowling": 82,
+      "fielding": 55
     },
+    "potential": 80,
     "traits": [
-      "finisher",
-      "powerplay-specialist"
+      "big-hitter",
+      "death-bowler"
     ],
     "overseas": false,
-    "teamId": "raj",
+    "teamId": "hyd",
     "contract": {
-      "salary": 1465,
-      "years": 2
+      "salary": 1390,
+      "years": 3
     }
   },
   {
@@ -830,18 +866,17 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 78,
-      "bowling": 81,
+      "batting": 69,
+      "bowling": 80,
       "fielding": 61
     },
-    "traits": [
-      "anchor"
-    ],
+    "potential": 79,
+    "traits": [],
     "overseas": false,
-    "teamId": "mum",
+    "teamId": "che",
     "contract": {
-      "salary": 1465,
-      "years": 1
+      "salary": 1170,
+      "years": 3
     }
   },
   {
@@ -852,15 +887,18 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 72,
+      "batting": 78,
       "bowling": 68,
-      "fielding": 72
+      "fielding": 56
     },
-    "traits": [],
+    "potential": 78,
+    "traits": [
+      "anchor"
+    ],
     "overseas": false,
-    "teamId": "blr",
+    "teamId": "hyd",
     "contract": {
-      "salary": 970,
+      "salary": 1035,
       "years": 2
     }
   },
@@ -872,17 +910,19 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 67,
-      "bowling": 62,
-      "fielding": 52
+      "batting": 66,
+      "bowling": 72,
+      "fielding": 68
     },
+    "potential": 75,
     "traits": [
-      "anchor"
+      "big-hitter",
+      "poor-vs-spin"
     ],
     "overseas": false,
-    "teamId": "guj",
+    "teamId": "raj",
     "contract": {
-      "salary": 585,
+      "salary": 910,
       "years": 3
     }
   },
@@ -894,17 +934,16 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 54,
-      "bowling": 70,
-      "fielding": 67
+      "batting": 73,
+      "bowling": 64,
+      "fielding": 75
     },
-    "traits": [
-      "poor-vs-spin"
-    ],
+    "potential": 74,
+    "traits": [],
     "overseas": false,
-    "teamId": "blr",
+    "teamId": "luc",
     "contract": {
-      "salary": 585,
+      "salary": 970,
       "years": 1
     }
   },
@@ -916,17 +955,18 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 69,
-      "bowling": 82,
-      "fielding": 52
+      "batting": 70,
+      "bowling": 67,
+      "fielding": 67
     },
+    "potential": 74,
     "traits": [
-      "big-hitter"
+      "powerplay-specialist"
     ],
     "overseas": false,
     "teamId": "mum",
     "contract": {
-      "salary": 1100,
+      "salary": 850,
       "years": 1
     }
   },
@@ -938,15 +978,16 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 59,
-      "bowling": 72,
-      "fielding": 72
+      "batting": 65,
+      "bowling": 63,
+      "fielding": 64
     },
+    "potential": 72,
     "traits": [],
     "overseas": false,
-    "teamId": "kol",
+    "teamId": "raj",
     "contract": {
-      "salary": 795,
+      "salary": 635,
       "years": 2
     }
   },
@@ -959,16 +1000,18 @@
     "bowlingType": "pace",
     "ratings": {
       "batting": 72,
-      "bowling": 57,
+      "bowling": 62,
       "fielding": 68
     },
+    "potential": 79,
     "traits": [
-      "big-hitter"
+      "anchor",
+      "powerplay-specialist"
     ],
     "overseas": false,
-    "teamId": "pun",
+    "teamId": "che",
     "contract": {
-      "salary": 685,
+      "salary": 795,
       "years": 1
     }
   },
@@ -980,15 +1023,16 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 63,
-      "bowling": 68,
-      "fielding": 58
+      "batting": 57,
+      "bowling": 65,
+      "fielding": 83
     },
+    "potential": 69,
     "traits": [
-      "anchor"
+      "death-bowler"
     ],
     "overseas": false,
-    "teamId": "kol",
+    "teamId": "che",
     "contract": {
       "salary": 685,
       "years": 3
@@ -1002,15 +1046,18 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 53,
-      "bowling": 56,
-      "fielding": 64
+      "batting": 69,
+      "bowling": 66,
+      "fielding": 52
     },
-    "traits": [],
+    "potential": 69,
+    "traits": [
+      "big-hitter"
+    ],
     "overseas": false,
     "teamId": "che",
     "contract": {
-      "salary": 300,
+      "salary": 685,
       "years": 3
     }
   },
@@ -1022,16 +1069,17 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 60,
-      "bowling": 62,
-      "fielding": 80
+      "batting": 50,
+      "bowling": 65,
+      "fielding": 83
     },
+    "potential": 67,
     "traits": [],
     "overseas": false,
-    "teamId": "luc",
+    "teamId": "blr",
     "contract": {
-      "salary": 635,
-      "years": 3
+      "salary": 540,
+      "years": 2
     }
   },
   {
@@ -1042,19 +1090,19 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 64,
-      "bowling": 56,
-      "fielding": 56
+      "batting": 66,
+      "bowling": 53,
+      "fielding": 69
     },
+    "potential": 65,
     "traits": [
-      "finisher",
-      "poor-vs-spin"
+      "anchor"
     ],
     "overseas": false,
-    "teamId": "hyd",
+    "teamId": "blr",
     "contract": {
-      "salary": 450,
-      "years": 1
+      "salary": 495,
+      "years": 2
     }
   },
   {
@@ -1065,18 +1113,19 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 61,
-      "bowling": 62,
-      "fielding": 54
+      "batting": 63,
+      "bowling": 46,
+      "fielding": 70
     },
+    "potential": 64,
     "traits": [
-      "death-bowler"
+      "finisher"
     ],
     "overseas": false,
-    "teamId": "che",
+    "teamId": "blr",
     "contract": {
-      "salary": 450,
-      "years": 3
+      "salary": 335,
+      "years": 2
     }
   },
   {
@@ -1087,18 +1136,17 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 65,
+      "batting": 61,
       "bowling": 51,
-      "fielding": 65
+      "fielding": 68
     },
-    "traits": [
-      "finisher"
-    ],
+    "potential": 62,
+    "traits": [],
     "overseas": false,
-    "teamId": "pun",
+    "teamId": "che",
     "contract": {
-      "salary": 410,
-      "years": 1
+      "salary": 375,
+      "years": 2
     }
   },
   {
@@ -1109,14 +1157,20 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 50,
-      "bowling": 46,
-      "fielding": 52
+      "batting": 63,
+      "bowling": 56,
+      "fielding": 58
     },
-    "traits": [],
+    "potential": 64,
+    "traits": [
+      "finisher"
+    ],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "guj",
+    "contract": {
+      "salary": 410,
+      "years": 3
+    }
   },
   {
     "id": "puu1bx6",
@@ -1126,18 +1180,19 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 58,
-      "bowling": 51,
-      "fielding": 72
+      "batting": 52,
+      "bowling": 55,
+      "fielding": 71
     },
+    "potential": 60,
     "traits": [
       "poor-vs-spin"
     ],
     "overseas": false,
-    "teamId": "luc",
+    "teamId": "pun",
     "contract": {
-      "salary": 335,
-      "years": 1
+      "salary": 300,
+      "years": 2
     }
   },
   {
@@ -1148,18 +1203,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 37,
-      "bowling": 75,
-      "fielding": 53
+      "batting": 14,
+      "bowling": 78,
+      "fielding": 78
     },
-    "traits": [
-      "death-bowler"
-    ],
+    "potential": 80,
+    "traits": [],
     "overseas": false,
-    "teamId": "luc",
+    "teamId": "kol",
     "contract": {
-      "salary": 850,
-      "years": 3
+      "salary": 1240,
+      "years": 2
     }
   },
   {
@@ -1170,16 +1224,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 37,
-      "bowling": 76,
-      "fielding": 61
+      "batting": 31,
+      "bowling": 77,
+      "fielding": 58
     },
+    "potential": 78,
     "traits": [],
     "overseas": false,
-    "teamId": "guj",
+    "teamId": "hyd",
     "contract": {
-      "salary": 970,
-      "years": 1
+      "salary": 1035,
+      "years": 3
     }
   },
   {
@@ -1190,16 +1245,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 29,
-      "bowling": 80,
-      "fielding": 71
+      "batting": 16,
+      "bowling": 82,
+      "fielding": 72
     },
+    "potential": 81,
     "traits": [],
     "overseas": false,
-    "teamId": "guj",
+    "teamId": "kol",
     "contract": {
-      "salary": 1315,
-      "years": 3
+      "salary": 1465,
+      "years": 2
     }
   },
   {
@@ -1210,16 +1266,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 24,
+      "batting": 36,
       "bowling": 82,
-      "fielding": 69
+      "fielding": 73
     },
+    "potential": 83,
     "traits": [],
     "overseas": false,
-    "teamId": "pun",
+    "teamId": "blr",
     "contract": {
-      "salary": 1390,
-      "years": 3
+      "salary": 1465,
+      "years": 1
     }
   },
   {
@@ -1230,16 +1287,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 35,
-      "bowling": 67,
-      "fielding": 63
+      "batting": 24,
+      "bowling": 78,
+      "fielding": 58
     },
+    "potential": 78,
     "traits": [],
     "overseas": false,
-    "teamId": "kol",
+    "teamId": "del",
     "contract": {
-      "salary": 585,
-      "years": 3
+      "salary": 1100,
+      "years": 2
     }
   },
   {
@@ -1250,15 +1308,16 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 22,
-      "bowling": 78,
-      "fielding": 77
+      "batting": 38,
+      "bowling": 66,
+      "fielding": 57
     },
+    "potential": 68,
     "traits": [],
     "overseas": false,
-    "teamId": "del",
+    "teamId": "kol",
     "contract": {
-      "salary": 1240,
+      "salary": 495,
       "years": 3
     }
   },
@@ -1270,18 +1329,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 38,
-      "bowling": 72,
-      "fielding": 62
+      "batting": 32,
+      "bowling": 68,
+      "fielding": 59
     },
+    "potential": 70,
     "traits": [
       "death-bowler"
     ],
     "overseas": false,
-    "teamId": "del",
+    "teamId": "che",
     "contract": {
-      "salary": 795,
-      "years": 3
+      "salary": 585,
+      "years": 1
     }
   },
   {
@@ -1292,16 +1352,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 24,
-      "bowling": 83,
-      "fielding": 60
+      "batting": 21,
+      "bowling": 75,
+      "fielding": 55
     },
+    "potential": 75,
     "traits": [],
     "overseas": false,
-    "teamId": "del",
+    "teamId": "guj",
     "contract": {
-      "salary": 1390,
-      "years": 1
+      "salary": 910,
+      "years": 2
     }
   },
   {
@@ -1312,16 +1373,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 19,
-      "bowling": 76,
-      "fielding": 70
+      "batting": 18,
+      "bowling": 72,
+      "fielding": 66
     },
+    "potential": 71,
     "traits": [],
     "overseas": false,
-    "teamId": "che",
+    "teamId": "kol",
     "contract": {
-      "salary": 1035,
-      "years": 2
+      "salary": 795,
+      "years": 1
     }
   },
   {
@@ -1332,18 +1394,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 22,
-      "bowling": 74,
-      "fielding": 78
+      "batting": 26,
+      "bowling": 67,
+      "fielding": 77
     },
+    "potential": 70,
     "traits": [
-      "powerplay-specialist"
+      "death-bowler"
     ],
     "overseas": false,
-    "teamId": "guj",
+    "teamId": "hyd",
     "contract": {
-      "salary": 970,
-      "years": 2
+      "salary": 635,
+      "years": 3
     }
   },
   {
@@ -1354,18 +1417,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 12,
-      "bowling": 69,
-      "fielding": 55
+      "batting": 13,
+      "bowling": 75,
+      "fielding": 82
     },
+    "potential": 83,
     "traits": [
-      "powerplay-specialist"
+      "death-bowler"
     ],
     "overseas": false,
-    "teamId": "del",
+    "teamId": "guj",
     "contract": {
-      "salary": 585,
-      "years": 2
+      "salary": 1100,
+      "years": 3
     }
   },
   {
@@ -1376,17 +1440,18 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 27,
-      "bowling": 74,
-      "fielding": 67
+      "batting": 12,
+      "bowling": 71,
+      "fielding": 49
     },
+    "potential": 69,
     "traits": [
-      "powerplay-specialist"
+      "death-bowler"
     ],
     "overseas": false,
     "teamId": "hyd",
     "contract": {
-      "salary": 910,
+      "salary": 635,
       "years": 2
     }
   },
@@ -1398,16 +1463,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 17,
-      "bowling": 65,
+      "batting": 22,
+      "bowling": 66,
       "fielding": 80
     },
+    "potential": 70,
     "traits": [],
     "overseas": false,
-    "teamId": "pun",
+    "teamId": "raj",
     "contract": {
-      "salary": 585,
-      "years": 1
+      "salary": 635,
+      "years": 3
     }
   },
   {
@@ -1418,18 +1484,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 16,
-      "bowling": 66,
-      "fielding": 71
+      "batting": 14,
+      "bowling": 67,
+      "fielding": 58
     },
+    "potential": 69,
     "traits": [
       "death-bowler"
     ],
     "overseas": false,
-    "teamId": "luc",
+    "teamId": "guj",
     "contract": {
-      "salary": 585,
-      "years": 2
+      "salary": 540,
+      "years": 1
     }
   },
   {
@@ -1440,16 +1507,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 36,
-      "bowling": 66,
-      "fielding": 74
+      "batting": 12,
+      "bowling": 58,
+      "fielding": 80
     },
+    "potential": 64,
     "traits": [],
     "overseas": false,
-    "teamId": "hyd",
+    "teamId": "guj",
     "contract": {
-      "salary": 585,
-      "years": 1
+      "salary": 335,
+      "years": 3
     }
   },
   {
@@ -1461,14 +1529,17 @@
     "bowlingType": "pace",
     "ratings": {
       "batting": 24,
-      "bowling": 70,
+      "bowling": 60,
       "fielding": 55
     },
-    "traits": [],
+    "potential": 62,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": false,
-    "teamId": "hyd",
+    "teamId": "mum",
     "contract": {
-      "salary": 635,
+      "salary": 270,
       "years": 2
     }
   },
@@ -1480,18 +1551,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 16,
-      "bowling": 63,
-      "fielding": 79
+      "batting": 14,
+      "bowling": 64,
+      "fielding": 49
     },
-    "traits": [
-      "death-bowler"
-    ],
+    "potential": 65,
+    "traits": [],
     "overseas": false,
-    "teamId": "kol",
+    "teamId": "luc",
     "contract": {
-      "salary": 495,
-      "years": 2
+      "salary": 375,
+      "years": 1
     }
   },
   {
@@ -1502,15 +1572,18 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 13,
-      "bowling": 69,
-      "fielding": 70
+      "batting": 24,
+      "bowling": 66,
+      "fielding": 81
     },
-    "traits": [],
+    "potential": 68,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": false,
     "teamId": "guj",
     "contract": {
-      "salary": 685,
+      "salary": 635,
       "years": 3
     }
   },
@@ -1522,16 +1595,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 33,
-      "bowling": 65,
-      "fielding": 57
+      "batting": 34,
+      "bowling": 73,
+      "fielding": 75
     },
-    "traits": [],
+    "potential": 74,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": false,
-    "teamId": "mum",
+    "teamId": "del",
     "contract": {
-      "salary": 450,
-      "years": 1
+      "salary": 910,
+      "years": 3
     }
   },
   {
@@ -1542,18 +1618,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 29,
-      "bowling": 65,
-      "fielding": 59
+      "batting": 15,
+      "bowling": 68,
+      "fielding": 55
     },
-    "traits": [
-      "powerplay-specialist"
-    ],
+    "potential": 67,
+    "traits": [],
     "overseas": false,
-    "teamId": "raj",
+    "teamId": "hyd",
     "contract": {
-      "salary": 450,
-      "years": 1
+      "salary": 540,
+      "years": 2
     }
   },
   {
@@ -1564,18 +1639,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 12,
-      "bowling": 60,
-      "fielding": 70
+      "batting": 15,
+      "bowling": 69,
+      "fielding": 73
     },
+    "potential": 72,
     "traits": [
       "death-bowler"
     ],
     "overseas": false,
-    "teamId": "raj",
+    "teamId": "pun",
     "contract": {
-      "salary": 335,
-      "years": 2
+      "salary": 685,
+      "years": 3
     }
   },
   {
@@ -1586,16 +1662,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 17,
-      "bowling": 70,
-      "fielding": 56
+      "batting": 21,
+      "bowling": 60,
+      "fielding": 73
     },
-    "traits": [],
+    "potential": 63,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": false,
     "teamId": "che",
     "contract": {
-      "salary": 635,
-      "years": 3
+      "salary": 375,
+      "years": 1
     }
   },
   {
@@ -1606,17 +1685,16 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 31,
-      "bowling": 68,
-      "fielding": 55
+      "batting": 14,
+      "bowling": 61,
+      "fielding": 77
     },
-    "traits": [
-      "death-bowler"
-    ],
+    "potential": 64,
+    "traits": [],
     "overseas": false,
-    "teamId": "raj",
+    "teamId": "del",
     "contract": {
-      "salary": 540,
+      "salary": 410,
       "years": 3
     }
   },
@@ -1628,18 +1706,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 15,
-      "bowling": 63,
-      "fielding": 66
+      "batting": 18,
+      "bowling": 60,
+      "fielding": 57
     },
-    "traits": [
-      "death-bowler"
-    ],
+    "potential": 60,
+    "traits": [],
     "overseas": false,
-    "teamId": "del",
+    "teamId": "che",
     "contract": {
-      "salary": 410,
-      "years": 3
+      "salary": 300,
+      "years": 1
     }
   },
   {
@@ -1650,15 +1727,18 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 22,
+      "batting": 28,
       "bowling": 66,
-      "fielding": 80
+      "fielding": 74
     },
-    "traits": [],
+    "potential": 68,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": false,
-    "teamId": "mum",
+    "teamId": "luc",
     "contract": {
-      "salary": 635,
+      "salary": 585,
       "years": 1
     }
   },
@@ -1670,16 +1750,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 23,
-      "bowling": 69,
-      "fielding": 55
+      "batting": 24,
+      "bowling": 62,
+      "fielding": 79
     },
+    "potential": 64,
     "traits": [],
     "overseas": false,
-    "teamId": "che",
+    "teamId": "blr",
     "contract": {
-      "salary": 585,
-      "years": 3
+      "salary": 450,
+      "years": 1
     }
   },
   {
@@ -1690,16 +1771,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 14,
-      "bowling": 66,
-      "fielding": 62
+      "batting": 12,
+      "bowling": 70,
+      "fielding": 83
     },
+    "potential": 75,
     "traits": [],
     "overseas": false,
-    "teamId": "mum",
+    "teamId": "pun",
     "contract": {
-      "salary": 540,
-      "years": 1
+      "salary": 850,
+      "years": 2
     }
   },
   {
@@ -1710,15 +1792,16 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 38,
-      "bowling": 63,
-      "fielding": 57
+      "batting": 34,
+      "bowling": 65,
+      "fielding": 66
     },
+    "potential": 68,
     "traits": [],
     "overseas": false,
-    "teamId": "kol",
+    "teamId": "mum",
     "contract": {
-      "salary": 375,
+      "salary": 495,
       "years": 2
     }
   },
@@ -1730,15 +1813,16 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 22,
-      "bowling": 62,
-      "fielding": 83
+      "batting": 30,
+      "bowling": 63,
+      "fielding": 71
     },
+    "potential": 66,
     "traits": [],
     "overseas": false,
-    "teamId": "guj",
+    "teamId": "del",
     "contract": {
-      "salary": 495,
+      "salary": 450,
       "years": 1
     }
   },
@@ -1750,10 +1834,11 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 21,
-      "bowling": 54,
-      "fielding": 45
+      "batting": 27,
+      "bowling": 55,
+      "fielding": 65
     },
+    "potential": 59,
     "traits": [],
     "overseas": false,
     "teamId": null,
@@ -1767,17 +1852,15 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 38,
-      "bowling": 59,
-      "fielding": 61
+      "batting": 17,
+      "bowling": 54,
+      "fielding": 60
     },
+    "potential": 56,
     "traits": [],
     "overseas": false,
-    "teamId": "kol",
-    "contract": {
-      "salary": 270,
-      "years": 3
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p1swm7ze",
@@ -1787,13 +1870,14 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 12,
-      "bowling": 59,
-      "fielding": 53
+      "batting": 37,
+      "bowling": 58,
+      "fielding": 61
     },
+    "potential": 58,
     "traits": [],
     "overseas": false,
-    "teamId": "pun",
+    "teamId": "raj",
     "contract": {
       "salary": 240,
       "years": 1
@@ -1807,18 +1891,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 34,
-      "bowling": 65,
-      "fielding": 75
+      "batting": 20,
+      "bowling": 59,
+      "fielding": 64
     },
-    "traits": [
-      "powerplay-specialist"
-    ],
+    "potential": 63,
+    "traits": [],
     "overseas": false,
-    "teamId": "che",
+    "teamId": "luc",
     "contract": {
-      "salary": 540,
-      "years": 1
+      "salary": 300,
+      "years": 3
     }
   },
   {
@@ -1829,16 +1912,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 28,
-      "bowling": 56,
-      "fielding": 55
+      "batting": 24,
+      "bowling": 60,
+      "fielding": 74
     },
+    "potential": 65,
     "traits": [],
     "overseas": false,
-    "teamId": "kol",
+    "teamId": "pun",
     "contract": {
-      "salary": 185,
-      "years": 1
+      "salary": 375,
+      "years": 3
     }
   },
   {
@@ -1849,16 +1933,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 16,
-      "bowling": 57,
-      "fielding": 81
+      "batting": 38,
+      "bowling": 56,
+      "fielding": 70
     },
+    "potential": 59,
     "traits": [],
     "overseas": false,
-    "teamId": "hyd",
+    "teamId": "blr",
     "contract": {
-      "salary": 300,
-      "years": 3
+      "salary": 240,
+      "years": 2
     }
   },
   {
@@ -1869,17 +1954,15 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 19,
-      "bowling": 59,
-      "fielding": 52
+      "batting": 28,
+      "bowling": 52,
+      "fielding": 79
     },
+    "potential": 57,
     "traits": [],
     "overseas": false,
-    "teamId": "luc",
-    "contract": {
-      "salary": 240,
-      "years": 2
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "pne6qr",
@@ -1889,14 +1972,18 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 21,
-      "bowling": 52,
-      "fielding": 73
+      "batting": 29,
+      "bowling": 60,
+      "fielding": 72
     },
+    "potential": 64,
     "traits": [],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "raj",
+    "contract": {
+      "salary": 335,
+      "years": 2
+    }
   },
   {
     "id": "p1hoybk",
@@ -1906,14 +1993,20 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 16,
-      "bowling": 55,
-      "fielding": 53
+      "batting": 18,
+      "bowling": 65,
+      "fielding": 77
     },
-    "traits": [],
+    "potential": 69,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "raj",
+    "contract": {
+      "salary": 540,
+      "years": 1
+    }
   },
   {
     "id": "p1w7i16e",
@@ -1923,16 +2016,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 30,
-      "bowling": 57,
-      "fielding": 52
+      "batting": 33,
+      "bowling": 59,
+      "fielding": 72
     },
+    "potential": 63,
     "traits": [],
     "overseas": false,
-    "teamId": "blr",
+    "teamId": "raj",
     "contract": {
-      "salary": 185,
-      "years": 3
+      "salary": 335,
+      "years": 2
     }
   },
   {
@@ -1943,14 +2037,20 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 16,
-      "bowling": 51,
-      "fielding": 54
+      "batting": 19,
+      "bowling": 60,
+      "fielding": 68
     },
-    "traits": [],
+    "potential": 64,
+    "traits": [
+      "powerplay-specialist"
+    ],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "del",
+    "contract": {
+      "salary": 335,
+      "years": 2
+    }
   },
   {
     "id": "ppjnbmq",
@@ -1960,15 +2060,16 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 28,
-      "bowling": 58,
-      "fielding": 72
+      "batting": 15,
+      "bowling": 56,
+      "fielding": 81
     },
+    "potential": 60,
     "traits": [],
     "overseas": false,
-    "teamId": "luc",
+    "teamId": "kol",
     "contract": {
-      "salary": 300,
+      "salary": 270,
       "years": 3
     }
   },
@@ -1980,16 +2081,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 31,
-      "bowling": 56,
-      "fielding": 59
+      "batting": 12,
+      "bowling": 55,
+      "fielding": 81
     },
+    "potential": 59,
     "traits": [],
     "overseas": false,
-    "teamId": "guj",
+    "teamId": "mum",
     "contract": {
-      "salary": 185,
-      "years": 2
+      "salary": 240,
+      "years": 1
     }
   },
   {
@@ -2000,16 +2102,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 16,
-      "bowling": 57,
-      "fielding": 76
+      "batting": 29,
+      "bowling": 56,
+      "fielding": 77
     },
+    "potential": 63,
     "traits": [],
     "overseas": false,
     "teamId": "blr",
     "contract": {
       "salary": 270,
-      "years": 3
+      "years": 1
     }
   },
   {
@@ -2020,17 +2123,15 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 37,
-      "bowling": 56,
-      "fielding": 77
+      "batting": 12,
+      "bowling": 53,
+      "fielding": 81
     },
+    "potential": 58,
     "traits": [],
     "overseas": false,
-    "teamId": "blr",
-    "contract": {
-      "salary": 270,
-      "years": 3
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p1joehb1",
@@ -2040,17 +2141,15 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 34,
-      "bowling": 57,
-      "fielding": 66
+      "batting": 13,
+      "bowling": 54,
+      "fielding": 71
     },
+    "potential": 61,
     "traits": [],
     "overseas": false,
-    "teamId": "hyd",
-    "contract": {
-      "salary": 240,
-      "years": 3
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p1vhp1m6",
@@ -2060,18 +2159,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 65,
-      "bowling": 25,
-      "fielding": 74
+      "batting": 60,
+      "bowling": 28,
+      "fielding": 70
     },
-    "traits": [
-      "finisher"
-    ],
+    "potential": 62,
+    "traits": [],
     "overseas": false,
-    "teamId": "luc",
+    "teamId": "guj",
     "contract": {
-      "salary": 540,
-      "years": 3
+      "salary": 335,
+      "years": 2
     }
   },
   {
@@ -2082,16 +2180,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 55,
+      "batting": 59,
       "bowling": 25,
-      "fielding": 75
+      "fielding": 55
     },
+    "potential": 63,
     "traits": [],
     "overseas": false,
-    "teamId": "mum",
+    "teamId": "del",
     "contract": {
-      "salary": 210,
-      "years": 2
+      "salary": 270,
+      "years": 3
     }
   },
   {
@@ -2102,14 +2201,18 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 54,
-      "bowling": 16,
+      "batting": 57,
+      "bowling": 13,
       "fielding": 60
     },
+    "potential": 70,
     "traits": [],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "hyd",
+    "contract": {
+      "salary": 210,
+      "years": 3
+    }
   },
   {
     "id": "p1ixeu84",
@@ -2119,18 +2222,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 58,
-      "bowling": 34,
-      "fielding": 64
+      "batting": 61,
+      "bowling": 17,
+      "fielding": 75
     },
-    "traits": [
-      "poor-vs-spin"
-    ],
+    "potential": 64,
+    "traits": [],
     "overseas": false,
-    "teamId": "kol",
+    "teamId": "blr",
     "contract": {
-      "salary": 270,
-      "years": 3
+      "salary": 410,
+      "years": 1
     }
   },
   {
@@ -2141,16 +2243,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 59,
-      "bowling": 19,
-      "fielding": 64
+      "batting": 58,
+      "bowling": 14,
+      "fielding": 84
     },
+    "potential": 64,
     "traits": [],
     "overseas": false,
-    "teamId": "pun",
+    "teamId": "blr",
     "contract": {
-      "salary": 300,
-      "years": 3
+      "salary": 335,
+      "years": 1
     }
   },
   {
@@ -2161,16 +2264,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 60,
-      "bowling": 22,
-      "fielding": 75
+      "batting": 61,
+      "bowling": 25,
+      "fielding": 53
     },
+    "potential": 60,
     "traits": [],
     "overseas": false,
-    "teamId": "del",
+    "teamId": "luc",
     "contract": {
-      "salary": 375,
-      "years": 3
+      "salary": 300,
+      "years": 1
     }
   },
   {
@@ -2181,18 +2285,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 62,
-      "bowling": 15,
-      "fielding": 84
+      "batting": 56,
+      "bowling": 14,
+      "fielding": 54
     },
-    "traits": [
-      "finisher"
-    ],
+    "potential": 59,
+    "traits": [],
     "overseas": false,
     "teamId": "guj",
     "contract": {
-      "salary": 495,
-      "years": 3
+      "salary": 185,
+      "years": 1
     }
   },
   {
@@ -2203,14 +2306,18 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 52,
-      "bowling": 26,
-      "fielding": 79
+      "batting": 61,
+      "bowling": 25,
+      "fielding": 68
     },
+    "potential": 65,
     "traits": [],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "mum",
+    "contract": {
+      "salary": 375,
+      "years": 1
+    }
   },
   {
     "id": "p17s985v",
@@ -2220,13 +2327,14 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 60,
-      "bowling": 27,
-      "fielding": 72
+      "batting": 62,
+      "bowling": 13,
+      "fielding": 54
     },
+    "potential": 63,
     "traits": [],
     "overseas": false,
-    "teamId": "raj",
+    "teamId": "kol",
     "contract": {
       "salary": 335,
       "years": 3
@@ -2240,17 +2348,15 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 66,
-      "bowling": 29,
-      "fielding": 59
+      "batting": 52,
+      "bowling": 28,
+      "fielding": 70
     },
+    "potential": 61,
     "traits": [],
     "overseas": false,
-    "teamId": "blr",
-    "contract": {
-      "salary": 495,
-      "years": 1
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "pf2ugia",
@@ -2260,14 +2366,18 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 45,
-      "bowling": 30,
-      "fielding": 78
+      "batting": 57,
+      "bowling": 22,
+      "fielding": 81
     },
+    "potential": 67,
     "traits": [],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "pun",
+    "contract": {
+      "salary": 300,
+      "years": 3
+    }
   },
   {
     "id": "par5jub",
@@ -2278,15 +2388,16 @@
     "bowlingType": null,
     "ratings": {
       "batting": 59,
-      "bowling": 8,
-      "fielding": 67
+      "bowling": 9,
+      "fielding": 80
     },
+    "potential": 65,
     "traits": [],
     "overseas": false,
-    "teamId": "raj",
+    "teamId": "luc",
     "contract": {
-      "salary": 335,
-      "years": 2
+      "salary": 410,
+      "years": 1
     }
   },
   {
@@ -2297,19 +2408,15 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 56,
-      "bowling": 9,
-      "fielding": 71
+      "batting": 58,
+      "bowling": 10,
+      "fielding": 66
     },
-    "traits": [
-      "poor-vs-spin"
-    ],
+    "potential": 69,
+    "traits": [],
     "overseas": false,
-    "teamId": "raj",
-    "contract": {
-      "salary": 270,
-      "years": 1
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "pprziab",
@@ -2319,10 +2426,11 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 53,
-      "bowling": 6,
-      "fielding": 62
+      "batting": 46,
+      "bowling": 10,
+      "fielding": 66
     },
+    "potential": 53,
     "traits": [
       "poor-vs-spin"
     ],
@@ -2338,16 +2446,17 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 62,
-      "bowling": 3,
-      "fielding": 63
+      "batting": 54,
+      "bowling": 5,
+      "fielding": 87
     },
+    "potential": 61,
     "traits": [],
     "overseas": false,
-    "teamId": "che",
+    "teamId": "guj",
     "contract": {
-      "salary": 375,
-      "years": 1
+      "salary": 335,
+      "years": 3
     }
   },
   {
@@ -2358,10 +2467,11 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 46,
-      "bowling": 3,
-      "fielding": 58
+      "batting": 49,
+      "bowling": 5,
+      "fielding": 59
     },
+    "potential": 52,
     "traits": [],
     "overseas": false,
     "teamId": null,
@@ -2375,10 +2485,11 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 49,
-      "bowling": 4,
-      "fielding": 59
+      "batting": 47,
+      "bowling": 8,
+      "fielding": 78
     },
+    "potential": 55,
     "traits": [],
     "overseas": false,
     "teamId": null,
@@ -2392,16 +2503,17 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 49,
-      "bowling": 47,
-      "fielding": 62
+      "batting": 48,
+      "bowling": 48,
+      "fielding": 79
     },
+    "potential": 71,
     "traits": [],
     "overseas": false,
-    "teamId": "del",
+    "teamId": "kol",
     "contract": {
-      "salary": 140,
-      "years": 3
+      "salary": 210,
+      "years": 2
     }
   },
   {
@@ -2412,17 +2524,16 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 50,
-      "bowling": 58,
-      "fielding": 81
+      "batting": 58,
+      "bowling": 57,
+      "fielding": 69
     },
-    "traits": [
-      "poor-vs-spin"
-    ],
+    "potential": 70,
+    "traits": [],
     "overseas": false,
-    "teamId": "pun",
+    "teamId": "kol",
     "contract": {
-      "salary": 375,
+      "salary": 410,
       "years": 2
     }
   },
@@ -2434,16 +2545,19 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 56,
-      "bowling": 47,
-      "fielding": 62
+      "batting": 62,
+      "bowling": 61,
+      "fielding": 80
     },
-    "traits": [],
+    "potential": 69,
+    "traits": [
+      "finisher"
+    ],
     "overseas": false,
-    "teamId": "luc",
+    "teamId": "del",
     "contract": {
-      "salary": 210,
-      "years": 2
+      "salary": 635,
+      "years": 1
     }
   },
   {
@@ -2454,16 +2568,17 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 57,
-      "bowling": 50,
-      "fielding": 56
+      "batting": 61,
+      "bowling": 58,
+      "fielding": 66
     },
+    "potential": 65,
     "traits": [],
     "overseas": false,
-    "teamId": "del",
+    "teamId": "mum",
     "contract": {
-      "salary": 240,
-      "years": 1
+      "salary": 495,
+      "years": 3
     }
   },
   {
@@ -2474,17 +2589,17 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 49,
-      "bowling": 48,
-      "fielding": 76
+      "batting": 42,
+      "bowling": 50,
+      "fielding": 81
     },
-    "traits": [],
+    "potential": 58,
+    "traits": [
+      "poor-vs-spin"
+    ],
     "overseas": false,
-    "teamId": "pun",
-    "contract": {
-      "salary": 210,
-      "years": 1
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p1he8typ",
@@ -2494,16 +2609,18 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 37,
-      "bowling": 42,
-      "fielding": 55
+      "batting": 49,
+      "bowling": 53,
+      "fielding": 66
     },
-    "traits": [
-      "poor-vs-spin"
-    ],
+    "potential": 59,
+    "traits": [],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "pun",
+    "contract": {
+      "salary": 210,
+      "years": 2
+    }
   },
   {
     "id": "p1h3s3qz",
@@ -2513,19 +2630,15 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 64,
-      "bowling": 56,
-      "fielding": 68
+      "batting": 52,
+      "bowling": 51,
+      "fielding": 56
     },
-    "traits": [
-      "big-hitter"
-    ],
+    "potential": 59,
+    "traits": [],
     "overseas": false,
-    "teamId": "kol",
-    "contract": {
-      "salary": 495,
-      "years": 1
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p17bfqwe",
@@ -2535,17 +2648,15 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 49,
-      "bowling": 65,
-      "fielding": 73
+      "batting": 55,
+      "bowling": 40,
+      "fielding": 59
     },
+    "potential": 55,
     "traits": [],
     "overseas": false,
-    "teamId": "raj",
-    "contract": {
-      "salary": 450,
-      "years": 3
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p1sdc7u0",
@@ -2555,10 +2666,11 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 44,
-      "bowling": 34,
-      "fielding": 57
+      "batting": 46,
+      "bowling": 35,
+      "fielding": 56
     },
+    "potential": 47,
     "traits": [],
     "overseas": false,
     "teamId": null,
@@ -2572,14 +2684,18 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 35,
-      "bowling": 55,
-      "fielding": 58
+      "batting": 28,
+      "bowling": 56,
+      "fielding": 65
     },
+    "potential": 59,
     "traits": [],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "luc",
+    "contract": {
+      "salary": 210,
+      "years": 2
+    }
   },
   {
     "id": "pbkhz93",
@@ -2589,17 +2705,15 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 28,
-      "bowling": 62,
-      "fielding": 73
+      "batting": 19,
+      "bowling": 52,
+      "fielding": 69
     },
+    "potential": 61,
     "traits": [],
     "overseas": false,
-    "teamId": "kol",
-    "contract": {
-      "salary": 410,
-      "years": 1
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p1i33cae",
@@ -2609,10 +2723,11 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 27,
+      "batting": 36,
       "bowling": 49,
-      "fielding": 77
+      "fielding": 47
     },
+    "potential": 49,
     "traits": [],
     "overseas": false,
     "teamId": null,
@@ -2626,14 +2741,18 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 23,
-      "bowling": 55,
-      "fielding": 64
+      "batting": 14,
+      "bowling": 62,
+      "fielding": 74
     },
+    "potential": 65,
     "traits": [],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "mum",
+    "contract": {
+      "salary": 410,
+      "years": 1
+    }
   },
   {
     "id": "p1klrsp9",
@@ -2643,14 +2762,18 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 33,
-      "bowling": 55,
-      "fielding": 50
+      "batting": 20,
+      "bowling": 57,
+      "fielding": 62
     },
+    "potential": 61,
     "traits": [],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "hyd",
+    "contract": {
+      "salary": 240,
+      "years": 3
+    }
   },
   {
     "id": "p1ldhwxd",
@@ -2660,10 +2783,11 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 22,
-      "bowling": 44,
-      "fielding": 57
+      "batting": 34,
+      "bowling": 54,
+      "fielding": 47
     },
+    "potential": 56,
     "traits": [],
     "overseas": false,
     "teamId": null,
@@ -2677,18 +2801,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 37,
-      "bowling": 65,
-      "fielding": 56
+      "batting": 34,
+      "bowling": 68,
+      "fielding": 81
     },
-    "traits": [
-      "powerplay-specialist"
-    ],
+    "potential": 70,
+    "traits": [],
     "overseas": false,
-    "teamId": "mum",
+    "teamId": "hyd",
     "contract": {
-      "salary": 450,
-      "years": 1
+      "salary": 740,
+      "years": 3
     }
   },
   {
@@ -2699,15 +2822,16 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 19,
-      "bowling": 56,
-      "fielding": 69
+      "batting": 16,
+      "bowling": 58,
+      "fielding": 73
     },
+    "potential": 61,
     "traits": [],
     "overseas": false,
     "teamId": "che",
     "contract": {
-      "salary": 240,
+      "salary": 300,
       "years": 3
     }
   },
@@ -2719,15 +2843,18 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 26,
-      "bowling": 56,
-      "fielding": 72
+      "batting": 32,
+      "bowling": 64,
+      "fielding": 66
     },
-    "traits": [],
+    "potential": 66,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": false,
-    "teamId": "mum",
+    "teamId": "guj",
     "contract": {
-      "salary": 240,
+      "salary": 450,
       "years": 3
     }
   },
@@ -2739,10 +2866,11 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 15,
-      "bowling": 40,
-      "fielding": 78
+      "batting": 18,
+      "bowling": 46,
+      "fielding": 70
     },
+    "potential": 49,
     "traits": [],
     "overseas": false,
     "teamId": null,
@@ -2756,10 +2884,11 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 34,
-      "bowling": 50,
-      "fielding": 84
+      "batting": 24,
+      "bowling": 54,
+      "fielding": 72
     },
+    "potential": 63,
     "traits": [],
     "overseas": false,
     "teamId": null,
@@ -2773,17 +2902,15 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 33,
-      "bowling": 62,
-      "fielding": 68
+      "batting": 31,
+      "bowling": 53,
+      "fielding": 64
     },
+    "potential": 56,
     "traits": [],
     "overseas": false,
-    "teamId": "blr",
-    "contract": {
-      "salary": 410,
-      "years": 2
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p167vfyu",
@@ -2793,16 +2920,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 19,
-      "bowling": 55,
-      "fielding": 79
+      "batting": 31,
+      "bowling": 61,
+      "fielding": 80
     },
-    "traits": [],
+    "potential": 71,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": false,
-    "teamId": "che",
+    "teamId": "pun",
     "contract": {
-      "salary": 240,
-      "years": 1
+      "salary": 410,
+      "years": 2
     }
   },
   {
@@ -2813,17 +2943,15 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 23,
-      "bowling": 57,
-      "fielding": 69
+      "batting": 29,
+      "bowling": 49,
+      "fielding": 59
     },
+    "potential": 52,
     "traits": [],
     "overseas": false,
-    "teamId": "hyd",
-    "contract": {
-      "salary": 240,
-      "years": 1
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "pkfw8bi",
@@ -2833,10 +2961,11 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 33,
-      "bowling": 53,
+      "batting": 17,
+      "bowling": 52,
       "fielding": 79
     },
+    "potential": 68,
     "traits": [],
     "overseas": false,
     "teamId": null,
@@ -2850,17 +2979,15 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 15,
-      "bowling": 65,
-      "fielding": 73
+      "batting": 32,
+      "bowling": 56,
+      "fielding": 60
     },
+    "potential": 58,
     "traits": [],
     "overseas": false,
-    "teamId": "pun",
-    "contract": {
-      "salary": 540,
-      "years": 3
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "pr3m8zg",
@@ -2870,14 +2997,18 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 31,
+      "batting": 15,
       "bowling": 55,
-      "fielding": 57
+      "fielding": 73
     },
+    "potential": 59,
     "traits": [],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "che",
+    "contract": {
+      "salary": 210,
+      "years": 1
+    }
   },
   {
     "id": "p1nyf9ox",
@@ -2887,16 +3018,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 20,
-      "bowling": 58,
-      "fielding": 81
+      "batting": 32,
+      "bowling": 59,
+      "fielding": 76
     },
+    "potential": 62,
     "traits": [],
     "overseas": false,
     "teamId": "mum",
     "contract": {
       "salary": 335,
-      "years": 3
+      "years": 1
     }
   },
   {
@@ -2907,14 +3039,18 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 35,
-      "bowling": 52,
-      "fielding": 70
+      "batting": 36,
+      "bowling": 58,
+      "fielding": 65
     },
+    "potential": 62,
     "traits": [],
     "overseas": false,
-    "teamId": null,
-    "contract": null
+    "teamId": "raj",
+    "contract": {
+      "salary": 270,
+      "years": 2
+    }
   },
   {
     "id": "pcgwwus",
@@ -2924,10 +3060,11 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 23,
-      "bowling": 48,
-      "fielding": 76
+      "batting": 27,
+      "bowling": 53,
+      "fielding": 78
     },
+    "potential": 56,
     "traits": [],
     "overseas": false,
     "teamId": null,
@@ -2941,17 +3078,18 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 81,
-      "bowling": 16,
-      "fielding": 73
+      "batting": 78,
+      "bowling": 24,
+      "fielding": 52
     },
+    "potential": 76,
     "traits": [
       "big-hitter"
     ],
     "overseas": true,
-    "teamId": "kol",
+    "teamId": "raj",
     "contract": {
-      "salary": 1390,
+      "salary": 1035,
       "years": 3
     }
   },
@@ -2963,17 +3101,18 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 75,
-      "bowling": 29,
-      "fielding": 58
+      "batting": 74,
+      "bowling": 24,
+      "fielding": 54
     },
+    "potential": 75,
     "traits": [
-      "finisher"
+      "anchor"
     ],
     "overseas": true,
     "teamId": "che",
     "contract": {
-      "salary": 910,
+      "salary": 850,
       "years": 2
     }
   },
@@ -2985,17 +3124,18 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 66,
-      "bowling": 33,
-      "fielding": 59
+      "batting": 65,
+      "bowling": 18,
+      "fielding": 74
     },
+    "potential": 70,
     "traits": [
-      "big-hitter"
+      "poor-vs-spin"
     ],
     "overseas": true,
-    "teamId": "luc",
+    "teamId": "che",
     "contract": {
-      "salary": 495,
+      "salary": 540,
       "years": 1
     }
   },
@@ -3007,18 +3147,18 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 68,
-      "bowling": 12,
-      "fielding": 90
+      "batting": 71,
+      "bowling": 9,
+      "fielding": 67
     },
+    "potential": 73,
     "traits": [
-      "big-hitter",
-      "poor-vs-spin"
+      "anchor"
     ],
     "overseas": true,
-    "teamId": "pun",
+    "teamId": "raj",
     "contract": {
-      "salary": 850,
+      "salary": 740,
       "years": 1
     }
   },
@@ -3030,16 +3170,19 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 73,
-      "bowling": 61,
-      "fielding": 56
+      "batting": 71,
+      "bowling": 73,
+      "fielding": 65
     },
-    "traits": [],
+    "potential": 78,
+    "traits": [
+      "anchor"
+    ],
     "overseas": true,
-    "teamId": "raj",
+    "teamId": "guj",
     "contract": {
-      "salary": 740,
-      "years": 2
+      "salary": 1035,
+      "years": 3
     }
   },
   {
@@ -3050,17 +3193,18 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 64,
-      "bowling": 61,
-      "fielding": 59
+      "batting": 66,
+      "bowling": 68,
+      "fielding": 50
     },
+    "potential": 71,
     "traits": [
-      "anchor"
+      "death-bowler"
     ],
     "overseas": true,
-    "teamId": "blr",
+    "teamId": "mum",
     "contract": {
-      "salary": 540,
+      "salary": 685,
       "years": 2
     }
   },
@@ -3072,16 +3216,19 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 63,
-      "bowling": 69,
-      "fielding": 68
+      "batting": 62,
+      "bowling": 64,
+      "fielding": 53
     },
-    "traits": [],
+    "potential": 69,
+    "traits": [
+      "big-hitter"
+    ],
     "overseas": true,
-    "teamId": "raj",
+    "teamId": "luc",
     "contract": {
-      "salary": 740,
-      "years": 3
+      "salary": 540,
+      "years": 1
     }
   },
   {
@@ -3092,17 +3239,18 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 76,
+      "batting": 67,
       "bowling": 61,
-      "fielding": 75
+      "fielding": 77
     },
+    "potential": 72,
     "traits": [
-      "death-bowler"
+      "poor-vs-spin"
     ],
     "overseas": true,
-    "teamId": "blr",
+    "teamId": "guj",
     "contract": {
-      "salary": 970,
+      "salary": 740,
       "years": 2
     }
   },
@@ -3115,14 +3263,17 @@
     "bowlingType": "pace",
     "ratings": {
       "batting": 29,
-      "bowling": 86,
-      "fielding": 78
+      "bowling": 85,
+      "fielding": 62
     },
-    "traits": [],
+    "potential": 83,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": true,
-    "teamId": "kol",
+    "teamId": "mum",
     "contract": {
-      "salary": 1800,
+      "salary": 1545,
       "years": 3
     }
   },
@@ -3134,17 +3285,16 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 28,
-      "bowling": 84,
-      "fielding": 49
+      "batting": 22,
+      "bowling": 78,
+      "fielding": 50
     },
-    "traits": [
-      "death-bowler"
-    ],
+    "potential": 78,
+    "traits": [],
     "overseas": true,
-    "teamId": "blr",
+    "teamId": "del",
     "contract": {
-      "salary": 1390,
+      "salary": 1035,
       "years": 3
     }
   },
@@ -3156,15 +3306,18 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 35,
-      "bowling": 83,
-      "fielding": 76
+      "batting": 16,
+      "bowling": 80,
+      "fielding": 77
     },
-    "traits": [],
+    "potential": 81,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": true,
-    "teamId": "che",
+    "teamId": "hyd",
     "contract": {
-      "salary": 1545,
+      "salary": 1390,
       "years": 2
     }
   },
@@ -3176,16 +3329,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 17,
-      "bowling": 68,
-      "fielding": 65
+      "batting": 29,
+      "bowling": 75,
+      "fielding": 77
     },
+    "potential": 78,
     "traits": [],
     "overseas": true,
-    "teamId": "raj",
+    "teamId": "blr",
     "contract": {
-      "salary": 635,
-      "years": 2
+      "salary": 1035,
+      "years": 3
     }
   },
   {
@@ -3196,18 +3350,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 15,
-      "bowling": 62,
-      "fielding": 70
+      "batting": 26,
+      "bowling": 64,
+      "fielding": 81
     },
-    "traits": [
-      "powerplay-specialist"
-    ],
+    "potential": 67,
+    "traits": [],
     "overseas": true,
-    "teamId": "guj",
+    "teamId": "che",
     "contract": {
-      "salary": 410,
-      "years": 1
+      "salary": 540,
+      "years": 3
     }
   },
   {
@@ -3218,18 +3371,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 33,
-      "bowling": 70,
-      "fielding": 56
+      "batting": 25,
+      "bowling": 73,
+      "fielding": 78
     },
-    "traits": [
-      "powerplay-specialist"
-    ],
+    "potential": 75,
+    "traits": [],
     "overseas": true,
-    "teamId": "mum",
+    "teamId": "luc",
     "contract": {
-      "salary": 635,
-      "years": 2
+      "salary": 970,
+      "years": 1
     }
   },
   {
@@ -3240,15 +3392,16 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 73,
-      "bowling": 28,
-      "fielding": 64
+      "batting": 76,
+      "bowling": 33,
+      "fielding": 63
     },
+    "potential": 75,
     "traits": [],
     "overseas": true,
-    "teamId": "del",
+    "teamId": "che",
     "contract": {
-      "salary": 850,
+      "salary": 970,
       "years": 1
     }
   },
@@ -3260,18 +3413,17 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 87,
-      "bowling": 12,
-      "fielding": 55
+      "batting": 77,
+      "bowling": 3,
+      "fielding": 80
     },
-    "traits": [
-      "finisher"
-    ],
+    "potential": 81,
+    "traits": [],
     "overseas": true,
-    "teamId": "che",
+    "teamId": "mum",
     "contract": {
-      "salary": 1465,
-      "years": 2
+      "salary": 1240,
+      "years": 1
     }
   },
   {
@@ -3282,18 +3434,19 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 81,
-      "bowling": 5,
-      "fielding": 59
+      "batting": 78,
+      "bowling": 8,
+      "fielding": 62
     },
+    "potential": 77,
     "traits": [
-      "anchor"
+      "big-hitter"
     ],
     "overseas": true,
-    "teamId": "hyd",
+    "teamId": "kol",
     "contract": {
-      "salary": 1170,
-      "years": 2
+      "salary": 1035,
+      "years": 1
     }
   },
   {
@@ -3304,19 +3457,17 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 65,
-      "bowling": 11,
-      "fielding": 78
+      "batting": 68,
+      "bowling": 8,
+      "fielding": 57
     },
+    "potential": 67,
     "traits": [
-      "finisher"
+      "anchor"
     ],
     "overseas": true,
-    "teamId": "luc",
-    "contract": {
-      "salary": 635,
-      "years": 3
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "pntxv76",
@@ -3326,18 +3477,19 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 67,
-      "bowling": 65,
-      "fielding": 53
+      "batting": 63,
+      "bowling": 75,
+      "fielding": 74
     },
+    "potential": 77,
     "traits": [
       "big-hitter"
     ],
     "overseas": true,
-    "teamId": "hyd",
+    "teamId": "pun",
     "contract": {
-      "salary": 635,
-      "years": 2
+      "salary": 970,
+      "years": 3
     }
   },
   {
@@ -3348,16 +3500,20 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 76,
-      "bowling": 60,
-      "fielding": 61
+      "batting": 66,
+      "bowling": 65,
+      "fielding": 74
     },
-    "traits": [],
+    "potential": 73,
+    "traits": [
+      "anchor",
+      "death-bowler"
+    ],
     "overseas": true,
-    "teamId": "pun",
+    "teamId": "blr",
     "contract": {
       "salary": 795,
-      "years": 2
+      "years": 3
     }
   },
   {
@@ -3368,18 +3524,17 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 82,
-      "bowling": 65,
-      "fielding": 69
+      "batting": 63,
+      "bowling": 67,
+      "fielding": 78
     },
-    "traits": [
-      "finisher"
-    ],
+    "potential": 72,
+    "traits": [],
     "overseas": true,
-    "teamId": "che",
+    "teamId": "del",
     "contract": {
-      "salary": 1170,
-      "years": 1
+      "salary": 795,
+      "years": 2
     }
   },
   {
@@ -3390,14 +3545,20 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 57,
-      "bowling": 59,
-      "fielding": 53
+      "batting": 72,
+      "bowling": 58,
+      "fielding": 68
     },
-    "traits": [],
+    "potential": 77,
+    "traits": [
+      "anchor"
+    ],
     "overseas": true,
-    "teamId": null,
-    "contract": null
+    "teamId": "del",
+    "contract": {
+      "salary": 740,
+      "years": 2
+    }
   },
   {
     "id": "plcyzm7",
@@ -3407,17 +3568,15 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 54,
-      "bowling": 61,
-      "fielding": 69
+      "batting": 60,
+      "bowling": 54,
+      "fielding": 52
     },
+    "potential": 61,
     "traits": [],
     "overseas": true,
-    "teamId": "guj",
-    "contract": {
-      "salary": 410,
-      "years": 1
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p1h1950o",
@@ -3427,18 +3586,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 19,
-      "bowling": 73,
-      "fielding": 74
+      "batting": 29,
+      "bowling": 80,
+      "fielding": 72
     },
-    "traits": [
-      "powerplay-specialist"
-    ],
+    "potential": 82,
+    "traits": [],
     "overseas": true,
-    "teamId": "mum",
+    "teamId": "guj",
     "contract": {
-      "salary": 910,
-      "years": 3
+      "salary": 1315,
+      "years": 1
     }
   },
   {
@@ -3449,15 +3607,16 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 21,
-      "bowling": 65,
-      "fielding": 57
+      "batting": 12,
+      "bowling": 70,
+      "fielding": 55
     },
+    "potential": 69,
     "traits": [],
     "overseas": true,
-    "teamId": "luc",
+    "teamId": "blr",
     "contract": {
-      "salary": 450,
+      "salary": 635,
       "years": 1
     }
   },
@@ -3469,16 +3628,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 73,
-      "bowling": 33,
-      "fielding": 76
+      "batting": 79,
+      "bowling": 30,
+      "fielding": 59
     },
+    "potential": 79,
     "traits": [],
     "overseas": true,
-    "teamId": "raj",
+    "teamId": "luc",
     "contract": {
-      "salary": 910,
-      "years": 2
+      "salary": 1170,
+      "years": 1
     }
   },
   {
@@ -3489,16 +3649,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 73,
-      "bowling": 13,
-      "fielding": 74
+      "batting": 71,
+      "bowling": 29,
+      "fielding": 69
     },
+    "potential": 71,
     "traits": [],
     "overseas": true,
-    "teamId": "raj",
+    "teamId": "guj",
     "contract": {
-      "salary": 910,
-      "years": 1
+      "salary": 795,
+      "years": 2
     }
   },
   {
@@ -3509,18 +3670,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 75,
-      "bowling": 24,
-      "fielding": 67
+      "batting": 74,
+      "bowling": 26,
+      "fielding": 82
     },
-    "traits": [
-      "finisher"
-    ],
+    "potential": 81,
+    "traits": [],
     "overseas": true,
-    "teamId": "kol",
+    "teamId": "mum",
     "contract": {
-      "salary": 970,
-      "years": 3
+      "salary": 1035,
+      "years": 1
     }
   },
   {
@@ -3531,18 +3691,19 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 76,
-      "bowling": 10,
-      "fielding": 85
+      "batting": 73,
+      "bowling": 6,
+      "fielding": 59
     },
+    "potential": 72,
     "traits": [
-      "finisher"
+      "big-hitter"
     ],
     "overseas": true,
-    "teamId": "pun",
+    "teamId": "mum",
     "contract": {
-      "salary": 1240,
-      "years": 2
+      "salary": 740,
+      "years": 3
     }
   },
   {
@@ -3553,16 +3714,20 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 66,
-      "bowling": 6,
-      "fielding": 65
+      "batting": 74,
+      "bowling": 5,
+      "fielding": 77
     },
+    "potential": 78,
     "traits": [
-      "poor-vs-spin"
+      "big-hitter"
     ],
     "overseas": true,
-    "teamId": null,
-    "contract": null
+    "teamId": "pun",
+    "contract": {
+      "salary": 1035,
+      "years": 3
+    }
   },
   {
     "id": "pb6tfht",
@@ -3572,17 +3737,18 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 71,
-      "bowling": 12,
-      "fielding": 89
+      "batting": 68,
+      "bowling": 3,
+      "fielding": 64
     },
+    "potential": 67,
     "traits": [
-      "big-hitter"
+      "finisher"
     ],
     "overseas": true,
-    "teamId": "hyd",
+    "teamId": "che",
     "contract": {
-      "salary": 1035,
+      "salary": 585,
       "years": 2
     }
   },
@@ -3594,16 +3760,17 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 66,
-      "bowling": 7,
-      "fielding": 83
+      "batting": 73,
+      "bowling": 12,
+      "fielding": 75
     },
+    "potential": 75,
     "traits": [],
     "overseas": true,
-    "teamId": "guj",
+    "teamId": "kol",
     "contract": {
-      "salary": 685,
-      "years": 1
+      "salary": 910,
+      "years": 2
     }
   },
   {
@@ -3616,17 +3783,15 @@
     "ratings": {
       "batting": 74,
       "bowling": 70,
-      "fielding": 63
+      "fielding": 58
     },
-    "traits": [
-      "anchor",
-      "death-bowler"
-    ],
+    "potential": 75,
+    "traits": [],
     "overseas": true,
-    "teamId": "luc",
+    "teamId": "mum",
     "contract": {
-      "salary": 1035,
-      "years": 1
+      "salary": 970,
+      "years": 3
     }
   },
   {
@@ -3637,16 +3802,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 22,
-      "bowling": 78,
-      "fielding": 56
+      "batting": 13,
+      "bowling": 84,
+      "fielding": 62
     },
-    "traits": [],
+    "potential": 81,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": true,
-    "teamId": "pun",
+    "teamId": "del",
     "contract": {
-      "salary": 1035,
-      "years": 2
+      "salary": 1465,
+      "years": 3
     }
   },
   {
@@ -3657,17 +3825,17 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 28,
-      "bowling": 65,
-      "fielding": 55
+      "batting": 32,
+      "bowling": 63,
+      "fielding": 66
     },
-    "traits": [],
+    "potential": 66,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": true,
-    "teamId": "guj",
-    "contract": {
-      "salary": 450,
-      "years": 2
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p1gn5od9",
@@ -3677,16 +3845,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 32,
-      "bowling": 64,
-      "fielding": 57
+      "batting": 25,
+      "bowling": 67,
+      "fielding": 64
     },
-    "traits": [],
+    "potential": 70,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": true,
-    "teamId": "guj",
+    "teamId": "pun",
     "contract": {
-      "salary": 410,
-      "years": 2
+      "salary": 585,
+      "years": 1
     }
   },
   {
@@ -3697,18 +3868,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 12,
-      "bowling": 71,
-      "fielding": 81
+      "batting": 37,
+      "bowling": 69,
+      "fielding": 84
     },
+    "potential": 74,
     "traits": [
       "powerplay-specialist"
     ],
     "overseas": true,
-    "teamId": "kol",
+    "teamId": "raj",
     "contract": {
-      "salary": 850,
-      "years": 1
+      "salary": 795,
+      "years": 2
     }
   },
   {
@@ -3719,16 +3891,19 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 79,
-      "bowling": 34,
-      "fielding": 71
+      "batting": 69,
+      "bowling": 35,
+      "fielding": 60
     },
-    "traits": [],
+    "potential": 71,
+    "traits": [
+      "finisher"
+    ],
     "overseas": true,
-    "teamId": "luc",
+    "teamId": "kol",
     "contract": {
-      "salary": 1240,
-      "years": 1
+      "salary": 635,
+      "years": 3
     }
   },
   {
@@ -3739,17 +3914,19 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 68,
-      "bowling": 30,
-      "fielding": 74
+      "batting": 63,
+      "bowling": 14,
+      "fielding": 71
     },
+    "potential": 65,
     "traits": [
-      "finisher"
+      "big-hitter",
+      "poor-vs-spin"
     ],
     "overseas": true,
-    "teamId": "blr",
+    "teamId": "hyd",
     "contract": {
-      "salary": 685,
+      "salary": 450,
       "years": 2
     }
   },
@@ -3761,18 +3938,17 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 70,
-      "bowling": 68,
-      "fielding": 59
+      "batting": 63,
+      "bowling": 67,
+      "fielding": 84
     },
-    "traits": [
-      "big-hitter"
-    ],
+    "potential": 75,
+    "traits": [],
     "overseas": true,
-    "teamId": "blr",
+    "teamId": "luc",
     "contract": {
       "salary": 850,
-      "years": 1
+      "years": 3
     }
   },
   {
@@ -3783,16 +3959,19 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 72,
-      "bowling": 73,
-      "fielding": 56
+      "batting": 68,
+      "bowling": 63,
+      "fielding": 58
     },
-    "traits": [],
+    "potential": 70,
+    "traits": [
+      "big-hitter"
+    ],
     "overseas": true,
-    "teamId": "del",
+    "teamId": "kol",
     "contract": {
-      "salary": 970,
-      "years": 3
+      "salary": 685,
+      "years": 2
     }
   },
   {
@@ -3803,17 +3982,16 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 67,
-      "bowling": 75,
-      "fielding": 64
+      "batting": 74,
+      "bowling": 70,
+      "fielding": 79
     },
-    "traits": [
-      "anchor"
-    ],
+    "potential": 79,
+    "traits": [],
     "overseas": true,
-    "teamId": "pun",
+    "teamId": "luc",
     "contract": {
-      "salary": 970,
+      "salary": 1170,
       "years": 3
     }
   },
@@ -3825,18 +4003,17 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 55,
-      "bowling": 67,
-      "fielding": 71
+      "batting": 54,
+      "bowling": 63,
+      "fielding": 59
     },
-    "traits": [
-      "death-bowler"
-    ],
+    "potential": 64,
+    "traits": [],
     "overseas": true,
-    "teamId": "mum",
+    "teamId": "hyd",
     "contract": {
-      "salary": 585,
-      "years": 2
+      "salary": 410,
+      "years": 1
     }
   },
   {
@@ -3847,16 +4024,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 20,
-      "bowling": 71,
-      "fielding": 70
+      "batting": 17,
+      "bowling": 76,
+      "fielding": 60
     },
-    "traits": [],
+    "potential": 75,
+    "traits": [
+      "powerplay-specialist"
+    ],
     "overseas": true,
-    "teamId": "luc",
+    "teamId": "kol",
     "contract": {
-      "salary": 795,
-      "years": 3
+      "salary": 970,
+      "years": 1
     }
   },
   {
@@ -3867,17 +4047,16 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 21,
-      "bowling": 75,
-      "fielding": 77
+      "batting": 32,
+      "bowling": 81,
+      "fielding": 74
     },
-    "traits": [
-      "death-bowler"
-    ],
+    "potential": 82,
+    "traits": [],
     "overseas": true,
-    "teamId": "del",
+    "teamId": "raj",
     "contract": {
-      "salary": 1035,
+      "salary": 1390,
       "years": 3
     }
   },
@@ -3889,17 +4068,16 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 70,
-      "bowling": 25,
-      "fielding": 59
+      "batting": 77,
+      "bowling": 20,
+      "fielding": 55
     },
-    "traits": [
-      "finisher"
-    ],
+    "potential": 74,
+    "traits": [],
     "overseas": true,
-    "teamId": "kol",
+    "teamId": "blr",
     "contract": {
-      "salary": 685,
+      "salary": 970,
       "years": 3
     }
   },
@@ -3911,19 +4089,17 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 67,
-      "bowling": 34,
-      "fielding": 72
+      "batting": 58,
+      "bowling": 13,
+      "fielding": 69
     },
+    "potential": 60,
     "traits": [
-      "anchor"
+      "poor-vs-spin"
     ],
     "overseas": true,
-    "teamId": "del",
-    "contract": {
-      "salary": 635,
-      "years": 2
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p1klsj7f",
@@ -3933,18 +4109,19 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 84,
-      "bowling": 10,
-      "fielding": 72
+      "batting": 82,
+      "bowling": 9,
+      "fielding": 58
     },
+    "potential": 79,
     "traits": [
       "big-hitter"
     ],
     "overseas": true,
-    "teamId": "mum",
+    "teamId": "che",
     "contract": {
-      "salary": 1545,
-      "years": 2
+      "salary": 1170,
+      "years": 1
     }
   },
   {
@@ -3955,16 +4132,20 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 63,
-      "bowling": 9,
-      "fielding": 82
+      "batting": 65,
+      "bowling": 10,
+      "fielding": 75
     },
+    "potential": 67,
     "traits": [
       "anchor"
     ],
     "overseas": true,
-    "teamId": null,
-    "contract": null
+    "teamId": "pun",
+    "contract": {
+      "salary": 585,
+      "years": 3
+    }
   },
   {
     "id": "po3p151",
@@ -3974,16 +4155,19 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 81,
-      "bowling": 72,
-      "fielding": 70
+      "batting": 73,
+      "bowling": 73,
+      "fielding": 53
     },
-    "traits": [],
+    "potential": 75,
+    "traits": [
+      "powerplay-specialist"
+    ],
     "overseas": true,
-    "teamId": "guj",
+    "teamId": "del",
     "contract": {
-      "salary": 1390,
-      "years": 1
+      "salary": 970,
+      "years": 3
     }
   },
   {
@@ -3994,15 +4178,16 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 66,
-      "bowling": 70,
-      "fielding": 60
+      "batting": 60,
+      "bowling": 76,
+      "fielding": 62
     },
+    "potential": 75,
     "traits": [],
     "overseas": true,
-    "teamId": "hyd",
+    "teamId": "luc",
     "contract": {
-      "salary": 795,
+      "salary": 850,
       "years": 1
     }
   },
@@ -4014,18 +4199,20 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 64,
+      "batting": 56,
       "bowling": 62,
-      "fielding": 63
+      "fielding": 81
     },
+    "potential": 67,
     "traits": [
-      "death-bowler"
+      "poor-vs-spin",
+      "powerplay-specialist"
     ],
     "overseas": true,
-    "teamId": "hyd",
+    "teamId": "pun",
     "contract": {
-      "salary": 585,
-      "years": 2
+      "salary": 540,
+      "years": 3
     }
   },
   {
@@ -4036,16 +4223,19 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 12,
-      "bowling": 69,
-      "fielding": 75
+      "batting": 23,
+      "bowling": 65,
+      "fielding": 77
     },
-    "traits": [],
+    "potential": 66,
+    "traits": [
+      "death-bowler"
+    ],
     "overseas": true,
-    "teamId": "che",
+    "teamId": "hyd",
     "contract": {
-      "salary": 740,
-      "years": 3
+      "salary": 540,
+      "years": 1
     }
   },
   {
@@ -4056,18 +4246,19 @@
     "role": "wicketkeeper",
     "bowlingType": null,
     "ratings": {
-      "batting": 81,
-      "bowling": 5,
-      "fielding": 61
+      "batting": 75,
+      "bowling": 10,
+      "fielding": 78
     },
+    "potential": 80,
     "traits": [
       "big-hitter"
     ],
     "overseas": true,
-    "teamId": "mum",
+    "teamId": "raj",
     "contract": {
-      "salary": 1170,
-      "years": 1
+      "salary": 1100,
+      "years": 2
     }
   },
   {
@@ -4078,18 +4269,20 @@
     "role": "allrounder",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 64,
+      "batting": 66,
       "bowling": 67,
-      "fielding": 67
+      "fielding": 59
     },
+    "potential": 72,
     "traits": [
-      "big-hitter"
+      "big-hitter",
+      "poor-vs-spin"
     ],
     "overseas": true,
-    "teamId": "hyd",
+    "teamId": "blr",
     "contract": {
-      "salary": 740,
-      "years": 2
+      "salary": 685,
+      "years": 1
     }
   },
   {
@@ -4100,14 +4293,18 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 47,
-      "bowling": 59,
-      "fielding": 42
+      "batting": 54,
+      "bowling": 69,
+      "fielding": 71
     },
+    "potential": 68,
     "traits": [],
     "overseas": true,
-    "teamId": null,
-    "contract": null
+    "teamId": "raj",
+    "contract": {
+      "salary": 585,
+      "years": 2
+    }
   },
   {
     "id": "p1i5lcbi",
@@ -4117,16 +4314,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 38,
-      "bowling": 83,
-      "fielding": 83
+      "batting": 21,
+      "bowling": 81,
+      "fielding": 84
     },
+    "potential": 83,
     "traits": [],
     "overseas": true,
-    "teamId": "del",
+    "teamId": "guj",
     "contract": {
-      "salary": 1630,
-      "years": 3
+      "salary": 1465,
+      "years": 2
     }
   },
   {
@@ -4137,16 +4335,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 33,
-      "bowling": 78,
-      "fielding": 71
+      "batting": 31,
+      "bowling": 70,
+      "fielding": 69
     },
+    "potential": 83,
     "traits": [],
     "overseas": true,
-    "teamId": "raj",
+    "teamId": "blr",
     "contract": {
-      "salary": 1170,
-      "years": 3
+      "salary": 740,
+      "years": 1
     }
   },
   {
@@ -4157,17 +4356,16 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 14,
-      "bowling": 71,
-      "fielding": 58
+      "batting": 33,
+      "bowling": 74,
+      "fielding": 75
     },
-    "traits": [
-      "powerplay-specialist"
-    ],
+    "potential": 75,
+    "traits": [],
     "overseas": true,
-    "teamId": "del",
+    "teamId": "guj",
     "contract": {
-      "salary": 685,
+      "salary": 970,
       "years": 1
     }
   },
@@ -4179,16 +4377,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 12,
-      "bowling": 72,
-      "fielding": 80
+      "batting": 35,
+      "bowling": 68,
+      "fielding": 78
     },
+    "potential": 71,
     "traits": [],
     "overseas": true,
-    "teamId": "mum",
+    "teamId": "del",
     "contract": {
-      "salary": 910,
-      "years": 2
+      "salary": 685,
+      "years": 1
     }
   },
   {
@@ -4199,14 +4398,20 @@
     "role": "batter",
     "bowlingType": null,
     "ratings": {
-      "batting": 58,
-      "bowling": 12,
-      "fielding": 67
+      "batting": 64,
+      "bowling": 31,
+      "fielding": 75
     },
-    "traits": [],
+    "potential": 67,
+    "traits": [
+      "big-hitter"
+    ],
     "overseas": true,
-    "teamId": null,
-    "contract": null
+    "teamId": "hyd",
+    "contract": {
+      "salary": 495,
+      "years": 2
+    }
   },
   {
     "id": "p116fbhg",
@@ -4216,19 +4421,15 @@
     "role": "allrounder",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 65,
+      "batting": 52,
       "bowling": 58,
-      "fielding": 74
+      "fielding": 78
     },
-    "traits": [
-      "big-hitter"
-    ],
+    "potential": 64,
+    "traits": [],
     "overseas": true,
-    "teamId": "kol",
-    "contract": {
-      "salary": 635,
-      "years": 2
-    }
+    "teamId": null,
+    "contract": null
   },
   {
     "id": "p1d4c8jp",
@@ -4238,16 +4439,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 29,
-      "bowling": 72,
-      "fielding": 60
+      "batting": 28,
+      "bowling": 80,
+      "fielding": 63
     },
+    "potential": 81,
     "traits": [],
     "overseas": true,
-    "teamId": "che",
+    "teamId": "pun",
     "contract": {
-      "salary": 795,
-      "years": 2
+      "salary": 1240,
+      "years": 3
     }
   },
   {
@@ -4259,17 +4461,18 @@
     "bowlingType": "pace",
     "ratings": {
       "batting": 37,
-      "bowling": 85,
-      "fielding": 65
+      "bowling": 71,
+      "fielding": 59
     },
+    "potential": 75,
     "traits": [
       "powerplay-specialist"
     ],
     "overseas": true,
-    "teamId": "pun",
+    "teamId": "kol",
     "contract": {
-      "salary": 1630,
-      "years": 2
+      "salary": 740,
+      "years": 3
     }
   },
   {
@@ -4280,16 +4483,17 @@
     "role": "bowler",
     "bowlingType": "spin",
     "ratings": {
-      "batting": 22,
-      "bowling": 66,
-      "fielding": 83
+      "batting": 33,
+      "bowling": 67,
+      "fielding": 65
     },
+    "potential": 69,
     "traits": [],
     "overseas": true,
-    "teamId": "blr",
+    "teamId": "hyd",
     "contract": {
-      "salary": 635,
-      "years": 1
+      "salary": 585,
+      "years": 3
     }
   },
   {
@@ -4300,12 +4504,13 @@
     "role": "bowler",
     "bowlingType": "pace",
     "ratings": {
-      "batting": 30,
+      "batting": 21,
       "bowling": 62,
       "fielding": 55
     },
+    "potential": 61,
     "traits": [
-      "death-bowler"
+      "powerplay-specialist"
     ],
     "overseas": true,
     "teamId": null,

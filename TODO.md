@@ -47,20 +47,21 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 
 ## Phase 2 — Core engine (M)
 - [x] Seeded PRNG module with tests (same seed, same sequence) — `src/sim/rng.ts`, done early for Phase 1
-- [ ] Calendar: weeks, match days, season rollover
-- [ ] Save schema with `version` field and migration function
-- [ ] Save/load to `localStorage`; wrap in try/catch; handle empty or full storage
-- [ ] JSON export and import (file download and paste/upload)
-- [ ] Size budget: store squads, finances, standings, match summaries only. Ball-by-ball data lives in memory for the current match
+- [x] Calendar: weeks, match days, season rollover (`src/sim/calendar.ts`; 14 league rounds until the format decision)
+- [x] Save schema with `version` field and migration function (`src/state/save.ts`)
+- [x] Save/load to `localStorage`; wrap in try/catch; handle empty or full storage; damaged saves kept aside (`src/state/storage.ts`)
+- [x] JSON export and import (file download and paste/upload) — in Settings
+- [x] Size budget: store squads, finances, standings, match summaries only. Ball-by-ball data lives in memory for the current match (new career is about 60 KB; test caps it at 250 KB)
 - [ ] Consider IndexedDB later if saves outgrow ~5 MB
+- [x] Minimal new-career flow (pick club, manager name) and club screen with Continue and squad list (full player names), so saves have something to hold; Phase 9/10 replace them
 
 ## Phase 3 — Player model (M)
-- [ ] Ratings: batting, bowling (pace/spin), fielding
-- [ ] Age curve (growth, prime, decline)
-- [ ] Fitness and form (both change with matches)
-- [ ] 3 to 5 traits (e.g. finisher, powerplay specialist, death bowler, poor vs spin, big hitter)
-- [ ] Overall rating function
-- [ ] Unit tests for age curve and rating bounds
+- [x] Ratings: batting, bowling (pace/spin), fielding, plus `potential` (growth ceiling)
+- [x] Age curve (growth, prime, decline), applied at season rollover with a seeded RNG per player and season
+- [x] Fitness and form model (`src/sim/player.ts`): match load, daily recovery, form towards grades, idle drift; `effectiveRating`. Wiring to real matches is Phase 6
+- [x] 3 to 5 traits (e.g. finisher, powerplay specialist, death bowler, poor vs spin, big hitter) — 6 traits in `src/data/types.ts`; their sim effects come in Phase 4
+- [x] Overall rating function
+- [x] Unit tests for age curve and rating bounds
 
 ## Phase 4 — Ball-by-ball sim and calibration (XL, riskiest piece)
 - [ ] `BallEvent` type: over, ball, batter, bowler, runs, extras, wicket, dismissal, shot direction and distance, boundary flag, commentary key
@@ -164,7 +165,7 @@ Reference direction (from the uploaded screenshots): scoreboard card on top, the
 
 ## Phase 12 — QA and feedback (M)
 - [ ] Sim tests: determinism, bounds, rules (overs, wickets, targets)
-- [ ] Save tests: round-trip, migration, corrupted save recovery
+- [x] Save tests: round-trip, migration, corrupted save recovery
 - [ ] Manual test pass on iOS Safari and Android Chrome
 - [ ] In-app "Send feedback" link (a form or mailto); no analytics backend
 - [ ] Local-only error log that testers can copy into feedback

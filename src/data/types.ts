@@ -43,6 +43,8 @@ export interface Player {
   role: Role
   bowlingType: BowlingType | null
   ratings: Ratings
+  /** Ceiling for the overall rating; growth stops here. 1–99. */
+  potential: number
   traits: Trait[]
   overseas: boolean
   /** Null for free agents. */

@@ -15,7 +15,7 @@ import {
   type Team,
   type Trait,
 } from '../src/data/types.ts'
-import { overallRating } from '../src/sim/player.ts'
+import { overallRating, potentialFor } from '../src/sim/player.ts'
 import {
   createRng,
   gaussian,
@@ -138,6 +138,7 @@ const players: Player[] = drafts.map((d) => {
     role: d.role,
     bowlingType: d.bowlingType,
     ratings,
+    potential: potentialFor(overallRating({ role: d.role, ratings }), d.age, rng),
     traits: makeTraits(d, ratings),
     overseas: d.nationality !== 'IND',
     teamId: null,

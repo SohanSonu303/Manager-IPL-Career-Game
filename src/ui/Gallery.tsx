@@ -1,4 +1,4 @@
-import { players, shortName, teamById, teams } from '@/data'
+import { players, teamById, teams } from '@/data'
 import { overallRating } from '@/sim/player'
 import { Avatar } from './identity/Avatar'
 import { ringStatus } from './identity/avatarSpec'
@@ -40,7 +40,7 @@ export function Gallery() {
                 badge={team ? { crest: team.crest, colors: team.colors } : undefined}
                 title={p.name}
               />
-              <figcaption>{shortName(p.name)}</figcaption>
+              <figcaption>{p.name}</figcaption>
             </figure>
           )
         })}

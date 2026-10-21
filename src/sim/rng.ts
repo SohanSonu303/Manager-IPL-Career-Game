@@ -22,6 +22,15 @@ export function hashString(s: string): number {
   return h >>> 0
 }
 
+/**
+ * Sub-seed for one part of the game (a match, a season's development, …). Everything
+ * random derives from the career seed this way, so the save only needs that one seed and
+ * any match or season can be replayed exactly.
+ */
+export function deriveSeed(base: number, ...parts: (string | number)[]): number {
+  return hashString([base, ...parts].join('|'))
+}
+
 /** Integer in [min, max], both inclusive. */
 export function randInt(rng: Rng, min: number, max: number): number {
   return min + Math.floor(rng() * (max - min + 1))

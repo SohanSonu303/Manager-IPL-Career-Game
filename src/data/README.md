@@ -28,8 +28,9 @@
    - Batters rated under 72 have a 15% chance of `poor-vs-spin`.
    - Pace bowlers rated 60+ may get `death-bowler` or `powerplay-specialist`.
    - Traits are random within those rules, so they will not match a real player's reputation.
-6. **Overall rating:** `overallRating` in `src/sim/player.ts`, weighted by role.
-7. **Salary (lakhs per year)** = `max(20, ((overall − 40) / 45)^2.2 × 1800)`, rounded to 5. Contract length is 1–3 years.
+6. **Potential** (growth ceiling): overall plus room by age — 12–22 at 19 or under, 6–14 at 20–22, 2–8 at 23–25, 0–3 after. Season development stops at it.
+7. **Overall rating:** `overallRating` in `src/sim/player.ts`, weighted by role.
+8. **Salary (lakhs per year)** = `max(20, ((overall − 40) / 45)^2.2 × 1800)`, rounded to 5. Contract length is 1–3 years.
 
 ## Players are real only
 
