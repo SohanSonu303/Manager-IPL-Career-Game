@@ -11,6 +11,7 @@ Mobile-first cricket career management sim, played in the browser. See `TODO.md`
 - `npm run lint`, `npm run typecheck`, `npm run format`
 - `npm run data` regenerate `src/data/players.json` and `teams.json` from `scripts/source/`
 - `npm run calibrate` simulate 10,000 matches and compare with real IPL numbers
+- `npm run winprob` rebuild the win-probability table (after any change to the ball model)
 
 ## Layout
 

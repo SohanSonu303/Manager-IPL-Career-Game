@@ -17,6 +17,19 @@ export const MAX_OVERS_PER_BOWLER = 4
 const oversBy = (inn: InningsState, id: string) =>
   Math.floor((inn.bowling[id]?.legalBalls ?? 0) / 6)
 
+/**
+ * Overs `bowlerId` has bowled in a row from the same end up to now (0 if they did not
+ * bowl the over before last). Bowling the next over would make it `spellLength + 1`.
+ */
+export function spellLength(inn: InningsState, bowlerId: string): number {
+  const over = Math.floor(inn.legalBalls / 6)
+  const byOver = new Map<number, string>()
+  for (const e of inn.events) if (!byOver.has(e.over)) byOver.set(e.over, e.bowlerId)
+  let n = 0
+  for (let o = over - 2; o >= 0 && byOver.get(o) === bowlerId; o -= 2) n++
+  return n
+}
+
 function phaseFit(p: MatchPlayer, phase: Phase): number {
   const pace = p.bowlingType === 'pace'
   const spin = p.bowlingType === 'spin'
@@ -96,6 +109,8 @@ export function chooseBowler(state: MatchState, inn: InningsState): string {
     .map((id) => {
       const p = player(id)
       let score = p.bowling + phaseFit(p, phase)
+      // Rest a tiring bowler: a third or fourth over in a row costs execution.
+      score -= 3 * Math.max(0, spellLength(inn, id) - 1)
       if (phase !== 'death' && deathOptions.includes(id) && quota(id) <= 2) score -= 15
       return { id, score }
     })

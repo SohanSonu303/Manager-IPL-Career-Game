@@ -21,6 +21,8 @@ import {
   startNextInnings,
 } from '@/sim/match/engine'
 import { ballLabel, chaseStatus, economy, oversText } from '@/sim/match/scorecard'
+import { spellLength } from '@/sim/match/tactics'
+import { winProbability } from '@/sim/match/winProb'
 import {
   AGGRESSION,
   BOWL_INTENTS,
@@ -37,7 +39,7 @@ import { Crest } from './identity/Crest'
 import { Icon } from './kit/Icon'
 import { Chip, Screen, StatBar } from './kit/kit'
 import { commentary } from './match/commentary'
-import { INTENT_LABEL, PostMatch, Scorecard } from './match/MatchView'
+import { INTENT_LABEL, PostMatch, Scorecard, WinWorm } from './match/MatchView'
 
 // three.js only loads when a match is opened.
 const Field3D = lazy(() => import('@/match3d/Field3D'))
@@ -152,6 +154,9 @@ export function MatchPage() {
           {bowlTeam && <Crest crest={bowlTeam.crest} colors={bowlTeam.colors} size={38} />}
           {other ? `${other.runs}/${other.wickets}` : bowlTeam?.short}
         </span>
+        {!state.result && (
+          <WinBar state={state} left={inn.battingTeamId} right={inn.bowlingTeamId} />
+        )}
       </div>
 
       <div className="six-strip" aria-label="Last six balls">
@@ -261,6 +266,7 @@ export function MatchPage() {
       )}
 
       <div className="match-extra">
+        {state.result && <WinWorm state={state} me={me} />}
         {state.result && (
           <PostMatch state={state} reports={null} canApply={false} onApply={() => {}} />
         )}
@@ -284,6 +290,34 @@ export function MatchPage() {
         ))}
       </div>
     </Screen>
+  )
+}
+
+/** Live win chance for the two sides, as one split bar (batting side on the left). */
+function WinBar({ state, left, right }: { state: MatchState; left: string; right: string }) {
+  const mine = teamById.get(left)
+  const theirs = teamById.get(right)
+  const p = winProbability(state, left)
+  const pct = Math.round(p * 100)
+  return (
+    <div className="win-bar" aria-label={`Win chance ${mine?.short} ${pct}%`}>
+      <span className="wb-side">
+        {mine?.short} <strong>{pct}%</strong>
+      </span>
+      <span className="wb-track">
+        <span
+          className="wb-fill"
+          style={{ width: `${pct}%`, background: mine?.colors.primary ?? 'var(--accent)' }}
+        />
+        <span
+          className="wb-rest"
+          style={{ background: theirs?.colors.primary ?? 'var(--surface-2)' }}
+        />
+      </span>
+      <span className="wb-side right">
+        <strong>{100 - pct}%</strong> {theirs?.short}
+      </span>
+    </div>
   )
 }
 
@@ -323,6 +357,11 @@ function BatRow({
         <strong>{name}</strong>
         <span>
           {line?.runs ?? 0} ({line?.balls ?? 0})
+          {(line?.balls ?? 0) < 6 ? (
+            <em className="tag warn"> New</em>
+          ) : (line?.balls ?? 0) >= 20 ? (
+            <em className="tag good"> Set</em>
+          ) : null}
         </span>
       </span>
       {human && (
@@ -358,6 +397,8 @@ function BowlRow({ state, players }: { state: MatchState; players: Map<string, C
   const p = players.get(id)
   const b = inn.bowling[id]
   const team = p?.teamId ? teamById.get(p.teamId) : undefined
+  const spell = inn.bowlerId === id ? (inn.spell ?? spellLength(inn, id) + 1) : 0
+  const rattled = inn.bowlerId === id && (inn.overBoundaries ?? 0) >= 2
   return (
     <div className="bat-row">
       {p && (
@@ -375,6 +416,8 @@ function BowlRow({ state, players }: { state: MatchState; players: Map<string, C
           {b
             ? `${oversText(b.legalBalls)}-${b.runs}-${b.wickets} · Econ ${economy(b.runs, b.legalBalls).toFixed(1)}`
             : 'Yet to bowl'}
+          {spell >= 3 && <em className="tag warn"> Tiring · over {spell} of spell</em>}
+          {rattled && <em className="tag bad"> Rattled</em>}
         </span>
       </span>
     </div>
@@ -430,7 +473,15 @@ function BowlingControls({
                 }}
               >
                 <span className="who">
-                  <strong>{m?.name}</strong>
+                  <strong>
+                    {m?.name}
+                    {spellLength(inn, id) >= 2 && (
+                      <em className="tag warn">
+                        {' '}
+                        Tiring · over {spellLength(inn, id) + 1} of spell
+                      </em>
+                    )}
+                  </strong>
                   <span className="dim">
                     {m?.bowlingType === 'spin' ? 'Spin' : 'Pace'} ·{' '}
                     {b ? `${oversText(b.legalBalls)}-${b.runs}-${b.wickets}` : '0-0-0'}

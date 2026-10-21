@@ -1,6 +1,20 @@
 import { createRng, deriveSeed, pickWeighted, type Rng } from '../rng'
-import { ballOdds, dismissalWeights, MODEL, wideFactor, type Odds } from './model'
-import { aiBowlingTactics, batterIntent, chooseBowler, MAX_OVERS_PER_BOWLER } from './tactics'
+import {
+  ballOdds,
+  dismissalWeights,
+  dropChance,
+  misfieldChance,
+  MODEL,
+  wideFactor,
+  type Odds,
+} from './model'
+import {
+  aiBowlingTactics,
+  batterIntent,
+  chooseBowler,
+  MAX_OVERS_PER_BOWLER,
+  spellLength,
+} from './tactics'
 import {
   AGGRESSION,
   bowlIntentValue,
@@ -262,6 +276,7 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
     const bowling = sheetOf(state, inn.bowlingTeamId)
     if (bowling.ai) Object.assign(bowling, aiBowlingTactics(state, inn, inn.bowlerId))
   }
+  if (inn.spell === undefined) inn.spell = spellLength(inn, inn.bowlerId) + 1
   const bowlerId = inn.bowlerId
   const bowler = state.players[bowlerId] as MatchPlayer
   const batterId = inn.strikerId
@@ -281,6 +296,10 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
     field: tactics.field,
     bowlIntent: bowlIntentValue(tactics.bowlIntent),
     plan: tactics.bowlPlan,
+    ballsFaced: inn.batting[batterId]?.balls ?? 0,
+    pressure: Math.min(1, (inn.dotRun ?? 0) / 6),
+    spell: inn.spell,
+    hitThisOver: inn.overBoundaries ?? 0,
   }
 
   const bat = (inn.batting[batterId] ??= { runs: 0, balls: 0, fours: 0, sixes: 0, out: null })
@@ -300,6 +319,7 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
   let wicket: BallEvent['wicket'] = null
   let shot: BallEvent['shot'] = null
   let boundary: BallEvent['boundary'] = null
+  let fumble: BallEvent['fumble'] = null
   let key: string
 
   const r = rng()
@@ -328,35 +348,58 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
         outcome = 'dot'
       }
     }
-    if (kind) {
+    // The catch may go down.
+    if (kind === 'caught') {
+      const keeperId = sheetOf(state, inn.bowlingTeamId).keeperId
+      const keeperChance = rng() < 0.13 && bowler.bowlingType === 'pace'
+      const catcher =
+        rng() < 0.03 ? bowlerId : keeperChance ? keeperId : pickFielder(state, inn, rng, bowlerId)
+      const f = state.players[catcher]?.fielding ?? 50
+      if (rng() < dropChance(f, catcher === keeperId)) {
+        fumble = { kind: 'drop', fielderId: catcher }
+        kind = null
+        outcome = rng() < 0.6 ? 'dot' : 'one'
+      } else {
+        wicket = { kind, playerOutId: batterId, fielderId: catcher }
+      }
+    }
+    if (wicket) {
+      shot = {
+        angle: rng() * 360,
+        distance: 15 + rng() * (state.pitch.boundary - 17),
+        aerial: true,
+      }
+      key = commentaryKey(0, shot, 'caught')
+    } else if (kind) {
       const runsCompleted = kind === 'runOut' && rng() < 0.5 ? 1 : 0
       runs = runsCompleted
       const outId = kind === 'runOut' && rng() < 0.4 ? inn.nonStrikerId : batterId
       const fielder =
-        kind === 'caught'
-          ? rng() < 0.03
-            ? bowlerId
-            : rng() < 0.13 && bowler.bowlingType === 'pace'
-              ? sheetOf(state, inn.bowlingTeamId).keeperId
-              : pickFielder(state, inn, rng, bowlerId)
-          : kind === 'stumped'
-            ? sheetOf(state, inn.bowlingTeamId).keeperId
-            : kind === 'runOut'
-              ? pickFielder(state, inn, rng, '')
-              : null
+        kind === 'stumped'
+          ? sheetOf(state, inn.bowlingTeamId).keeperId
+          : kind === 'runOut'
+            ? pickFielder(state, inn, rng, '')
+            : null
       wicket = { kind, playerOutId: outId, fielderId: fielder }
       shot =
-        kind === 'caught'
-          ? { angle: rng() * 360, distance: 15 + rng() * (state.pitch.boundary - 17), aerial: true }
-          : kind === 'runOut'
-            ? { angle: rng() * 360, distance: 10 + rng() * 20, aerial: false }
-            : null
+        kind === 'runOut' ? { angle: rng() * 360, distance: 10 + rng() * 20, aerial: false } : null
       key = commentaryKey(0, shot, kind)
     } else {
       runs = { dot: 0, one: 1, two: 2, three: 3, four: 4, six: 6, wicket: 0 }[outcome]
-      shot = makeShot(rng, runs, state.pitch.boundary, state.pitch)
+      // A single can become two through a misfield.
+      if (runs === 1 && !fumble) {
+        const fielder = pickFielder(state, inn, rng, bowlerId)
+        if (rng() < misfieldChance(state.players[fielder]?.fielding ?? 50)) {
+          fumble = { kind: 'misfield', fielderId: fielder }
+          runs = 2
+        }
+      }
+      shot =
+        fumble?.kind === 'drop'
+          ? { angle: rng() * 360, distance: 15 + rng() * (state.pitch.boundary - 17), aerial: true }
+          : makeShot(rng, runs, state.pitch.boundary, state.pitch)
       if (runs === 4 || runs === 6) boundary = runs
-      key = commentaryKey(runs, shot, null)
+      key = fumble ? fumble.kind : commentaryKey(runs, shot, null)
       // Some would-be dots become leg-byes or byes (legal balls only).
       if (runs === 0 && !noBall) {
         const lb = rng()
@@ -387,7 +430,9 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
     inn.legalBalls++
     bowl.legalBalls++
     if (total === 0) bowl.dots++
+    inn.dotRun = total === 0 && !wicket ? (inn.dotRun ?? 0) + 1 : 0
   }
+  if (boundary) inn.overBoundaries = (inn.overBoundaries ?? 0) + 1
   inn.freeHitNext =
     extra?.kind === 'noball' ? true : extra?.kind === 'wide' ? inn.freeHitNext : false
 
@@ -434,6 +479,7 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
     wicket,
     shot,
     boundary,
+    fumble,
     commentary: key,
     score: { runs: inn.runs, wickets: inn.wickets, legalBalls: inn.legalBalls },
   }
@@ -443,6 +489,8 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
     swapStrike(inn)
     inn.lastOverBowlerId = bowlerId
     inn.bowlerId = null
+    inn.spell = undefined
+    inn.overBoundaries = 0
   }
   if (inn.legalBalls >= inn.maxOvers * 6) inn.complete = true
   if (inn.target !== null && inn.runs >= inn.target) inn.complete = true

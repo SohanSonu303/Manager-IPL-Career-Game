@@ -9,9 +9,9 @@ import type { BowlPlan, DismissalKind, FieldSetting, MatchPlayer, Phase, Pitch }
 export const MODEL = {
   /** Legal-ball rates per phase for an average matchup at balanced intent. */
   base: {
-    powerplay: { wicket: 0.039, dot: 0.375, four: 0.188, six: 0.066 },
-    middle: { wicket: 0.045, dot: 0.262, four: 0.11, six: 0.065 },
-    death: { wicket: 0.06, dot: 0.2, four: 0.17, six: 0.122 },
+    powerplay: { wicket: 0.0372, dot: 0.375, four: 0.188, six: 0.066 },
+    middle: { wicket: 0.0482, dot: 0.262, four: 0.11, six: 0.065 },
+    death: { wicket: 0.0635, dot: 0.2, four: 0.17, six: 0.122 },
   } satisfies Record<Phase, { wicket: number; dot: number; four: number; six: number }>,
   /** Skill = (batting − bowling − center) / 10. Center = the average matchup. */
   skillCenter: -3,
@@ -20,14 +20,34 @@ export const MODEL = {
   /** Exponential sensitivity to intent (per step from balanced, −2…+2). */
   intent: { wicket: 0.24, boundary: 0.2, six: 0.12, dot: -0.14 },
   /** Of the non-boundary runs: share of twos and threes (rest are singles). */
-  twoShare: 0.134,
+  twoShare: 0.124,
   threeShare: 0.004,
   /** Per delivery. */
-  wide: 0.046,
+  wide: 0.0435,
   noball: 0.0041,
   /** Share of would-be dots that become leg-byes / byes. */
   legbyeOfDot: 0.058,
   byeOfDot: 0.016,
+  /**
+   * Getting set: a new batter is likelier to get out and finds the boundary less often.
+   * Multiplier = set + (new − set) · e^(−balls / settle). Mean-centred by the base rates.
+   */
+  settle: 8,
+  newWicket: 1.3,
+  setWicket: 0.86,
+  newBoundary: 0.82,
+  setBoundary: 1.08,
+  /** Pressure from a run of dot balls: extra false-shot risk at six dots in a row. */
+  pressureWicket: 0.25,
+  /** Rating points a bowler loses per over past two in a spell. */
+  fatigue: 3,
+  /** Rattled bowler: rating points lost and extra wide risk per boundary past one this over. */
+  rattledRating: 3,
+  rattledWide: 0.2,
+  /** Dropped catches: share of chances put down by a 60-rated fielder (keepers drop fewer). */
+  drop: 0.15,
+  /** Share of singles that become two through a misfield (60-rated fielder). */
+  misfield: 0.02,
   /** Dismissal mix (given a wicket), from real IPL data; adjusted by bowler type. */
   dismissals: {
     caught: 0.739,
@@ -61,11 +81,48 @@ export interface BallContext {
   /** −1 (contain) … +1 (attack). */
   bowlIntent?: number
   plan?: BowlPlan
+  /** Balls the batter has faced this innings (getting set). */
+  ballsFaced?: number
+  /** 0…1: built up by a run of dot balls. */
+  pressure?: number
+  /** Consecutive overs in the bowler's current spell, this one included. */
+  spell?: number
+  /** Boundaries the bowler has conceded in this over. */
+  hitThisOver?: number
 }
 
-/** Extra wide risk from the bowling plan and intent. */
-export function wideFactor({ plan, bowlIntent = 0 }: BallContext): number {
-  return (plan === 'wide' ? 1.6 : 1) * (bowlIntent > 0 ? 1.15 : 1)
+/** Extra wide risk from the bowling plan, intent and a rattled bowler. */
+export function wideFactor({ plan, bowlIntent = 0, hitThisOver = 0 }: BallContext): number {
+  return (
+    (plan === 'wide' ? 1.6 : 1) *
+    (bowlIntent > 0 ? 1.15 : 1) *
+    (1 + MODEL.rattledWide * Math.max(0, hitThisOver - 1))
+  )
+}
+
+/** Wicket and boundary multipliers for a batter who has faced `balls` balls. */
+export function settleFactor(balls: number): { wicket: number; boundary: number } {
+  const k = Math.exp(-balls / MODEL.settle)
+  return {
+    wicket: MODEL.setWicket + (MODEL.newWicket - MODEL.setWicket) * k,
+    boundary: MODEL.setBoundary + (MODEL.newBoundary - MODEL.setBoundary) * k,
+  }
+}
+
+/** Rating points the bowler is down today from a long spell or a bad over. */
+export function bowlerPenalty({ spell = 1, hitThisOver = 0 }: BallContext): number {
+  return MODEL.fatigue * Math.max(0, spell - 2) + MODEL.rattledRating * Math.max(0, hitThisOver - 1)
+}
+
+/** Chance a catch goes down, by the fielder's rating. */
+export function dropChance(fielding: number, keeper: boolean): number {
+  const p = MODEL.drop * Math.exp((60 - fielding) / 15) * (keeper ? 0.6 : 1)
+  return Math.min(0.3, Math.max(0.05, p))
+}
+
+/** Chance a single becomes two through a misfield. */
+export function misfieldChance(fielding: number): number {
+  return Math.min(0.06, Math.max(0.005, MODEL.misfield * Math.exp((60 - fielding) / 15)))
 }
 
 const has = (p: MatchPlayer, t: Trait) => p.traits.includes(t)
@@ -81,15 +138,25 @@ export function ballOdds(ctx: BallContext): Odds {
     field = 'balanced',
     bowlIntent = 0,
     plan = 'stock',
+    ballsFaced,
+    pressure = 0,
   } = ctx
   const base = MODEL.base[phase]
-  const s = (batter.batting - bowler.bowling - MODEL.skillCenter) / 10
+  const s = (batter.batting - (bowler.bowling - bowlerPenalty(ctx)) - MODEL.skillCenter) / 10
 
   let w = base.wicket * Math.exp(-MODEL.skill.wicket * s + MODEL.intent.wicket * intent)
   let b =
     (base.four + base.six) * Math.exp(MODEL.skill.boundary * s + MODEL.intent.boundary * intent)
   let sixShare = (base.six / (base.four + base.six)) * Math.exp(MODEL.intent.six * intent)
   let d = base.dot * Math.exp(-MODEL.skill.dot * s + MODEL.intent.dot * intent)
+
+  // Getting set, and pressure from dot balls.
+  if (ballsFaced !== undefined) {
+    const f = settleFactor(ballsFaced)
+    w *= f.wicket
+    b *= f.boundary
+  }
+  w *= 1 + MODEL.pressureWicket * pressure
 
   // Batter traits.
   if (has(batter, 'big-hitter')) {

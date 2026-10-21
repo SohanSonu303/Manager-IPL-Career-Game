@@ -58,11 +58,15 @@ export function gradeMatch(
 ): Omit<PlayerReport, 'ratingChange' | 'fitnessAfter' | 'formAfter' | 'injury'>[] {
   const main = state.innings.slice(0, 2)
   const made = new Map<string, number>()
+  const fumbles = new Map<string, number>()
   for (const inn of main) {
     for (const e of inn.events) {
       const f = e.wicket?.fielderId
       if (f && e.wicket?.kind !== 'bowled' && e.wicket?.kind !== 'lbw')
         made.set(f, (made.get(f) ?? 0) + 1)
+      // A dropped catch costs more than a misfield.
+      const by = e.fumble?.fielderId
+      if (by) fumbles.set(by, (fumbles.get(by) ?? 0) + (e.fumble?.kind === 'drop' ? 4 : 1))
     }
   }
   return Object.values(state.sheets).flatMap((sheet) =>
@@ -73,7 +77,7 @@ export function gradeMatch(
       const bowled = bowlInn?.bowling[id] ?? null
       const bat = batted && (batted.balls > 0 || batted.out) ? battingGrade(batted) : null
       const bowl = bowled && bowled.legalBalls > 0 ? bowlingGrade(bowled) : null
-      const fielding = (made.get(id) ?? 0) * 4
+      const fielding = (made.get(id) ?? 0) * 4 - (fumbles.get(id) ?? 0)
       const parts = [bat, bowl].filter((g): g is number => g !== null)
       const base =
         parts.length === 2 ? Math.max(...parts) * 0.7 + Math.min(...parts) * 0.3 : (parts[0] ?? 50)

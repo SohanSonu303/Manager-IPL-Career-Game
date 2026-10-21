@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest'
-import { ballOdds, wideFactor, type BallContext } from './model'
+import {
+  ballOdds,
+  bowlerPenalty,
+  dropChance,
+  misfieldChance,
+  settleFactor,
+  wideFactor,
+  type BallContext,
+} from './model'
 import type { MatchPlayer } from './types'
 
 const player = (over: Partial<MatchPlayer>): MatchPlayer => ({
@@ -66,5 +74,34 @@ describe('bowling tactics', () => {
         const o = ballOdds({ ...base, field, plan, bowlIntent: 1, intent: 2 })
         expect(Object.values(o).reduce((a, b) => a + b, 0)).toBeCloseTo(1, 9)
       }
+  })
+})
+
+describe('engine v2 effects', () => {
+  it('a new batter is at more risk and finds fewer boundaries than a set one', () => {
+    const fresh = ballOdds({ ...base, ballsFaced: 0 })
+    const set = ballOdds({ ...base, ballsFaced: 30 })
+    expect(fresh.wicket).toBeGreaterThan(set.wicket * 1.3)
+    expect(fresh.four + fresh.six).toBeLessThan(set.four + set.six)
+    expect(settleFactor(0).wicket).toBeGreaterThan(settleFactor(10).wicket)
+  })
+
+  it('dot-ball pressure raises the wicket chance', () => {
+    expect(ballOdds({ ...base, pressure: 1 }).wicket).toBeGreaterThan(ballOdds(base).wicket)
+  })
+
+  it('a tiring or rattled bowler is easier to score off and bowls more wides', () => {
+    expect(bowlerPenalty({ ...base, spell: 2 })).toBe(0)
+    expect(bowlerPenalty({ ...base, spell: 4 })).toBeGreaterThan(
+      bowlerPenalty({ ...base, spell: 3 }),
+    )
+    expect(boundary({ ...base, spell: 4 })).toBeGreaterThan(boundary({ ...base, spell: 1 }))
+    expect(wideFactor({ ...base, hitThisOver: 3 })).toBeGreaterThan(wideFactor(base))
+  })
+
+  it('good fielders drop fewer catches and misfield less', () => {
+    expect(dropChance(85, false)).toBeLessThan(dropChance(40, false))
+    expect(dropChance(60, true)).toBeLessThan(dropChance(60, false))
+    expect(misfieldChance(85)).toBeLessThan(misfieldChance(40))
   })
 })

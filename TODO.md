@@ -212,6 +212,20 @@ Reference direction (from the uploaded screenshots): scoreboard card on top, the
 - [ ] Re-check a few players against the official IPL site before a public pitch (see `src/data/README.md`)
 - [ ] Other mockups (F, G, I, J) not used; more design rounds later
 
+## Engine v2 and retention (plan: slices 1–6)
+Slice 1, the feel of the match (done):
+- [x] Getting set: a new batter is at more risk and hits fewer boundaries, and is safer once set. "New" and "Set" tags appear on the crease panel
+- [x] Dot-ball pressure raises the false-shot risk
+- [x] Bowler fatigue from the third over in a row; a rattled bowler after 2+ boundaries in an over (more wides, easier to hit); the AI rests tiring bowlers; "Tiring" tags on the picker
+- [x] Fielding: dropped catches and misfields scaled by the fielding rating; they appear in commentary and lower the fielding grade
+- [x] Win probability: a table from 20k simulated innings (`npm run winprob`), a live split bar in the scorebug, and a post-match worm with the turning point
+- [x] Recalibrated: all metrics within about 3%
+- [ ] Slice 2: Daily Challenge (seeded scenario per date, share card, streak), "while you were away" summary, achievements
+- [ ] Slice 3: toss decision with dew, Impact Player, DRS, strategic timeouts
+- [ ] Slice 4: delivery model (intended vs executed length), shot types, wagon wheel, 3D shot direction
+- [ ] Slice 5: mega auction every 3 seasons, manager reputation and job offers, press conferences
+- [ ] Later: batting hand and matchups, rain and DLS, scenario mode
+
 ## Open decisions
 - [x] League format: 14 matches each (IPL style). Revisit if needed
 - [ ] Game name; final franchise names (current ones are a first pass)

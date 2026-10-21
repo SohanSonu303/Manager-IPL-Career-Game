@@ -52,3 +52,6 @@ for (const [name, real, s] of rows) {
   )
 }
 console.log('\ndismissals (sim):', sim.dismissals)
+console.log(
+  `fielding (sim): ${sim.dropsPerMatch} drops, ${sim.misfieldsPerMatch} misfields per match`,
+)

@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "data": "tsx scripts/generate-data.ts",
-    "calibrate": "tsx scripts/calibrate.ts"
+    "calibrate": "tsx scripts/calibrate.ts",
+    "winprob": "tsx scripts/winprob.ts"
   },
   "dependencies": {
     "@fontsource/barlow-condensed": "^5.3.0",

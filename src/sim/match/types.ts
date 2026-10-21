@@ -96,6 +96,8 @@ export interface BallEvent {
    */
   shot: { angle: number; distance: number; aerial: boolean } | null
   boundary: 4 | 6 | null
+  /** A dropped catch or a misfield on this ball. */
+  fumble?: { kind: 'drop' | 'misfield'; fielderId: string } | null
   /** Key for commentary templates, e.g. "six.lofted", "wicket.bowled", "wide". */
   commentary: string
   /** Score after this delivery. */
@@ -146,6 +148,12 @@ export interface InningsState {
   battedOrder: string[]
   events: BallEvent[]
   complete: boolean
+  /** Legal dot balls in a row (pressure). */
+  dotRun?: number
+  /** Consecutive overs in the current bowler's spell, this over included. */
+  spell?: number
+  /** Boundaries conceded in the current over. */
+  overBoundaries?: number
 }
 
 export interface MatchResult {

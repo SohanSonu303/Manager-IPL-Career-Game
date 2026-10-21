@@ -51,6 +51,15 @@ export function commentary(e: BallEvent, state: MatchState): string {
     case 'bye':
       line = 'Past the keeper, they scamper a bye.'
       break
+    case 'drop': {
+      const f = name(e.fumble?.fielderId)
+      line = `Dropped! ${bat} skies it and ${f} puts it down. ${bowl} can't believe it.`
+      if (e.runs === 1) line += ' They scramble a single.'
+      break
+    }
+    case 'misfield':
+      line = `${bat} pushes into the ring, ${name(e.fumble?.fielderId)} fumbles and they come back for two.`
+      break
     case 'wicket.bowled':
       line = `Bowled! ${bowl} knocks back ${bat}'s stumps.`
       break

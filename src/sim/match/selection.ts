@@ -154,6 +154,7 @@ export function autoBowlingPlan(sheet: TeamSheet, players: MatchPlayer[]): strin
     legalBalls: 0,
     lastOverBowlerId: null,
     bowling: {},
+    events: [],
   } as unknown as InningsState
   const plan: string[] = []
   for (let over = 0; over < 20; over++) {
@@ -167,6 +168,8 @@ export function autoBowlingPlan(sheet: TeamSheet, players: MatchPlayer[]): strin
       wides: 0,
       noballs: 0,
     }
+    // Enough of an event for spell tracking.
+    inn.events.push({ over, bowlerId: id } as InningsState['events'][number])
     inn.legalBalls += 6
     inn.lastOverBowlerId = id
   }

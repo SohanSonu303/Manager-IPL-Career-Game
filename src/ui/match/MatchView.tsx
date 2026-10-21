@@ -19,6 +19,7 @@ import {
   strikeRate,
 } from '@/sim/match/scorecard'
 import type { Aggression, InningsState, MatchState } from '@/sim/match/types'
+import { turningPoint, winProbabilityTrail } from '@/sim/match/winProb'
 import { commentary } from './commentary'
 
 export const INTENT_LABEL: Record<Aggression, string> = {
@@ -248,6 +249,47 @@ export function Scorecard({ state, inn }: { state: MatchState; inn: InningsState
         </tbody>
       </table>
     </details>
+  )
+}
+
+/** Win-chance worm over both innings, with the ball that swung it most. */
+export function WinWorm({ state, me }: { state: MatchState; me: string }) {
+  const trail = winProbabilityTrail(state, me)
+  if (trail.length < 2) return null
+  const W = 320
+  const H = 90
+  const x = (i: number) => (i / (trail.length - 1)) * W
+  const y = (p: number) => H - p * H
+  const points = trail.map((p, i) => `${x(i).toFixed(1)},${y(p).toFixed(1)}`).join(' ')
+  const breakAt = (state.innings[0]?.events.length ?? 0) + 0.5
+  const tp = turningPoint(trail)
+  const events = state.innings.slice(0, 2).flatMap((i) => i.events)
+  const tpEvent = tp ? events[tp.index] : undefined
+  const team = teamById.get(me)
+  return (
+    <section className="worm">
+      <h2 className="section">Win chance · {team?.short}</h2>
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Win chance through the match">
+        <line x1={0} x2={W} y1={H / 2} y2={H / 2} className="worm-mid" />
+        <line x1={x(breakAt)} x2={x(breakAt)} y1={0} y2={H} className="worm-mid" />
+        <polyline points={points} className="worm-line" />
+        {tp && (
+          <circle
+            cx={x(tp.index + 1)}
+            cy={y(trail[tp.index + 1] ?? 0.5)}
+            r={4}
+            className="worm-dot"
+          />
+        )}
+      </svg>
+      {tp && tpEvent && (
+        <p className="dim">
+          <strong>Turning point</strong> ({tpEvent.innings === 0 ? '1st' : '2nd'} inns{' '}
+          {tpEvent.over}.{tpEvent.ball}, {tp.swing > 0 ? '+' : ''}
+          {Math.round(tp.swing * 100)}%): {commentary(tpEvent, state)}
+        </p>
+      )}
+    </section>
   )
 }
 

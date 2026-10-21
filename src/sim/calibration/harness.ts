@@ -29,9 +29,12 @@ export interface SimStats {
   chaseWinRate: number
   tieRate: number
   dismissals: Record<string, number>
+  /** Dropped catches and misfields per match. */
+  dropsPerMatch: number
+  misfieldsPerMatch: number
 }
 
-const squads: Record<string, Selectable[]> = Object.fromEntries(
+export const squads: Record<string, Selectable[]> = Object.fromEntries(
   teams.map((t) => [
     t.id,
     players.filter((p) => p.teamId === t.id).map((p) => ({ ...p, fitness: 100, form: 50 })),
@@ -52,6 +55,8 @@ export function runCalibration(n: number, seed = 1): SimStats {
   let chaseWins = 0
   let decided = 0
   let ties = 0
+  let drops = 0
+  let misfields = 0
 
   for (let i = 0; i < n; i++) {
     const h = i % teams.length
@@ -72,6 +77,8 @@ export function runCalibration(n: number, seed = 1): SimStats {
     state.innings.slice(0, 2).forEach((inn, idx) => {
       for (const e of inn.events) {
         const ph = phaseOf(e.over)
+        if (e.fumble?.kind === 'drop') drops++
+        if (e.fumble?.kind === 'misfield') misfields++
         runs[ph] += e.total
         if (e.extra) {
           const k = { wide: 'wides', noball: 'noballs', bye: 'byes', legbye: 'legbyes' } as const
@@ -156,5 +163,7 @@ export function runCalibration(n: number, seed = 1): SimStats {
         .sort((x, y) => y[1] - x[1])
         .map(([k, v]) => [k, round(v / totalW)]),
     ),
+    dropsPerMatch: round(drops / n, 2),
+    misfieldsPerMatch: round(misfields / n, 2),
   }
 }
