@@ -4,13 +4,13 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 
 ## Decisions so far
 - **Stack:** React 18, TypeScript (strict), Vite. Client-side only, no backend. Deploy on Vercel.
-- **3D:** three.js for the match screen only, lazy-loaded.
+- **3D:** three.js for the match screen only, lazy-loaded. v1 uses a top-down orthographic camera only (no tilted broadcast camera).
 - **Storage:** `localStorage` for saves (versioned, with JSON export/import).
 - **Mobile-first:** design for 360–430 px wide; on desktop show a centered phone-width column. Installable as a PWA.
 - **Names and art:** real player names only (public). Stats and ratings are generated. Teams, crests and avatars are fictional and procedural (SVG). Photos deferred.
-- **UI look:** own layout and visual identity. Palette direction from the approved mockups (charcoal, periwinkle blue, green for money, amber for warnings). No radial hub, no mascot crests, no cartoon busts.
+- **UI look:** own layout and visual identity. Palette direction from the approved mockups (charcoal, periwinkle blue, green for money, amber for warnings). Procedural face avatars in our own layered SVG style are allowed. No radial hub, no mascot crests.
 - **Scope v1:** manager career mode. One league (10 teams), no promotion or relegation.
-- **Deferred:** AI photos, training, youth academy, sponsors, stadium building, weather, DRS, loans, coin economy, backend and accounts.
+- **Deferred:** AI photos, training, youth academy, sponsors, stadium building, weather, DRS, loans, coin economy, backend and accounts, tilted/broadcast camera, radial hub home screen, image-based player portraits.
 
 ## Principles
 - [ ] Sim is pure TypeScript in `src/sim`. No React, no DOM, no `window`. UI and 3D only read its output.
@@ -36,7 +36,13 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [ ] 10 fictional franchises: city + original nickname, own colors (not matching real team palettes)
 - [ ] Fictional-names toggle for players (for public pitches)
 - [ ] SVG crest generator (seeded: shape + glyph + two colors)
-- [ ] SVG avatar generator (initials and kit color, or faceless silhouette; one consistent style)
+- [ ] SVG avatar generator: procedural face avatar, own style, one consistent look
+  - [ ] Layered parts: head shape, skin tone (6 to 8), hair style (about 10) and color, facial hair (about 5), eyebrows, kit collar in club colors, optional small club badge in the corner
+  - [ ] Seeded from player id so the same player always looks the same
+  - [ ] Style sheet: one stroke weight, flat fills, 3 shades per skin tone
+  - [ ] Ring wrapper that shows form/fitness (green, amber, red) around the avatar
+  - [ ] Slot to swap in an image URL later (AI portraits deferred)
+  - [ ] Check: render 100 random avatars on one page and confirm they do not look repetitive
 - [ ] Short legal check before any public pitch: real names, any IPL wording, any logos
 
 ## Phase 2 — Core engine (M)
@@ -109,12 +115,18 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [ ] Design tokens in `src/theme` (colors, type scale, spacing, radii)
 - [ ] Layout shell: top bar (purse, reputation), content, bottom action bar; safe-area insets
 - [ ] Touch targets at least 48 px; text contrast at least 4.5:1
+- [ ] Shared components (reference direction from screenshots; own look, no copied art or icons):
+  - [ ] `Card`, `Button` (primary, secondary, danger), `Chip` (role, trait, e.g. "Specialist chasing")
+  - [ ] `RatingRing` (number inside, color by rating band), `StatBar` (segmented; also used for aggression)
+  - [ ] `Avatar` (from Phase 1), `TopBar` (purse in green, reputation), `NewsTicker` for the welcome/news line
+  - [ ] `BottomActionBar`: Back plus a primary action with a slanted edge (e.g. Play Match)
 - [ ] Screens:
-  - [ ] Club home (card grid with status lines, next-match button)
-  - [ ] Squad list with filters and player detail
-  - [ ] Pick XI and batting order
+  - [ ] Club home: top bar, news line, 3 quick tabs (Objectives, Finances, Club), card grid (Squad, Market, Stats, Standings, Calendar, Settings) with a status line per card and a red dot when attention is needed, next-match card, Play Match bar. Deferred tiles (Training, Academy, Stadium, Sponsors) are hidden, not greyed out
+  - [ ] Squad list and market list: row = avatar, name, nationality marker, role label, trait chips, rating ring, captain/overseas marker; sort and filter by role, overseas, fitness; virtualize if over 50 rows
+  - [ ] Player detail sheet: ratings, traits, form, fitness, contract
+  - [ ] Pick XI and batting order: tap-to-swap (drag optional), overseas counter, auto-pick button
   - [ ] Match screen (see Phase 11)
-  - [ ] Post-match summary
+  - [ ] Post-match summary: result, player grades with rating changes, injuries
   - [ ] Market and contract negotiation
   - [ ] Standings
   - [ ] Calendar
@@ -125,18 +137,28 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [ ] Respect `prefers-reduced-motion`
 
 ## Phase 11 — 3D match screen with three.js (XL)
-Reference direction (from the uploaded screenshot): scoreboard card on top, the field fills the screen from above, last six balls over the field, batter controls docked at the bottom, a shot arc and a big run popup. Take the layout idea only. Do not copy its stadium art, crowd, logos, ad boards or typography.
+Reference direction (from the uploaded screenshots): scoreboard card on top, the field fills the screen from above, last six balls over the field, batter controls docked at the bottom, a shot arc and a big run popup. Take the layout idea only. Do not copy its stadium art, crowd, logos, ad boards, icons or typography.
+- [ ] Spike first (S): static field with stands and floodlights; measure fps on a low-end Android before building the rest
 - [ ] Use `three` with `@react-three/fiber` v8 (v9 needs React 19) and a few `drei` helpers
 - [ ] Lazy-load the match chunk (`React.lazy`) so the rest of the app stays small
-- [ ] Orthographic top-down camera; field, boundary rope, 30-yard circle, pitch strip
-- [ ] 11 fielder markers and 2 batters (instanced meshes); positions come from the field setup
-- [ ] Ball and shot arc driven by `BallEvent` (direction, distance, boundary); big run or wicket popup
-- [ ] Stands as a procedural ring with instanced crowd dots; two simple floodlight cones
-- [ ] Own look: own colors, own ad-board placeholders ("YOUR SPONSOR HERE")
-- [ ] DOM overlay for the HUD: scorebug, last 6 balls, batter cards with aggression control, sim buttons
+- [ ] Layout (DOM over canvas):
+  - [ ] Top scorebug card: competition and venue, big score and overs, target and required rate, last-ball commentary, team crests left and right
+  - [ ] Six-ball strip with colored chips (boundary, dot, wicket)
+  - [ ] Bottom panel: batting rows (avatar, name, runs (balls), info button, aggression `-` bar `+` with label), bowling row, sim buttons
+- [ ] Scene:
+  - [ ] Orthographic top-down camera
+  - [ ] Striped mowing pattern (shader or canvas texture), boundary rope and cream boundary band, dashed 30-yard circle, pitch strip with crease lines
+  - [ ] 11 fielders, 2 batters and the bowler as flat discs (instanced), team colors; positions come from the field setup
+  - [ ] Procedural stand ring with instanced crowd dots in several colors
+  - [ ] Floodlight clusters in the corners with soft light-cone sprites
+  - [ ] Own ad-board placeholders near the rope ("YOUR SPONSOR HERE")
+- [ ] Animation driven by `BallEvent`: ball travel, yellow shot arc that fades, boundary landing marker, big "4", "6" or "W" popup, fielders drift toward the ball, crowd flash on a six
+- [ ] `prefers-reduced-motion`: no animation, show the result instantly
+- [ ] Field settings: presets (attacking, defensive, death) that feed fielder positions in both the sim and the view
+- [ ] Aggression controls: per-batter setting (defend, rotate, balanced, loft, all-out) passed into `simBall`; changes apply from the next ball
 - [ ] Sim buttons: Next ball, Sim over, Sim 5 overs, Sim innings (skips animation and shows result)
-- [ ] Performance: no real-time shadows, cap device pixel ratio at 2, target 30+ fps on a mid-range Android phone, dispose geometries on unmount
-- [ ] Fallback: a 2D SVG field renderer using the same `BallEvent` stream (also helps low-end phones and WebGL failures)
+- [ ] Performance: no real-time shadows, device pixel ratio capped at 2, instanced meshes, crowd in one draw call, textures 1024 px or smaller, dispose geometries on unmount, target 30+ fps on a mid-range Android phone
+- [ ] Fallback: a 2D SVG field renderer using the same `BallEvent` stream; switch automatically when WebGL fails or fps stays under 25 for 3 seconds
 - [ ] Test on a low-end phone before polishing
 
 ## Phase 12 — QA and feedback (M)
@@ -146,6 +168,9 @@ Reference direction (from the uploaded screenshot): scoreboard card on top, the 
 - [ ] In-app "Send feedback" link (a form or mailto); no analytics backend
 - [ ] Local-only error log that testers can copy into feedback
 - [ ] "Prototype" banner and build version shown in Settings
+- [ ] Screenshot check of the match field at 360, 390 and 430 px wide
+- [ ] Contrast check of rating rings and chips
+- [ ] Log fps samples in the local error log
 
 ## Phase 13 — Deploy and pitch (S)
 - [ ] Vercel production deploy and a stable URL
@@ -160,10 +185,15 @@ Reference direction (from the uploaded screenshot): scoreboard card on top, the 
 - [ ] Salary cap size and starting budget
 - [ ] How many seasons a career runs, and what "winning" means
 - [ ] Whether to add an auction instead of a free-agent market
+- [ ] Nationality marker: own simple flag glyphs or a country-code chip
+- [ ] Aggression levels and their exact effect on the sim
+- [ ] Font choice (a condensed sans for the scorebug)
 
 ## Risks
 - Sim calibration: believable results take iteration. Plan for it, do not assume it works first time.
 - `localStorage` limits and browser clearing. Export/import is the safety net.
 - Three.js performance on low-end phones. The 2D fallback is the insurance.
 - Real player names without a license. Keep the data swappable.
+- Crowd and stand visuals cost performance. Keep them instanced and simple.
+- Avatars can look repetitive. Needs enough part combinations and the 100-avatar check.
 - Scope creep from the deferred list. Resist until v1 is playable end to end.
