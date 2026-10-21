@@ -17,13 +17,14 @@ import {
 } from '@/sim/market'
 import { overallRating } from '@/sim/player'
 import { offerContract, proposeTrade, release, useGame } from '@/state/store'
-import { crore } from './format'
+import { crore, teamShort } from './format'
 import { Chip, Screen } from './kit/kit'
 import { PlayerRow, PlayerSheet } from './PlayerRow'
-import { FilterChips, FILTERS, type Filter } from './SquadPage'
+import { FilterBar } from './FilterBar'
+import { applyFilters, DEFAULT_FILTERS, type PlayerFilters } from './playerFilters'
 import { useNextAction } from './useNextAction'
 
-type Tab = 'free' | 'squad' | 'trade' | 'log'
+type Tab = 'free' | 'squad' | 'all' | 'trade' | 'log'
 
 const AGENT_TEXT = { Keen: 'keen to sign', Fair: 'fair', Tough: 'hard bargainer' } as const
 const AGENT_TONE = { Keen: 'good', Fair: 'plain', Tough: 'warn' } as const
@@ -51,7 +52,7 @@ export function MarketPage() {
         <p className="dim">Sign, release and trade in the preseason or once the season ends.</p>
       )}
       <div className="tabs" role="tablist">
-        {(['free', 'squad', 'trade', 'log'] as const).map((t) => (
+        {(['free', 'squad', 'all', 'trade', 'log'] as const).map((t) => (
           <button
             key={t}
             role="tab"
@@ -59,7 +60,11 @@ export function MarketPage() {
             className={tab === t ? 'active' : ''}
             onClick={() => setTab(t)}
           >
-            {{ free: 'Free agents', squad: 'My squad', trade: 'Trade', log: 'Log' }[t]}
+            {
+              { free: 'Free agents', squad: 'My squad', all: 'League', trade: 'Trade', log: 'Log' }[
+                t
+              ]
+            }
           </button>
         ))}
       </div>
@@ -67,6 +72,13 @@ export function MarketPage() {
         <Players career={career} players={freeAgents(career.players)} mode="sign" />
       )}
       {tab === 'squad' && <Players career={career} players={squad} mode="mine" />}
+      {tab === 'all' && (
+        <Players
+          career={career}
+          players={career.players.filter((p) => p.teamId !== null && p.teamId !== me)}
+          mode="browse"
+        />
+      )}
       {tab === 'trade' && <Trade career={career} />}
       {tab === 'log' && <Log career={career} />}
     </Screen>
@@ -80,19 +92,27 @@ function Players({
 }: {
   career: Career
   players: CareerPlayer[]
-  mode: 'sign' | 'mine'
+  mode: 'sign' | 'mine' | 'browse'
 }) {
-  const [filter, setFilter] = useState<Filter>('all')
+  const [filters, setFilters] = useState<PlayerFilters>(DEFAULT_FILTERS)
   const [openId, setOpenId] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
-  const test = FILTERS.find(([f]) => f === filter)?.[2] ?? (() => true)
-  const sorted = players.filter(test).sort((a, b) => overallRating(b) - overallRating(a))
   /** What this player wants from the manager's club, for his preferred length. */
   const demand = (p: CareerPlayer) => requiredSalary(career, p, preferredYears(p.age), TEAM_IDS)
+  // Free agents are priced by what they want from you; everyone else by their salary.
+  const sorted = applyFilters(players, filters, (p) =>
+    mode === 'sign' ? demand(p) : (p.contract?.salary ?? 0),
+  )
   const open = career.players.find((p) => p.id === openId)
   return (
     <>
-      <FilterChips value={filter} onChange={setFilter} />
+      <FilterBar
+        value={filters}
+        onChange={setFilters}
+        count={sorted.length}
+        total={players.length}
+        priceLabel={mode === 'sign' ? 'Asking price' : 'Salary'}
+      />
       {message && <p className="good">{message}</p>}
       <ul className="plist">
         {sorted.length === 0 && <li className="dim">Nobody here right now.</li>}
@@ -108,6 +128,7 @@ function Players({
                   </>
                 ) : (
                   <span className={(p.contract?.years ?? 0) <= 1 ? 'warn' : ''}>
+                    {mode === 'browse' && <strong>{teamShort(p.teamId ?? '')} · </strong>}
                     {crore(p.contract?.salary ?? 0)} · {p.contract?.years} yr left
                   </span>
                 )
@@ -121,7 +142,11 @@ function Players({
           p={open}
           onClose={() => setOpenId(null)}
           actions={
-            mode === 'sign' || (open.contract?.years ?? 0) <= 1 ? (
+            mode === 'browse' ? (
+              <p className="dim">
+                To get him, use the Trade tab (trades run in the preseason and after the season).
+              </p>
+            ) : mode === 'sign' || (open.contract?.years ?? 0) <= 1 ? (
               <>
                 <Negotiation
                   player={open}

@@ -26,6 +26,8 @@ const PATHS = {
   trophy:
     'M7 4h10v4a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6',
   play: 'M7 4l13 8-13 8z',
+  filter: 'M3 5h18l-7 8v6l-4-2v-4z',
+  menu: 'M4 7h16M4 12h16M4 17h16',
 } as const
 
 export type IconName = keyof typeof PATHS

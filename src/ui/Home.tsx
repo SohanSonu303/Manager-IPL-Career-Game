@@ -1,17 +1,28 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { teamById, teams } from '@/data'
 import { objectiveForRank } from '@/sim/board'
-import { today } from '@/sim/calendar'
+import { describeEvent, today } from '@/sim/calendar'
 import type { Career, SeasonReview } from '@/sim/career'
 import { isMyClub, needsAction } from '@/sim/news'
-import { managerSheet, standings, startCareer as previewCareer, TEAM_IDS } from '@/sim/game'
+import {
+  managerSheet,
+  schedule,
+  stageName,
+  standings,
+  startCareer as previewCareer,
+  TEAM_IDS,
+  userFixtureToday,
+} from '@/sim/game'
+import type { Fixture } from '@/sim/league'
+import { pitchFor } from '@/sim/match/selection'
 import { capRoom, isWindowOpen, payroll, SALARY_CAP, squadOf, strengthRanking } from '@/sim/market'
-import { resetCareer, startCareer, useGame } from '@/state/store'
-import { crore, ordinal, teamName } from './format'
+import { quickSimMyMatch, resetCareer, startCareer, useGame } from '@/state/store'
+import { crore, ordinal, teamName, teamShort } from './format'
 import { Crest } from './identity/Crest'
 import { Icon, type IconName } from './kit/Icon'
-import { FlatButton, HubButton, Meter, Screen, Sheet, Tile } from './kit/kit'
+import { Meter, Screen, Sheet } from './kit/kit'
+import { describePitch } from './PreMatchPage'
 import { useNextAction } from './useNextAction'
 
 const PHASE_LABEL = {
@@ -75,19 +86,38 @@ function NewCareer() {
   )
 }
 
-// --- Club hub ------------------------------------------------------------------------------
+// --- Club home: the season as a timeline ----------------------------------------------------
 
-type SheetName = 'board' | 'finances' | 'club' | 'review' | null
+type SheetName = 'board' | 'finances' | 'club' | 'review' | 'menu' | null
 
-/** Six hub buttons on a circle; angles in degrees, 0 = right, clockwise. */
-const HUB: { icon: IconName; label: string; to: string; angle: number }[] = [
-  { icon: 'market', label: 'Market', to: '/market', angle: -90 },
-  { icon: 'stats', label: 'Statistics', to: '/stats', angle: -30 },
-  { icon: 'calendar', label: 'Fixtures', to: '/fixtures', angle: 30 },
-  { icon: 'lineup', label: 'Pick XI', to: '/lineup', angle: 90 },
-  { icon: 'table', label: 'Table', to: '/table', angle: 150 },
-  { icon: 'squad', label: 'Squad', to: '/squad', angle: 210 },
+const MENU: { icon: IconName; label: string; to: string }[] = [
+  { icon: 'squad', label: 'Squad', to: '/squad' },
+  { icon: 'lineup', label: 'Pick XI', to: '/lineup' },
+  { icon: 'market', label: 'Market', to: '/market' },
+  { icon: 'table', label: 'Table', to: '/table' },
+  { icon: 'stats', label: 'Statistics', to: '/stats' },
+  { icon: 'calendar', label: 'Fixtures', to: '/fixtures' },
+  { icon: 'club', label: 'News', to: '/news' },
+  { icon: 'settings', label: 'Settings', to: '/settings' },
 ]
+
+/** One dot on the timeline: a result, today's card, or an upcoming fixture. */
+function TimelineRow({
+  mark,
+  tone,
+  children,
+}: {
+  mark: string
+  tone: 'win' | 'loss' | 'draw' | 'today' | 'next'
+  children: ReactNode
+}) {
+  return (
+    <div className={`tl-row ${tone}`}>
+      <span className="tl-dot">{mark}</span>
+      <div className="tl-body">{children}</div>
+    </div>
+  )
+}
 
 function ClubHub({ career }: { career: Career }) {
   const navigate = useNavigate()
@@ -100,104 +130,181 @@ function ClubHub({ career }: { career: Career }) {
   const table = standings(career)
   const started = table.some((r) => r.played > 0)
   const position = table.findIndex((r) => r.teamId === me) + 1
+  const myRow = table.find((r) => r.teamId === me)
   const injured = squad.filter((p) => p.injury)
   const expiring = squad.filter((p) => (p.contract?.years ?? 0) <= 1)
   const lineupStale =
     !!career.lineup &&
     managerSheet(career).battingOrder.join() !== career.lineup.battingOrder.join()
-  const round = career.season.results.filter(
-    (r) => r.stage === 'league' && r.teams.includes(me),
-  ).length
-
   const pending = career.news.filter((n) => isMyClub(n, me) && needsAction(n)).length
-  const latest = [...career.news].reverse().find((n) => isMyClub(n, me))
-  const alert: { text: string; icon: IconName | null; go: () => void } = career.season.review
-    ? { text: 'Season review', icon: 'trophy', go: () => setSheet('review') }
-    : pending
-      ? {
-          text: `${pending} need${pending > 1 ? '' : 's'} you`,
-          icon: 'alert',
-          go: () => navigate('/news'),
-        }
-      : injured.length
-        ? { text: `${injured.length} injured`, icon: 'alert', go: () => navigate('/news') }
-        : { text: latest?.text ?? 'No news yet', icon: null, go: () => navigate('/news') }
+
+  const fixtures = schedule(career).filter((f) => f.homeId === me || f.awayId === me)
+  const resultOf = new Map(career.season.results.map((r) => [r.fixtureId, r]))
+  const played = fixtures.filter((f) => resultOf.has(f.id))
+  const mine = userFixtureToday(career)
+  const upcoming = fixtures.filter((f) => !resultOf.has(f.id) && f.id !== mine?.id).slice(0, 4)
+  const playoffs = career.season.results.filter((r) => r.stage !== 'league')
+  const oppOf = (f: Fixture) => (f.homeId === me ? f.awayId : f.homeId)
+
+  const badge = (to: string) =>
+    (to === '/squad' && injured.length > 0) ||
+    (to === '/market' && expiring.length > 0 && isWindowOpen(career)) ||
+    (to === '/lineup' && lineupStale) ||
+    (to === '/news' && pending > 0)
 
   return (
     <Screen back={{ label: 'Settings', onClick: () => navigate('/settings') }} primary={next}>
-      <div className="hub-tabs">
-        <FlatButton onClick={() => setSheet('board')}>Board</FlatButton>
-        <FlatButton onClick={() => setSheet('finances')}>Finances</FlatButton>
-        <FlatButton onClick={() => setSheet('club')}>Club</FlatButton>
-      </div>
-
-      <div className="hub">
-        <div className="hub-ring" />
-        <div className="hub-ring inner" />
-        <div className="hub-center">
-          {team && <Crest crest={team.crest} colors={team.colors} size={112} />}
-          <strong>{team?.name}</strong>
-          <span>
-            {career.calendar.year} ·{' '}
-            {day.phase === 'league'
-              ? `Round ${Math.min(14, round + 1)}/14`
-              : PHASE_LABEL[day.phase]}
-          </span>
+      <header className="tl-head">
+        <div className="tl-title">
+          {team && <Crest crest={team.crest} colors={team.colors} size={44} />}
+          <div>
+            <h1>
+              {team?.name} · {career.calendar.year}
+            </h1>
+            <span className="dim">
+              {started
+                ? `${ordinal(position)} · ${myRow?.points ?? 0} pts`
+                : PHASE_LABEL[day.phase]}{' '}
+              · board {Math.round(career.manager.boardConfidence)} ·{' '}
+              {crore(capRoom(career.players, me))}
+            </span>
+          </div>
         </div>
-        {HUB.map((h) => {
-          const rad = (h.angle * Math.PI) / 180
-          const badge =
-            (h.to === '/squad' && injured.length > 0) ||
-            (h.to === '/market' && expiring.length > 0 && isWindowOpen(career)) ||
-            (h.to === '/lineup' && lineupStale)
+        <div
+          className="tl-progress"
+          role="img"
+          aria-label={`${played.length} of ${fixtures.length} league matches played`}
+        >
+          {fixtures.map((f, i) => (
+            <span
+              key={f.id}
+              className={f.id === mine?.id ? 'now' : i < played.length ? 'done' : ''}
+            />
+          ))}
+        </div>
+        <div className="tl-chips">
+          <button onClick={() => setSheet('board')}>Board</button>
+          <button onClick={() => setSheet('finances')}>Finances</button>
+          <button onClick={() => setSheet('club')}>Club</button>
+        </div>
+      </header>
+
+      <div className="timeline">
+        {played.slice(-3).map((f) => {
+          const r = resultOf.get(f.id)
+          if (!r) return null
+          const won = r.winnerId === me
           return (
-            <div
-              key={h.to}
-              style={{
-                ['--x' as string]: `${50 + 37 * Math.cos(rad)}%`,
-                ['--y' as string]: `${50 + 37 * Math.sin(rad)}%`,
-              }}
-              className="hub-pos"
+            <TimelineRow
+              key={f.id}
+              mark={r.winnerId ? (won ? 'W' : 'L') : '–'}
+              tone={r.winnerId ? (won ? 'win' : 'loss') : 'draw'}
             >
-              <HubButton
-                icon={h.icon}
-                label={h.label}
-                onClick={() => navigate(h.to)}
-                badge={badge}
-              />
-            </div>
+              <span>
+                R{f.round} {f.homeId === me ? 'vs' : '@'} {teamShort(oppOf(f))}
+              </span>
+              <span className="dim">
+                {r.winnerId
+                  ? `${teamShort(r.winnerId)} ${r.margin.replace('won by ', '')}`
+                  : 'no result'}
+              </span>
+            </TimelineRow>
           )
         })}
-      </div>
 
-      <div className="tiles">
-        <Tile caption="Standings" onClick={() => navigate('/table')}>
-          {started ? (
-            <span className="big">
-              {position}
-              <sup>{ordinal(position).slice(-2)}</sup>
-            </span>
-          ) : (
-            <span className="big">–</span>
-          )}
-        </Tile>
-        <Tile caption="Calendar" onClick={() => navigate('/fixtures')}>
-          <span className="big">{career.calendar.year}</span>
-        </Tile>
-        <Tile caption="News" onClick={alert.go}>
-          {alert.icon ? (
-            <>
-              <span className="bad">
-                <Icon name={alert.icon} size={30} />
+        {mine ? (
+          <TimelineRow mark={mine.round ? `R${mine.round}` : '★'} tone="today">
+            <div className="tl-today">
+              <span className="eyebrow">
+                TODAY · {mine.homeId === me ? 'HOME' : 'AWAY'}
+                {mine.stage !== 'league' ? ` · ${stageName(mine.stage).toUpperCase()}` : ''}
               </span>
-              <span>{alert.text}</span>
-            </>
-          ) : (
-            <span className="tile-news">{alert.text}</span>
-          )}
-        </Tile>
+              <strong className="tl-opp">vs {teamName(oppOf(mine))}</strong>
+              <span className="dim">
+                {teamById.get(mine.homeId)?.ground}: {describePitch(pitchFor(mine.homeId))}.
+              </span>
+              <div className="button-row">
+                <button className="primary grow2" onClick={() => navigate('/prematch')}>
+                  Play match
+                </button>
+                <button onClick={quickSimMyMatch}>Sim</button>
+              </div>
+            </div>
+          </TimelineRow>
+        ) : (
+          <TimelineRow mark="★" tone="today">
+            <div className="tl-today">
+              <span className="eyebrow">
+                {PHASE_LABEL[day.phase].toUpperCase()} · WEEK {day.week}
+              </span>
+              <strong className="tl-opp">
+                {career.season.review
+                  ? `${career.calendar.year} season complete`
+                  : day.event
+                    ? describeEvent(day.event)
+                    : day.day === 0
+                      ? 'A new season begins'
+                      : 'No match today'}
+              </strong>
+              {career.season.review ? (
+                <button onClick={() => setSheet('review')}>Season review</button>
+              ) : isWindowOpen(career) ? (
+                <span className="warn">
+                  Transfer window open
+                  {expiring.length
+                    ? ` · ${expiring.length} contract${expiring.length > 1 ? 's' : ''} ending`
+                    : ''}
+                </span>
+              ) : (
+                <span className="dim">Press Continue to move on.</span>
+              )}
+            </div>
+          </TimelineRow>
+        )}
+
+        {playoffs.map((r) => (
+          <TimelineRow
+            key={r.fixtureId}
+            mark="★"
+            tone={r.winnerId === me ? 'win' : r.teams.includes(me) ? 'loss' : 'draw'}
+          >
+            <span>{stageName(r.stage)}</span>
+            <span className="dim">
+              {r.winnerId
+                ? `${teamShort(r.winnerId)} ${r.margin.replace('won by ', '')}`
+                : 'no result'}
+            </span>
+          </TimelineRow>
+        ))}
+
+        {upcoming.map((f) => (
+          <TimelineRow key={f.id} mark={`R${f.round}`} tone="next">
+            <span>
+              {f.homeId === me ? 'vs' : '@'} {teamName(oppOf(f))}
+            </span>
+          </TimelineRow>
+        ))}
       </div>
 
+      <button className="fab" onClick={() => setSheet('menu')} aria-label="Open menu">
+        <Icon name="menu" size={22} />
+        Menu
+        {(injured.length > 0 || pending > 0 || lineupStale) && <span className="fab-dot" />}
+      </button>
+
+      {sheet === 'menu' && (
+        <Sheet title="Menu" onClose={() => setSheet(null)}>
+          <div className="menu-grid">
+            {MENU.map((m) => (
+              <button key={m.to} className="menu-item" onClick={() => navigate(m.to)}>
+                <Icon name={m.icon} size={26} />
+                {m.label}
+                {badge(m.to) && <span className="menu-dot" aria-label="Needs attention" />}
+              </button>
+            ))}
+          </div>
+        </Sheet>
+      )}
       {sheet === 'board' && (
         <BoardSheet
           career={career}

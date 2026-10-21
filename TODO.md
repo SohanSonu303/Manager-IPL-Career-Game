@@ -13,11 +13,11 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - **Deferred:** AI photos, training, youth academy, sponsors, stadium building, weather, DRS, loans, coin economy, backend and accounts, tilted/broadcast camera, image-based player portraits.
 
 ## Principles
-- [ ] Sim is pure TypeScript in `src/sim`. No React, no DOM, no `window`. UI and 3D only read its output.
-- [ ] One seeded RNG; the seed is stored in the save so any match or bug replays exactly.
-- [ ] Sim emits a stream of `BallEvent`s. Scoreboard, commentary and 3D view all consume the same stream.
-- [ ] All players and teams live in JSON data files, generated from `scripts/source/`.
-- [ ] No dates in this file. Sizes only: S (hours), M (a day or two), L (several days), XL (a week or more).
+- [x] Sim is pure TypeScript in `src/sim`. No React, no DOM, no `window`. UI and 3D only read its output.
+- [x] One seeded RNG; the seed is stored in the save so any match or bug replays exactly.
+- [x] Sim emits a stream of `BallEvent`s. Scoreboard, commentary and 3D view all consume the same stream.
+- [x] All players and teams live in JSON data files, generated from `scripts/source/`.
+- [x] No dates in this file. Sizes only: S (hours), M (a day or two), L (several days), XL (a week or more).
 
 ## Phase 0 — Project setup (S)
 - [x] `npm create vite@latest` with the React + TypeScript template (moved from React 18 to 19 before Phase 1 so current R3F/drei work)
@@ -43,7 +43,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
   - [x] Slot to swap in an image URL later (AI portraits deferred)
   - [x] Check: render 100 random avatars on one page and confirm they do not look repetitive
 - [ ] Short legal check before any public pitch: real names, any IPL wording, any logos
-- [ ] Hand-set traits for well-known real players (generated traits are random, e.g. Kohli can come out as "finisher")
+- [x] Hand-set traits for well-known real players (about 80, `scripts/source/known-traits.ts`)
 
 ## Phase 2 — Core engine (M)
 - [x] Seeded PRNG module with tests (same seed, same sequence) — `src/sim/rng.ts`, done early for Phase 1
@@ -100,7 +100,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [x] Free-agent market; AI clubs restock at the turn of the year (needs first, then one upgrade)
 - [x] Trades between clubs, 1-for-1 in the UI (engine allows more); AI wants 5% more value (loans deferred)
 - [x] Retirements (long T20 careers; fading players go sooner)
-- [ ] Season pool: new real players added through data updates (no generated names) — **needs a decision, see Risks**
+- [ ] Season pool: new real players added through data updates (no generated names). The real squads plus 73 free agents last longer; still needs a decision (see Risks)
 - [x] Overseas player rules (max 8 in squad, 4 in the XI); squad size 18–25
 - [x] Safety nets: manager keeps 11 if contracts lapse, emergency signings, short sides, walkovers
 - [x] Market screen: free agents, my squad (renew/release), trade, transfer log
@@ -203,11 +203,20 @@ Reference direction (from the uploaded screenshots): scoreboard card on top, the
 - [x] Calibration re-tuned with AI tactics in play (all within about 2–4%)
 - [ ] Mid-season AI trades (currently only in the windows; mid-season has rumours)
 
+## Real squads, filters and the Timeline UI (done)
+- [x] Real IPL 2026 squads (23–25 per club) from Wikipedia season pages, real auction salaries, withdrawn/unsold players as free agents
+- [x] Ratings from real performance (Cricsheet 2023+: average, strike rate, economy, wickets per over), shrunk towards a salary prior for small samples; roles from real usage
+- [x] Market filters: search, role, nationality, bowling, age, rating, skill, price, availability, sort, reset; League tab to browse other clubs' players; same bar on the Squad screen
+- [x] Mockup H integrated: Timeline club home (progress bar, results, Today card, upcoming, Menu sheet) and Pick XI on a field diagram
+- [x] Repo ignore rules (`.claude`, `.code-review-graph`, `.design-directions`, `.env*`, `*.tsbuildinfo`)
+- [ ] Re-check a few players against the official IPL site before a public pitch (see `src/data/README.md`)
+- [ ] Other mockups (F, G, I, J) not used; more design rounds later
+
 ## Open decisions
 - [x] League format: 14 matches each (IPL style). Revisit if needed
 - [ ] Game name; final franchise names (current ones are a first pass)
 - [ ] Final palette and fonts (from the mockups)
-- [ ] Salary cap size and starting budget (₹140 cr for now; squads start at ₹122–136 cr)
+- [ ] Salary cap size (₹140 cr for now; real squads start at ₹88–123 cr)
 - [ ] How many seasons a career runs, and what "winning" means
 - [ ] Whether to add an auction instead of a free-agent market
 - [ ] Nationality marker: own simple flag glyphs or a country-code chip
