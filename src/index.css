@@ -64,3 +64,44 @@ body {
     transition: none !important;
   }
 }
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: var(--tap);
+}
+
+.toggle input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
+}
+
+.gallery h2 {
+  font-size: 16px;
+  color: var(--text-dim);
+  margin: 20px 0 8px;
+}
+
+.crest-grid,
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+
+.gallery figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.gallery figcaption {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 1.3;
+}

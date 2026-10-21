@@ -31,22 +31,23 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [ ] Test on at least two real phones from the first deploy
 
 ## Phase 1 — Data and identity (M)
-- [ ] Player schema: id, name, age, role, batting and bowling ratings, traits, overseas flag, contract
-- [ ] Players JSON: real names, generated ratings (document how they were generated)
-- [ ] 10 fictional franchises: city + original nickname, own colors (not matching real team palettes)
-- [ ] Fictional-names toggle for players (for public pitches)
-- [ ] SVG crest generator (seeded: shape + glyph + two colors)
-- [ ] SVG avatar generator: procedural face avatar, own style, one consistent look
-  - [ ] Layered parts: head shape, skin tone (6 to 8), hair style (about 10) and color, facial hair (about 5), eyebrows, kit collar in club colors, optional small club badge in the corner
-  - [ ] Seeded from player id so the same player always looks the same
-  - [ ] Style sheet: one stroke weight, flat fills, 3 shades per skin tone
-  - [ ] Ring wrapper that shows form/fitness (green, amber, red) around the avatar
-  - [ ] Slot to swap in an image URL later (AI portraits deferred)
-  - [ ] Check: render 100 random avatars on one page and confirm they do not look repetitive
+- [x] Player schema: id, name, age, role, batting and bowling ratings, traits, overseas flag, contract
+- [x] Players JSON: real names, generated ratings (documented in `src/data/README.md`; regenerate with `npm run data`)
+- [x] 10 fictional franchises: city + original nickname, own colors (not matching real team palettes)
+- [x] Fictional-names toggle for players (for public pitches)
+- [x] SVG crest generator (seeded: shape + glyph + two colors)
+- [x] SVG avatar generator: procedural face avatar, own style, one consistent look
+  - [x] Layered parts: head shape, skin tone (6 to 8), hair style (about 10) and color, facial hair (about 5), eyebrows, kit collar in club colors, optional small club badge in the corner
+  - [x] Seeded from player id so the same player always looks the same
+  - [x] Style sheet: one stroke weight, flat fills, 3 shades per skin tone
+  - [x] Ring wrapper that shows form/fitness (green, amber, red) around the avatar
+  - [x] Slot to swap in an image URL later (AI portraits deferred)
+  - [x] Check: render 100 random avatars on one page and confirm they do not look repetitive
 - [ ] Short legal check before any public pitch: real names, any IPL wording, any logos
+- [ ] Hand-set traits for well-known real players (generated traits are random, e.g. Kohli can come out as "finisher")
 
 ## Phase 2 — Core engine (M)
-- [ ] Seeded PRNG module with tests (same seed, same sequence)
+- [x] Seeded PRNG module with tests (same seed, same sequence) — `src/sim/rng.ts`, done early for Phase 1
 - [ ] Calendar: weeks, match days, season rollover
 - [ ] Save schema with `version` field and migration function
 - [ ] Save/load to `localStorage`; wrap in try/catch; handle empty or full storage

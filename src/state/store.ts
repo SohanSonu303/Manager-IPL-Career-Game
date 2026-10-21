@@ -4,6 +4,17 @@ import { create } from 'zustand'
 export interface GameState {
   version: number
   seed: number
+  settings: {
+    /** Show made-up names instead of real player names (for public pitches). */
+    fictionalNames: boolean
+  }
 }
 
-export const useGame = create<GameState>(() => ({ version: 1, seed: 1 }))
+export const useGame = create<GameState>(() => ({
+  version: 1,
+  seed: 1,
+  settings: { fictionalNames: false },
+}))
+
+export const setFictionalNames = (on: boolean) =>
+  useGame.setState((s) => ({ settings: { ...s.settings, fictionalNames: on } }))

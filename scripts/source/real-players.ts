@@ -1,0 +1,212 @@
+/**
+ * Source list of real cricketers. Only public facts plus our own rough judgement:
+ * name, nationality, role, bowling type, tier (1 = fringe … 5 = elite) and approximate
+ * birth year. No real stats are used; `scripts/generate-data.ts` turns the tier into
+ * generated ratings. Edit freely, then run `npm run data`.
+ */
+import type { BowlingType, Nationality, Role } from '../../src/data/types.ts'
+
+export type SourcePlayer = [
+  name: string,
+  nationality: Nationality,
+  role: Role,
+  bowling: BowlingType | null,
+  tier: 1 | 2 | 3 | 4 | 5,
+  birthYear: number,
+]
+
+const bat = 'batter'
+const wk = 'wicketkeeper'
+const ar = 'allrounder'
+const bowl = 'bowler'
+const p = 'pace'
+const s = 'spin'
+
+export const realPlayers: SourcePlayer[] = [
+  // India — batters and keepers
+  ['Virat Kohli', 'IND', bat, null, 5, 1988],
+  ['Rohit Sharma', 'IND', bat, null, 5, 1987],
+  ['Shubman Gill', 'IND', bat, null, 5, 1999],
+  ['Yashasvi Jaiswal', 'IND', bat, null, 5, 2001],
+  ['Suryakumar Yadav', 'IND', bat, null, 5, 1990],
+  ['Shreyas Iyer', 'IND', bat, null, 4, 1994],
+  ['Ruturaj Gaikwad', 'IND', bat, null, 4, 1997],
+  ['Tilak Varma', 'IND', bat, null, 4, 2002],
+  ['Rinku Singh', 'IND', bat, null, 4, 1997],
+  ['Rajat Patidar', 'IND', bat, null, 4, 1993],
+  ['Sai Sudharsan', 'IND', bat, null, 4, 2001],
+  ['Prithvi Shaw', 'IND', bat, null, 3, 1999],
+  ['Devdutt Padikkal', 'IND', bat, null, 3, 2000],
+  ['Ajinkya Rahane', 'IND', bat, null, 3, 1988],
+  ['Nitish Rana', 'IND', bat, null, 3, 1993],
+  ['Shashank Singh', 'IND', bat, null, 3, 1991],
+  ['Ayush Badoni', 'IND', bat, null, 3, 1999],
+  ['Abdul Samad', 'IND', bat, null, 3, 2001],
+  ['Rahul Tripathi', 'IND', bat, null, 3, 1991],
+  ['Angkrish Raghuvanshi', 'IND', bat, null, 3, 2005],
+  ['Naman Dhir', 'IND', bat, null, 3, 2000],
+  ['Nehal Wadhera', 'IND', bat, null, 3, 2000],
+  ['Priyansh Arya', 'IND', bat, null, 3, 2001],
+  ['Vaibhav Suryavanshi', 'IND', bat, null, 3, 2011],
+  ['Ayush Mhatre', 'IND', bat, null, 3, 2007],
+  ['Sarfaraz Khan', 'IND', bat, null, 3, 1997],
+  ['Karun Nair', 'IND', bat, null, 3, 1991],
+  ['Mayank Agarwal', 'IND', bat, null, 2, 1991],
+  ['Manish Pandey', 'IND', bat, null, 2, 1989],
+  ['KL Rahul', 'IND', wk, null, 4, 1992],
+  ['Rishabh Pant', 'IND', wk, null, 5, 1997],
+  ['Sanju Samson', 'IND', wk, null, 4, 1994],
+  ['Ishan Kishan', 'IND', wk, null, 4, 1998],
+  ['Dhruv Jurel', 'IND', wk, null, 3, 2001],
+  ['Jitesh Sharma', 'IND', wk, null, 3, 1993],
+  ['Prabhsimran Singh', 'IND', wk, null, 3, 2000],
+  ['Abishek Porel', 'IND', wk, null, 3, 2002],
+  ['Anuj Rawat', 'IND', wk, null, 2, 1999],
+
+  // India — all-rounders
+  ['Hardik Pandya', 'IND', ar, p, 5, 1993],
+  ['Ravindra Jadeja', 'IND', ar, s, 5, 1988],
+  ['Axar Patel', 'IND', ar, s, 5, 1994],
+  ['Washington Sundar', 'IND', ar, s, 4, 1999],
+  ['Abhishek Sharma', 'IND', ar, s, 4, 2000],
+  ['Shivam Dube', 'IND', ar, p, 4, 1993],
+  ['Riyan Parag', 'IND', ar, s, 4, 2001],
+  ['Nitish Kumar Reddy', 'IND', ar, p, 4, 2003],
+  ['Venkatesh Iyer', 'IND', ar, p, 3, 1994],
+  ['Krunal Pandya', 'IND', ar, s, 3, 1991],
+  ['Shahbaz Ahmed', 'IND', ar, s, 3, 1994],
+  ['Rahul Tewatia', 'IND', ar, s, 3, 1993],
+  ['Shardul Thakur', 'IND', ar, p, 3, 1991],
+  ['Ramandeep Singh', 'IND', ar, p, 2, 1997],
+  ['Vijay Shankar', 'IND', ar, p, 2, 1991],
+  ['Deepak Hooda', 'IND', ar, s, 2, 1995],
+
+  // India — bowlers
+  ['Jasprit Bumrah', 'IND', bowl, p, 5, 1993],
+  ['Arshdeep Singh', 'IND', bowl, p, 5, 1999],
+  ['Kuldeep Yadav', 'IND', bowl, s, 5, 1994],
+  ['Varun Chakravarthy', 'IND', bowl, s, 5, 1991],
+  ['Mohammed Shami', 'IND', bowl, p, 4, 1990],
+  ['Mohammed Siraj', 'IND', bowl, p, 4, 1994],
+  ['Bhuvneshwar Kumar', 'IND', bowl, p, 4, 1990],
+  ['Yuzvendra Chahal', 'IND', bowl, s, 4, 1990],
+  ['Ravi Bishnoi', 'IND', bowl, s, 4, 2000],
+  ['Prasidh Krishna', 'IND', bowl, p, 4, 1996],
+  ['Harshit Rana', 'IND', bowl, p, 4, 2001],
+  ['Harshal Patel', 'IND', bowl, p, 4, 1990],
+  ['Avesh Khan', 'IND', bowl, p, 3, 1996],
+  ['Mukesh Kumar', 'IND', bowl, p, 3, 1993],
+  ['Deepak Chahar', 'IND', bowl, p, 3, 1992],
+  ['Mohit Sharma', 'IND', bowl, p, 3, 1988],
+  ['T Natarajan', 'IND', bowl, p, 3, 1991],
+  ['Khaleel Ahmed', 'IND', bowl, p, 3, 1997],
+  ['Tushar Deshpande', 'IND', bowl, p, 3, 1995],
+  ['Akash Deep', 'IND', bowl, p, 3, 1996],
+  ['Mayank Yadav', 'IND', bowl, p, 3, 2002],
+  ['Yash Dayal', 'IND', bowl, p, 3, 1997],
+  ['Sandeep Sharma', 'IND', bowl, p, 3, 1993],
+  ['Vaibhav Arora', 'IND', bowl, p, 3, 1997],
+  ['Anshul Kamboj', 'IND', bowl, p, 3, 2000],
+  ['Harpreet Brar', 'IND', bowl, s, 3, 1995],
+  ['Rahul Chahar', 'IND', bowl, s, 3, 1999],
+  ['Sai Kishore', 'IND', bowl, s, 3, 1996],
+  ['Digvesh Rathi', 'IND', bowl, s, 3, 1999],
+  ['Umesh Yadav', 'IND', bowl, p, 2, 1987],
+  ['Umran Malik', 'IND', bowl, p, 2, 1999],
+  ['Navdeep Saini', 'IND', bowl, p, 2, 1992],
+  ['Kartik Tyagi', 'IND', bowl, p, 2, 2000],
+  ['Akash Madhwal', 'IND', bowl, p, 2, 1993],
+  ['Kuldeep Sen', 'IND', bowl, p, 2, 1996],
+  ['Simarjeet Singh', 'IND', bowl, p, 2, 1998],
+  ['Chetan Sakariya', 'IND', bowl, p, 2, 1998],
+  ['Vyshak Vijaykumar', 'IND', bowl, p, 2, 1997],
+  ['Ishant Sharma', 'IND', bowl, p, 2, 1988],
+  ['Jaydev Unadkat', 'IND', bowl, p, 2, 1991],
+  ['Shivam Mavi', 'IND', bowl, p, 2, 1998],
+  ['Mukesh Choudhary', 'IND', bowl, p, 2, 1996],
+  ['Suyash Sharma', 'IND', bowl, s, 2, 2003],
+  ['Mayank Markande', 'IND', bowl, s, 2, 1997],
+  ['Vignesh Puthur', 'IND', bowl, s, 2, 2001],
+
+  // Australia
+  ['Travis Head', 'AUS', bat, null, 5, 1993],
+  ['Tim David', 'AUS', bat, null, 4, 1996],
+  ['Jake Fraser-McGurk', 'AUS', bat, null, 3, 2002],
+  ['Josh Inglis', 'AUS', wk, null, 4, 1995],
+  ['Glenn Maxwell', 'AUS', ar, s, 4, 1988],
+  ['Mitchell Marsh', 'AUS', ar, p, 4, 1991],
+  ['Marcus Stoinis', 'AUS', ar, p, 4, 1989],
+  ['Cameron Green', 'AUS', ar, p, 4, 1999],
+  ['Pat Cummins', 'AUS', bowl, p, 5, 1993],
+  ['Mitchell Starc', 'AUS', bowl, p, 5, 1990],
+  ['Josh Hazlewood', 'AUS', bowl, p, 5, 1991],
+  ['Adam Zampa', 'AUS', bowl, s, 4, 1992],
+  ['Nathan Ellis', 'AUS', bowl, p, 3, 1994],
+  ['Spencer Johnson', 'AUS', bowl, p, 3, 1995],
+
+  // England
+  ['Harry Brook', 'ENG', bat, null, 4, 1999],
+  ['Jos Buttler', 'ENG', wk, null, 5, 1990],
+  ['Phil Salt', 'ENG', wk, null, 5, 1996],
+  ['Jonny Bairstow', 'ENG', wk, null, 3, 1989],
+  ['Liam Livingstone', 'ENG', ar, s, 4, 1993],
+  ['Sam Curran', 'ENG', ar, p, 4, 1998],
+  ['Will Jacks', 'ENG', ar, s, 4, 1998],
+  ['Jacob Bethell', 'ENG', ar, s, 3, 2003],
+  ['Moeen Ali', 'ENG', ar, s, 3, 1987],
+  ['Jofra Archer', 'ENG', bowl, p, 4, 1995],
+  ['Mark Wood', 'ENG', bowl, p, 3, 1990],
+
+  // South Africa
+  ['David Miller', 'RSA', bat, null, 4, 1989],
+  ['Aiden Markram', 'RSA', bat, null, 4, 1994],
+  ['Dewald Brevis', 'RSA', bat, null, 4, 2003],
+  ['Heinrich Klaasen', 'RSA', wk, null, 5, 1991],
+  ['Quinton de Kock', 'RSA', wk, null, 4, 1992],
+  ['Tristan Stubbs', 'RSA', wk, null, 4, 2000],
+  ['Ryan Rickelton', 'RSA', wk, null, 3, 1996],
+  ['Marco Jansen', 'RSA', ar, p, 4, 2000],
+  ['Kagiso Rabada', 'RSA', bowl, p, 5, 1995],
+  ['Anrich Nortje', 'RSA', bowl, p, 3, 1993],
+  ['Gerald Coetzee', 'RSA', bowl, p, 3, 2000],
+  ['Lungi Ngidi', 'RSA', bowl, p, 3, 1996],
+
+  // New Zealand
+  ['Devon Conway', 'NZ', bat, null, 4, 1991],
+  ['Kane Williamson', 'NZ', bat, null, 3, 1990],
+  ['Rachin Ravindra', 'NZ', ar, s, 4, 1999],
+  ['Glenn Phillips', 'NZ', ar, s, 4, 1996],
+  ['Mitchell Santner', 'NZ', ar, s, 4, 1992],
+  ['Daryl Mitchell', 'NZ', ar, p, 3, 1991],
+  ['Trent Boult', 'NZ', bowl, p, 4, 1989],
+  ['Lockie Ferguson', 'NZ', bowl, p, 4, 1991],
+
+  // West Indies
+  ['Shimron Hetmyer', 'WI', bat, null, 4, 1996],
+  ['Rovman Powell', 'WI', bat, null, 3, 1993],
+  ['Nicholas Pooran', 'WI', wk, null, 5, 1995],
+  ['Shai Hope', 'WI', wk, null, 3, 1993],
+  ['Andre Russell', 'WI', ar, p, 4, 1988],
+  ['Sunil Narine', 'WI', ar, s, 4, 1988],
+  ['Romario Shepherd', 'WI', ar, p, 3, 1994],
+  ['Alzarri Joseph', 'WI', bowl, p, 3, 1996],
+
+  // Afghanistan
+  ['Rahmanullah Gurbaz', 'AFG', wk, null, 4, 2001],
+  ['Azmatullah Omarzai', 'AFG', ar, p, 4, 2000],
+  ['Mohammad Nabi', 'AFG', ar, s, 3, 1985],
+  ['Rashid Khan', 'AFG', bowl, s, 5, 1998],
+  ['Noor Ahmad', 'AFG', bowl, s, 4, 2005],
+  ['Fazalhaq Farooqi', 'AFG', bowl, p, 3, 2000],
+  ['Mujeeb Ur Rahman', 'AFG', bowl, s, 3, 2001],
+
+  // Sri Lanka
+  ['Pathum Nissanka', 'SL', bat, null, 3, 1998],
+  ['Kamindu Mendis', 'SL', ar, s, 3, 1998],
+  ['Wanindu Hasaranga', 'SL', bowl, s, 4, 1997],
+  ['Matheesha Pathirana', 'SL', bowl, p, 4, 2002],
+  ['Maheesh Theekshana', 'SL', bowl, s, 3, 2000],
+
+  // Bangladesh
+  ['Mustafizur Rahman', 'BAN', bowl, p, 3, 1995],
+]
