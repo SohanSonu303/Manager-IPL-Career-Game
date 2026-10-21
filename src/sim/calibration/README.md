@@ -11,6 +11,7 @@ The ball-by-ball sim is tuned so that AI-vs-AI matches between the real squads l
   - dropped catches and misfields.
 
   These effects spread outcomes, so the base rates were retuned to keep the averages.
+
 - **Harness:** `harness.ts` plays N matches between random pairs of the 10 squads.
   - `npm run calibrate` runs 10,000 matches and prints the table below (about 2.5 s), plus drops and misfields per match.
   - `calibration.test.ts` runs 3,000 matches with tolerances, so a model change that breaks realism fails the test suite.
