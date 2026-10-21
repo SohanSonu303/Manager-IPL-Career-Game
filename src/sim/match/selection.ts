@@ -123,6 +123,35 @@ export function pickKeeper(xi: Selectable[]): string {
   return id
 }
 
+/**
+ * Impact Player substitutes: five fit players outside the XI, the best two batters and
+ * best two bowlers first, then the best of the rest.
+ */
+export function impactSubs(squad: Selectable[], xi: string[], n = 5): string[] {
+  const bench = squad.filter((p) => isAvailable(p) && !xi.includes(p.id))
+  const picked: string[] = []
+  const take = (sorted: Selectable[], k: number) => {
+    for (const p of sorted) {
+      if (k <= 0 || picked.length >= n) break
+      if (!picked.includes(p.id)) {
+        picked.push(p.id)
+        k--
+      }
+    }
+  }
+  const by = (f: (p: Selectable) => number) => [...bench].sort((a, b) => f(b) - f(a))
+  take(
+    by((p) => effectiveRating(p.ratings.batting, p)),
+    2,
+  )
+  take(
+    by((p) => effectiveRating(p.ratings.bowling, p)),
+    2,
+  )
+  take(by(value), n)
+  return picked
+}
+
 /** A complete team sheet chosen by the AI (also the default for a human side). */
 export function autoTeamSheet(teamId: string, squad: Selectable[], ai: boolean): TeamSheet {
   const xi = autoPickXI(squad)

@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { teamById } from '@/data'
+import { direction } from '@/match3d/geometry'
 import {
   currentInnings,
   simBall,
@@ -180,8 +181,16 @@ export function MatchView({
   )
 }
 
+/** "(impact)" for an Impact Player who came on, "(replaced)" for the player he replaced. */
+function impactTag(state: MatchState, teamId: string, id: string): string {
+  const used = state.sheets[teamId]?.impact?.used
+  return used?.inId === id ? ' (impact)' : used?.outId === id ? ' (replaced)' : ''
+}
+
 export function Scorecard({ state, inn }: { state: MatchState; inn: InningsState }) {
   const name = (id: string) => state.players[id]?.name ?? id
+  const batName = (id: string) => name(id) + impactTag(state, inn.battingTeamId, id)
+  const bowlName = (id: string) => name(id) + impactTag(state, inn.bowlingTeamId, id)
   const title =
     inn.index >= 2
       ? `Super over: ${short(inn.battingTeamId)}`
@@ -209,7 +218,7 @@ export function Scorecard({ state, inn }: { state: MatchState; inn: InningsState
             return (
               <tr key={id}>
                 <td>
-                  {name(id)}
+                  {batName(id)}
                   <small>{dismissalText(state, inn, id)}</small>
                 </td>
                 <td>{l?.runs ?? 0}</td>
@@ -239,7 +248,7 @@ export function Scorecard({ state, inn }: { state: MatchState; inn: InningsState
         <tbody>
           {bowlers.map(([id, b]) => (
             <tr key={id}>
-              <td>{name(id)}</td>
+              <td>{bowlName(id)}</td>
               <td>{oversText(b.legalBalls)}</td>
               <td>{b.runs}</td>
               <td>{b.wickets}</td>
@@ -248,7 +257,75 @@ export function Scorecard({ state, inn }: { state: MatchState; inn: InningsState
           ))}
         </tbody>
       </table>
+      <WagonWheel state={state} inn={inn} />
     </details>
+  )
+}
+
+/** Every scoring shot of an innings (or one batter) from the striker's end. */
+export function WagonWheel({ state, inn }: { state: MatchState; inn: InningsState }) {
+  const [batter, setBatter] = useState<string>('')
+  const shots = inn.events.filter((e) => e.shot && e.runs > 0 && (!batter || e.batterId === batter))
+  const off = shots.filter((e) => (e.shot?.angle ?? 0) < 180).reduce((n, e) => n + e.runs, 0)
+  const total = shots.reduce((n, e) => n + e.runs, 0)
+  const R = 100
+  // From the batter at the centre; fours reach the rope, sixes just beyond it.
+  const end = (e: (typeof shots)[number]) => {
+    const s = e.shot as NonNullable<typeof e.shot>
+    const reach = e.boundary === 6 ? 1.05 : e.boundary === 4 ? 1 : Math.min(0.95, s.distance / 70)
+    const d = direction(s.angle)
+    return { x: d.x * reach * R, y: d.y * reach * R }
+  }
+  return (
+    <div className="wagon">
+      <div className="row-between">
+        <strong>Wagon wheel</strong>
+        <select
+          value={batter}
+          onChange={(ev) => setBatter(ev.target.value)}
+          aria-label="Wagon wheel for"
+        >
+          <option value="">Whole innings</option>
+          {inn.battedOrder.map((id) => (
+            <option key={id} value={id}>
+              {state.players[id]?.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <svg
+        viewBox={`${-R - 8} ${-R - 8} ${2 * R + 16} ${2 * R + 16}`}
+        role="img"
+        aria-label={`Scoring shots: ${total} runs, ${off} on the off side`}
+      >
+        <circle r={R} className="ww-field" />
+        <circle r={R * 0.42} className="ww-ring" />
+        <rect x={-3} y={-2} width={6} height={26} className="ww-pitch" />
+        {shots.map((e, i) => {
+          const p = end(e)
+          return (
+            <line
+              key={i}
+              x1={0}
+              y1={0}
+              x2={p.x}
+              y2={p.y}
+              className={e.boundary === 6 ? 'ww-six' : e.boundary === 4 ? 'ww-four' : 'ww-run'}
+            />
+          )
+        })}
+        <text x={-R + 4} y={R - 4} className="ww-label">
+          Off {off}
+        </text>
+        <text x={R - 4} y={R - 4} className="ww-label" textAnchor="end">
+          Leg {total - off}
+        </text>
+      </svg>
+      <p className="dim ww-key">
+        <span className="ww-dot four" /> Four <span className="ww-dot six" /> Six{' '}
+        <span className="ww-dot run" /> 1–3
+      </p>
+    </div>
   )
 }
 

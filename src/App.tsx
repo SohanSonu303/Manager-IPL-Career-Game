@@ -1,4 +1,6 @@
 import { HashRouter, Route, Routes } from 'react-router-dom'
+import { AchievementsPage } from '@/ui/AchievementsPage'
+import { DailyPage } from '@/ui/DailyPage'
 import { Gallery } from '@/ui/Gallery'
 import { Home } from '@/ui/Home'
 import { LineupPage } from '@/ui/LineupPage'
@@ -27,6 +29,8 @@ export default function App() {
           <Route path="news" element={<NewsPage />} />
           <Route path="prematch" element={<PreMatchPage />} />
           <Route path="match" element={<MatchPage />} />
+          <Route path="daily" element={<DailyPage />} />
+          <Route path="achievements" element={<AchievementsPage />} />
           <Route path="settings" element={<Settings />} />
           <Route path="debug" element={<Debug />} />
           <Route path="gallery" element={<Gallery />} />

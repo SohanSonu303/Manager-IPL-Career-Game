@@ -40,6 +40,7 @@ import { autoTeamSheet, isAvailable, validateSheet, type Selectable } from './ma
 import { setupMatch } from './match/setup'
 import type { MatchState, TeamSheet } from './match/types'
 import { matchNews } from './matchNews'
+import { matchAchievements, unlock } from './achievements'
 import { addNews, updateNews } from './news'
 import { overallRating } from './player'
 import { createRng, deriveSeed } from './rng'
@@ -182,10 +183,12 @@ export function recordFixture(career: Career, f: Fixture, state: MatchState): Ca
       stats: addMatchStats(career.season.stats, state),
     },
   }
-  return addNews(
+  const withNews = addNews(
     after,
     ...matchNews(career, after, f, state, createRng(deriveSeed(career.seed, 'news', f.id))),
   )
+  const me = career.manager.teamId
+  return involves(f, me) ? unlock(withNews, matchAchievements(state, me)) : withNews
 }
 
 /** A word with an unhappy player: lifts his morale (once per complaint). */

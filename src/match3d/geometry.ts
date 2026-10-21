@@ -1,4 +1,4 @@
-import type { BallEvent, FieldSetting, Phase } from '@/sim/match/types'
+import type { BallEvent, BowlingDelivery, FieldSetting, Phase } from '@/sim/match/types'
 
 /*
  * Field geometry shared by the 3D and 2D renderers. Units are metres; the origin is the
@@ -59,6 +59,28 @@ export function shotEnd(
     )
   if (boundary === 4) return along(STRIKER, d, toRope)
   return along(STRIKER, d, Math.min(shot.distance, toRope - 2))
+}
+
+/** Metres from the batter's stumps where each kind of delivery pitches. */
+const PITCHES_AT: Record<BowlingDelivery, number> = {
+  fulltoss: 0.2,
+  yorker: 0.7,
+  full: 3,
+  wideline: 4,
+  slower: 5,
+  good: 6.5,
+  short: 8.5,
+  longhop: 9.5,
+  bouncer: 10.5,
+}
+
+/**
+ * Where the ball pitched, for the pitch map. Wide ones land outside off (the off side is
+ * to the left of the screen); a full toss is drawn at the batter's feet.
+ */
+export function pitchPoint(d: BowlingDelivery): Point {
+  const x = d === 'wideline' || d === 'longhop' ? -1.3 : -0.25
+  return { x, y: -PITCH_LENGTH / 2 + PITCHES_AT[d] }
 }
 
 /** Control point for a curved shot path (aerial shots bow more). */

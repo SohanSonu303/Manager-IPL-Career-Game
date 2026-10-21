@@ -160,6 +160,8 @@ export function batterIntent(state: MatchState, inn: InningsState, batterId: str
       else if (rrr < 8) a = Math.min(a, 0)
     }
     if (w >= 7 && phase !== 'death') a -= 1
+    // Early wickets: rebuild before going again (setting a total, not chasing hard).
+    else if (inn.target === null && w >= 4 && over < 12) a -= 1
     if (state.players[batterId]?.traits.includes('anchor')) a -= 1
   }
   if (inn.freeHitNext) a += 1

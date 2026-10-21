@@ -9,6 +9,8 @@ export interface FieldProps {
   field: FieldSetting
   /** The latest delivery (null before the first ball). */
   event: BallEvent | null
+  /** Earlier scoring shots this over, drawn as faint trails. */
+  recent?: BallEvent[]
   /** Changes on every delivery, to restart the animation. */
   eventKey: number
   batColor: string

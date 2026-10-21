@@ -5,7 +5,7 @@ import { downloadSave } from '@/state/storage'
 import { importSave, resetCareer, simToSeasonEnd, useGame } from '@/state/store'
 import { Screen } from './kit/kit'
 import { MatchDebug } from './match/MatchDebug'
-import { readViewMode, VIEW_KEY, type ViewMode } from './MatchPage'
+import { readViewMode, VIEW_KEY, type ViewMode } from './match/viewMode'
 
 export function Debug() {
   const career = useGame((s) => s.career)

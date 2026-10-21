@@ -17,7 +17,11 @@ import {
 import type { Fixture } from '@/sim/league'
 import { pitchFor } from '@/sim/match/selection'
 import { capRoom, isWindowOpen, payroll, SALARY_CAP, squadOf, strengthRanking } from '@/sim/market'
+import { ACHIEVEMENTS, achievementById } from '@/sim/achievements'
+import { challengeNumber, localDateKey, streak } from '@/sim/challenge'
+import { readDaily } from '@/state/daily'
 import { quickSimMyMatch, resetCareer, startCareer, useGame } from '@/state/store'
+import { dismissWelcomeBack, welcomeBackDue } from '@/state/visit'
 import { crore, ordinal, teamName, teamShort } from './format'
 import { Crest } from './identity/Crest'
 import { Icon, type IconName } from './kit/Icon'
@@ -60,6 +64,7 @@ function NewCareer() {
     <Screen back={false}>
       <h1>Cricket Manager</h1>
       <p className="dim">Take charge of a franchise. Win the title, keep the board happy.</p>
+      <DailyCard />
       <label className="field">
         Manager name
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
@@ -88,7 +93,35 @@ function NewCareer() {
 
 // --- Club home: the hub on top, the season timeline below ------------------------------------
 
-type SheetName = 'board' | 'finances' | 'club' | 'review' | null
+type SheetName = 'board' | 'finances' | 'club' | 'review' | 'welcome' | null
+
+/** Today's Daily Challenge: played or not, and the streak. */
+function DailyCard() {
+  const navigate = useNavigate()
+  const today = localDateKey()
+  const records = readDaily()
+  const done = records[today]
+  const run = streak(Object.keys(records), today)
+  return (
+    <button className="daily-link" onClick={() => navigate('/daily')}>
+      <span className="daily-icon" aria-hidden>
+        <Icon name="trophy" size={22} />
+      </span>
+      <span className="grow2">
+        <strong>Daily Challenge #{challengeNumber(today)}</strong>
+        <small>
+          {done
+            ? `${'★'.repeat(done.stars)}${'☆'.repeat(3 - done.stars)} ${done.line}`
+            : 'A new finish to win today'}
+        </small>
+      </span>
+      <span className="daily-streak">
+        {run}
+        <small>day{run === 1 ? '' : 's'}</small>
+      </span>
+    </button>
+  )
+}
 
 /** Six hub buttons on a circle; angles in degrees, 0 = right, clockwise. */
 const HUB: { icon: IconName; label: string; to: string; angle: number }[] = [
@@ -121,7 +154,13 @@ function TimelineRow({
 function ClubHub({ career }: { career: Career }) {
   const navigate = useNavigate()
   const next = useNextAction()
-  const [sheet, setSheet] = useState<SheetName>(career.season.review ? 'review' : null)
+  const [sheet, setSheet] = useState<SheetName>(
+    career.season.review
+      ? 'review'
+      : welcomeBackDue() && (career.calendar.day > 0 || career.history.length > 0)
+        ? 'welcome'
+        : null,
+  )
   const me = career.manager.teamId
   const team = teamById.get(me)
   const day = today(career.calendar)
@@ -230,6 +269,19 @@ function ClubHub({ career }: { career: Career }) {
           )}
         </Tile>
       </div>
+
+      <DailyCard />
+      <button className="daily-link badges-link" onClick={() => navigate('/achievements')}>
+        <span className="daily-icon" aria-hidden>
+          <Icon name="trophy" size={22} />
+        </span>
+        <span className="grow2">
+          <strong>Achievements</strong>
+          <small>
+            {Object.keys(career.achievements ?? {}).length} of {ACHIEVEMENTS.length} unlocked
+          </small>
+        </span>
+      </button>
 
       <section className="tl-section" aria-label="Season timeline">
         <div className="row-between">
@@ -363,7 +415,95 @@ function ClubHub({ career }: { career: Career }) {
       {sheet === 'review' && career.season.review && (
         <ReviewSheet review={career.season.review} onClose={() => setSheet(null)} />
       )}
+      {sheet === 'welcome' && (
+        <WelcomeBackSheet
+          career={career}
+          position={started ? position : null}
+          pending={pending}
+          onClose={() => {
+            dismissWelcomeBack()
+            setSheet(null)
+          }}
+        />
+      )}
     </Screen>
+  )
+}
+
+/** What the manager comes back to: last result, the table, what needs him, the daily. */
+function WelcomeBackSheet({
+  career,
+  position,
+  pending,
+  onClose,
+}: {
+  career: Career
+  position: number | null
+  pending: number
+  onClose: () => void
+}) {
+  const navigate = useNavigate()
+  const me = career.manager.teamId
+  const last = [...career.season.results].reverse().find((r) => r.teams.includes(me))
+  const next = userFixtureToday(career)
+  const records = readDaily()
+  const today = localDateKey()
+  const unlocked = Object.entries(career.achievements ?? {})
+    .sort((a, b) => b[1].year - a[1].year || b[1].day - a[1].day)
+    .slice(0, 1)
+    .map(([id]) => achievementById.get(id)?.title)
+  const opp = (teams: [string, string]) => teams.find((t) => t !== me) ?? teams[1]
+  return (
+    <Sheet title={`Welcome back, ${career.manager.name}`} onClose={onClose}>
+      <ul className="welcome">
+        {last && (
+          <li>
+            Last time: {last.winnerId === me ? 'beat' : last.winnerId ? 'lost to' : 'tied with'}{' '}
+            {teamName(opp(last.teams))}
+            {last.winnerId ? ` (${teamShort(last.winnerId)} ${last.margin})` : ''}.
+          </li>
+        )}
+        {position && (
+          <li>
+            You are {ordinal(position)} in the table in {career.calendar.year}.
+          </li>
+        )}
+        <li>
+          {next
+            ? `Next: ${teamName(next.homeId === me ? next.awayId : next.homeId)}, today.`
+            : 'No match today: press Continue to move on.'}
+        </li>
+        {pending > 0 && (
+          <li className="warn">
+            {pending} item{pending > 1 ? 's' : ''} in the news need{pending > 1 ? '' : 's'} you.
+          </li>
+        )}
+        <li>
+          Daily Challenge #{challengeNumber(today)}:{' '}
+          {records[today] ? 'done for today' : 'not played yet'} · streak{' '}
+          {streak(Object.keys(records), today)}
+        </li>
+        <li>
+          Achievements: {Object.keys(career.achievements ?? {}).length} of {ACHIEVEMENTS.length}
+          {unlocked[0] ? ` (latest: ${unlocked[0]})` : ''}
+        </li>
+      </ul>
+      <div className="button-row">
+        <button className="primary" onClick={onClose}>
+          Back to the club
+        </button>
+        {!records[today] && (
+          <button
+            onClick={() => {
+              onClose()
+              navigate('/daily')
+            }}
+          >
+            Play the daily
+          </button>
+        )}
+      </div>
+    </Sheet>
   )
 }
 

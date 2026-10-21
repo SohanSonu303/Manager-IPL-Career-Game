@@ -1,9 +1,17 @@
 import { describe, expect, it } from 'vitest'
-import { direction, fielderPositions, rayToCircle, shotEnd, STRIKER } from './geometry'
+import { direction, fielderPositions, pitchPoint, rayToCircle, shotEnd, STRIKER } from './geometry'
 
 const len = (p: { x: number; y: number }) => Math.hypot(p.x, p.y)
 
 describe('field geometry', () => {
+  it('pitch map: yorkers land at the batter, bouncers short, wide ones outside off', () => {
+    expect(pitchPoint('yorker').y).toBeLessThan(pitchPoint('good').y)
+    expect(pitchPoint('good').y).toBeLessThan(pitchPoint('bouncer').y)
+    expect(pitchPoint('wideline').x).toBeLessThan(pitchPoint('good').x)
+    for (const d of ['yorker', 'bouncer', 'fulltoss'] as const)
+      expect(Math.abs(pitchPoint(d).y)).toBeLessThan(10.1)
+  })
+
   it('maps angles: straight down, off side left, leg side right', () => {
     expect(direction(0).y).toBeCloseTo(1)
     expect(direction(90).x).toBeCloseTo(-1)

@@ -26,6 +26,14 @@ function fullStore(): KeyValueStore {
 }
 
 describe('save format', () => {
+  it('upgrades a v4 save: achievements start empty', () => {
+    const { achievements: _drop, ...old } = career()
+    void _drop
+    const parsed = migrate({ version: 4, savedAt: '', career: old })
+    expect(parsed.ok && parsed.save.version).toBe(5)
+    expect(parsed.ok && parsed.save.career.achievements).toEqual({})
+  })
+
   it('round-trips through JSON', () => {
     const c = career()
     const parsed = parseSave(serializeSave(c))

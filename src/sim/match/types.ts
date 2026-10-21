@@ -44,6 +44,8 @@ export interface TeamSheet {
   bowlPlan: BowlPlan
   /** True if the AI sets this side's intent and bowling. */
   ai: boolean
+  /** Impact Player substitutes (missing = none named). */
+  impact?: ImpactState
 }
 
 /** Field placement: more catchers in the ring, or more boundary riders. */
@@ -54,6 +56,44 @@ export type FieldSetting = (typeof FIELD_SETTINGS)[number]
 export const BOWL_INTENTS = ['contain', 'balanced', 'attack'] as const
 export type BowlIntent = (typeof BOWL_INTENTS)[number]
 export const bowlIntentValue = (b: BowlIntent): number => BOWL_INTENTS.indexOf(b) - 1
+
+/** What a ball actually was: a planned length, or what a missed one became. */
+export const BOWLING_DELIVERIES = [
+  'yorker',
+  'full',
+  'good',
+  'short',
+  'bouncer',
+  'slower',
+  'wideline',
+  'fulltoss',
+  'longhop',
+] as const
+export type BowlingDelivery = (typeof BOWLING_DELIVERIES)[number]
+
+/** The batter's stroke, for commentary and the wagon wheel. */
+export const SHOT_KINDS = [
+  'defend',
+  'drive',
+  'loft',
+  'cut',
+  'pull',
+  'hook',
+  'sweep',
+  'flick',
+  'glance',
+  'edge',
+  'scoop',
+  'slog',
+  'push',
+] as const
+export type ShotKind = (typeof SHOT_KINDS)[number]
+
+/** Impact Player: named substitutes, one of whom may replace a player once. */
+export interface ImpactState {
+  subs: string[]
+  used: { outId: string; inId: string; innings: number; over: number } | null
+}
 
 /** Line and length plan for the over. */
 export const BOWL_PLANS = ['stock', 'yorkers', 'bouncers', 'wide', 'variations'] as const
@@ -94,11 +134,15 @@ export interface BallEvent {
    * (0 = straight, 90 = square on the off side, 180 = behind the keeper, 270 = square
    * leg). `distance` in metres from the batter. Null when the ball was missed.
    */
-  shot: { angle: number; distance: number; aerial: boolean } | null
+  shot: { angle: number; distance: number; aerial: boolean; kind?: ShotKind } | null
+  /** What the bowler meant to bowl and what he actually bowled (legal balls). */
+  delivery?: { intended: BowlingDelivery; actual: BowlingDelivery } | null
+  /** A DRS review on this ball: who asked, the umpire's call, and whether it was overturned. */
+  review?: { teamId: string; call: 'out' | 'notout'; overturned: boolean } | null
   boundary: 4 | 6 | null
   /** A dropped catch or a misfield on this ball. */
   fumble?: { kind: 'drop' | 'misfield'; fielderId: string } | null
-  /** Key for commentary templates, e.g. "six.lofted", "wicket.bowled", "wide". */
+  /** Key for commentary templates, e.g. "six.pull", "four.drive", "wicket.bowled", "wide". */
   commentary: string
   /** Score after this delivery. */
   score: { runs: number; wickets: number; legalBalls: number }
@@ -154,6 +198,8 @@ export interface InningsState {
   spell?: number
   /** Boundaries conceded in the current over. */
   overBoundaries?: number
+  /** DRS reviews left per side this innings. */
+  reviews?: Record<string, number>
 }
 
 export interface MatchResult {
@@ -170,7 +216,31 @@ export interface MatchState {
   sheets: Record<string, TeamSheet>
   /** Team ids in batting order for the first innings. */
   order: [string, string]
-  toss: { winnerId: string; decision: 'bat' | 'field' }
+  /** `pending`: a manager won the toss and has not chosen yet (the AI's call stands if he sims on). */
+  toss: { winnerId: string; decision: 'bat' | 'field'; pending?: boolean }
   innings: InningsState[]
   result: MatchResult | null
+  /** Match conditions: 0…1 dew expected in the second innings. */
+  conditions?: { dew: number }
+  /** A manager is watching: reviews wait for his call (see `pendingReview`). */
+  interactive?: boolean
+  /** A decision the manager may review before the ball is settled. */
+  pendingReview?: PendingReview | null
+  /** Strategic timeouts taken, per side: the over taken and legal balls of refocus left. */
+  timeouts?: Record<string, { innings: number; over: number; boostBalls: number }>
+}
+
+/** A ball bowled but not yet settled, waiting for a DRS call. */
+export interface PendingReview {
+  /** The side that may review. */
+  teamId: string
+  /** The umpire's call. */
+  call: 'out' | 'notout'
+  kind: 'lbw' | 'caught'
+  batterId: string
+  bowlerId: string
+  /** The truth the ball-tracker would show. */
+  truthOut: boolean
+  /** The ball as it stands if not reviewed (internal to the engine). */
+  draft: unknown
 }

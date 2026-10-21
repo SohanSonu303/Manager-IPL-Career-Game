@@ -7,7 +7,7 @@ Mobile-first cricket career management sim, played in the browser. See `TODO.md`
 - `npm run dev` start the dev server
 - `npm run build` typecheck and build (with PWA)
 - `npm run preview` serve the production build (add `-- --host` to open it on a phone on the same Wi-Fi)
-- `npm test` run Vitest (sim, data, save and filter tests)
+- `npm test` run Vitest (sim, rules, daily challenge, achievements, data, save and filter tests)
 - `npm run lint`, `npm run typecheck`, `npm run format`
 - `npm run data` regenerate `src/data/players.json` and `teams.json` from `scripts/source/`
 - `npm run calibrate` simulate 10,000 matches and compare with real IPL numbers

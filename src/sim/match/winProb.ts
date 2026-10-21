@@ -16,6 +16,13 @@ function remaining(ballsLeft: number, wickets: number): { mean: number; sd: numb
   return { mean: table.mean[k] ?? 0, sd: table.sd[k] ?? 0 }
 }
 
+/** Where an innings is heading: runs so far plus the typical runs still to come. */
+export function projectedScore(inn: InningsState): number {
+  const ballsLeft = inn.maxOvers * 6 - inn.legalBalls
+  if (inn.complete || ballsLeft <= 0 || inn.wickets >= inn.maxWickets) return inn.runs
+  return Math.round(inn.runs + remaining(ballsLeft, inn.wickets).mean)
+}
+
 /** Standard normal CDF (Abramowitz–Stegun 7.1.26). */
 function phi(x: number): number {
   const t = 1 / (1 + 0.3275911 * (Math.abs(x) / Math.SQRT2))

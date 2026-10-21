@@ -14,6 +14,7 @@ import {
   NON_STRIKER,
   PITCH_LENGTH,
   PITCH_WIDTH,
+  pitchPoint,
   shotControl,
   shotEnd,
   STANDS_DEPTH,
@@ -324,7 +325,26 @@ function Disc({
 }
 
 /** Fielders, batters, ball and shot arc for the latest delivery. */
-function Play({ radius, phase, field, event, eventKey, batColor, reducedMotion }: FieldProps) {
+function Play({
+  radius,
+  phase,
+  field,
+  event,
+  eventKey,
+  batColor,
+  reducedMotion,
+  recent = [],
+}: FieldProps) {
+  const trails = useMemo(
+    () =>
+      recent
+        .filter((e) => e.shot)
+        .map((e) => [
+          v3(STRIKER, 0.4),
+          v3(shotEnd(e.shot as NonNullable<typeof e.shot>, e.boundary, radius), 0.4),
+        ]),
+    [recent, radius],
+  )
   const fielders = useMemo(() => fielderPositions(phase, radius, field), [phase, radius, field])
   const flight = useMemo(() => {
     if (!event?.shot) return null
@@ -380,6 +400,20 @@ function Play({ radius, phase, field, event, eventKey, batColor, reducedMotion }
         ) : (
           <Disc key={i} at={f} color="#ffffff" />
         ),
+      )}
+      {trails.map((pts, i) => (
+        <Line key={i} points={pts} color="#ffffff" lineWidth={1} transparent opacity={0.35} />
+      ))}
+      {event?.delivery && (
+        <mesh
+          rotation-x={FLAT}
+          position={[pitchPoint(event.delivery.actual).x, 0.2, pitchPoint(event.delivery.actual).y]}
+        >
+          <circleGeometry args={[0.7, 16]} />
+          <meshBasicMaterial
+            color={event.delivery.actual === event.delivery.intended ? '#3cc26a' : '#e5484d'}
+          />
+        </mesh>
       )}
       <Disc at={KEEPER} color="#ffffff" />
       <Disc at={BOWLER} color="#ffffff" />

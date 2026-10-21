@@ -69,8 +69,15 @@ export function gradeMatch(
       if (by) fumbles.set(by, (fumbles.get(by) ?? 0) + (e.fumble?.kind === 'drop' ? 4 : 1))
     }
   }
+  // The XI as it ended, plus a player replaced by the Impact Player (he played too).
+  const playedBy = (sheet: (typeof state.sheets)[string]) => {
+    const out = sheet.impact?.used?.outId
+    return out && !sheet.battingOrder.includes(out)
+      ? [...sheet.battingOrder, out]
+      : sheet.battingOrder
+  }
   return Object.values(state.sheets).flatMap((sheet) =>
-    sheet.battingOrder.map((id) => {
+    playedBy(sheet).map((id) => {
       const batInn = main.find((i) => i.battingTeamId === sheet.teamId)
       const bowlInn = main.find((i) => i.bowlingTeamId === sheet.teamId)
       const batted = batInn?.battedOrder.includes(id) ? (batInn.batting[id] ?? null) : null

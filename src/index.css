@@ -1823,3 +1823,322 @@ select.input {
   flex-direction: column;
   gap: 8px;
 }
+
+/* Wagon wheel */
+.wagon {
+  margin-top: 10px;
+}
+
+.wagon select {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 6px 8px;
+  font: inherit;
+  min-height: 36px;
+}
+
+.wagon svg {
+  width: 100%;
+  max-width: 320px;
+  display: block;
+  margin: 8px auto 0;
+}
+
+.ww-field {
+  fill: #2f7d3a;
+}
+
+.ww-ring {
+  fill: none;
+  stroke: #ffffff66;
+  stroke-dasharray: 3 3;
+}
+
+.ww-pitch {
+  fill: #c9a06a;
+}
+
+.ww-run,
+.ww-four,
+.ww-six {
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.ww-run {
+  stroke: #e8ecf5aa;
+}
+
+.ww-four {
+  stroke: var(--accent);
+  stroke-width: 2.2;
+}
+
+.ww-six {
+  stroke: var(--gold);
+  stroke-width: 2.4;
+}
+
+.ww-label {
+  fill: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ww-key {
+  text-align: center;
+  font-size: 12px;
+}
+
+.ww-dot {
+  display: inline-block;
+  width: 10px;
+  height: 3px;
+  vertical-align: middle;
+  margin-left: 8px;
+}
+
+.ww-dot.four {
+  background: var(--accent);
+}
+
+.ww-dot.six {
+  background: var(--gold);
+}
+
+.ww-dot.run {
+  background: #e8ecf5;
+}
+
+/* Match decisions: toss, DRS, timeout, Impact Player */
+.crease-panel + .crease-panel {
+  margin-top: 8px;
+}
+
+.crease-panel.decision {
+  border-color: var(--gold);
+  gap: 8px;
+}
+
+.crease-panel.decision strong {
+  font-size: 18px;
+}
+
+.crease-panel .button-row {
+  margin-top: 2px;
+}
+
+.impact-hint {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 14px;
+}
+
+.tips {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+  display: grid;
+  gap: 2px;
+}
+
+.pick-list {
+  display: grid;
+  gap: 6px;
+}
+
+.pick-list > button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  min-height: var(--tap);
+  padding: 8px 10px;
+  border: 2px solid transparent;
+}
+
+.pick-list > button.on {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.error {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+/* Daily Challenge */
+.daily-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.daily-link strong,
+.daily-link small {
+  display: block;
+}
+
+.daily-link small {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.daily-icon {
+  color: var(--gold);
+  display: grid;
+  place-items: center;
+}
+
+.daily-streak {
+  font-family: var(--font-display);
+  font-size: 26px;
+  text-align: center;
+  line-height: 1;
+  color: var(--gold);
+}
+
+.daily-streak small {
+  display: block;
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.daily-brief {
+  margin: 6px 10px 0;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  background: rgb(245 197 66 / 15%);
+  border: 1px solid var(--gold);
+  font-size: 14px;
+  text-align: center;
+}
+
+.daily-card {
+  align-items: center;
+  text-align: center;
+}
+
+.daily-ask {
+  font-family: var(--font-display);
+  font-size: 30px;
+}
+
+.daily-stats {
+  display: flex;
+  justify-content: space-around;
+  margin: 12px 0;
+  color: var(--text-dim);
+}
+
+.daily-stats strong {
+  display: block;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--text);
+}
+
+.daily-result {
+  align-items: center;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.daily-stars {
+  font-size: 34px;
+  color: var(--gold);
+  letter-spacing: 4px;
+}
+
+.daily-share {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--bg-deep);
+  font-family: inherit;
+  white-space: pre-wrap;
+  user-select: all;
+}
+
+/* Welcome back */
+.welcome {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+/* Achievements */
+.badges {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.badges li {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  opacity: 0.55;
+}
+
+.badges li.on {
+  opacity: 1;
+  border: 1px solid var(--gold);
+}
+
+.badges strong,
+.badges small {
+  display: block;
+}
+
+.badges small {
+  color: var(--text-dim);
+}
+
+.badges small.good {
+  color: var(--money);
+}
+
+.badge-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--text-dim);
+  flex: none;
+}
+
+.badges li.on .badge-icon {
+  background: var(--gold);
+  color: var(--bg-deep);
+}
+
+.badges-link {
+  margin-top: 8px;
+  border-color: var(--line);
+}

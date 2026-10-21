@@ -9,6 +9,7 @@ import {
   NON_STRIKER,
   PITCH_LENGTH,
   PITCH_WIDTH,
+  pitchPoint,
   shotControl,
   shotEnd,
   STANDS_DEPTH,
@@ -29,6 +30,7 @@ export default function Field2D({
   eventKey,
   batColor,
   reducedMotion,
+  recent = [],
 }: FieldProps) {
   const ext = radius + STANDS_GAP + STANDS_DEPTH - 2
   const inner = radius + STANDS_GAP
@@ -98,6 +100,36 @@ export default function Field2D({
         height={PITCH_LENGTH + 2.4}
         fill="#c9a06a"
       />
+      {recent.map((e, i) => {
+        if (!e.shot) return null
+        const end = shotEnd(e.shot, e.boundary, radius)
+        return (
+          <line
+            key={i}
+            x1={STRIKER.x}
+            y1={STRIKER.y}
+            x2={end.x}
+            y2={end.y}
+            stroke="#fff"
+            strokeOpacity={0.35}
+            strokeWidth={0.5}
+          />
+        )
+      })}
+      {event?.delivery && (
+        <circle
+          cx={pitchPoint(event.delivery.actual).x}
+          cy={pitchPoint(event.delivery.actual).y}
+          r={0.7}
+          fill={event.delivery.actual === event.delivery.intended ? '#3cc26a' : '#e5484d'}
+          stroke="#1b2238"
+          strokeWidth={0.2}
+        >
+          <title>
+            {event.delivery.actual === event.delivery.intended ? 'On the spot' : 'Missed length'}
+          </title>
+        </circle>
+      )}
       {fielders.map((f, i) => (
         <g key={i}>{disc(f, '#fff')}</g>
       ))}

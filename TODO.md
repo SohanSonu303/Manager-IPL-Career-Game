@@ -81,7 +81,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [x] Batting aggression setting: 5 levels (defend, rotate, balanced, attack, all-out), team default plus per-batter, changeable live
 - [x] Opposition AI: picks XI, orders and bowlers; reads the chase for intent
 - [x] Overseas limit in the XI (max 4)
-- [ ] Impact player substitute (real IPL rule since 2023) — decide whether v1 needs it
+- [x] Impact player substitute (real IPL rule since 2023), in Engine v2 slice 3
 
 ## Phase 6 — Post-match step (M)
 - [x] Batting and bowling grades per player
@@ -220,9 +220,37 @@ Slice 1, the feel of the match (done):
 - [x] Fielding: dropped catches and misfields scaled by the fielding rating; they appear in commentary and lower the fielding grade
 - [x] Win probability: a table from 20k simulated innings (`npm run winprob`), a live split bar in the scorebug, and a post-match worm with the turning point
 - [x] Recalibrated: all metrics within about 3%
-- [ ] Slice 2: Daily Challenge (seeded scenario per date, share card, streak), "while you were away" summary, achievements
-- [ ] Slice 3: toss decision with dew, Impact Player, DRS, strategic timeouts
-- [ ] Slice 4: delivery model (intended vs executed length), shot types, wagon wheel, 3D shot direction
+Slice 2, reasons to come back (done):
+- [x] Daily Challenge (`/daily`):
+  - one seeded finish per date, the same for everyone; take over for the last 2–6 overs, batting or bowling;
+  - 0–3 stars, a Wordle-style share card, a streak and a played/won count, stored in this browser only;
+  - replays after the first attempt are practice.
+- [x] Welcome-back sheet after 6+ hours away: last result, table, next match, items waiting, daily status, achievements
+- [x] 26 achievements (save v5): match ones checked when your match is recorded, career ones on every save; news item on unlock; badge wall at `/achievements`
+
+Slice 3, IPL rules (done):
+- [x] Toss with conditions:
+  - dew forecast (heavy in about half of matches);
+  - a manager who wins the toss picks bat or bowl;
+  - AI captains field more often with dew and name their XI after the toss (extra batter if batting first, extra bowler if bowling first).
+- [x] Impact Player:
+  - five named substitutes; one swap per match at an over break or the innings break;
+  - never the keeper or a batter at the crease; the overseas limit is kept;
+  - the AI uses it at the break; you get a suggestion or choose yourself; graded and shown in the scorecard as "(impact)" or "(replaced)".
+- [x] DRS:
+  - 2 reviews per side per innings, 1 in a super over;
+  - lbw and caught-behind outs can be wrong, and big lbw appeals can be turned down wrongly;
+  - you choose Review or Walk off/Accept; a review is kept if it succeeds; the AI reviews on feel.
+- [x] Strategic timeouts:
+  - bowling side overs 6–9, batting side 13–16;
+  - a +2 refocus for two overs, plus a timeout card with win chance, set batters, overs left and a dew note;
+  - the AI takes its own.
+
+Slice 4, deliveries and shots (done):
+- [x] Delivery model: the plan sets what the bowler means to bowl, execution depends on rating, skills, fatigue, nerves and dew; a missed yorker becomes a full toss and a missed bouncer a long hop; odds follow what was bowled
+- [x] Shot types (drive, cut, pull, hook, sweep, flick, glance, loft, slog, scoop, edge) with matching directions and commentary
+- [x] Wagon wheel per innings or per batter in every scorecard; pitch-map dot (green on target, red missed) and this over's shot trails in the 2D and 3D views
+- [x] Recalibrated (all within about 2–4%; see `src/sim/calibration/README.md` for known gaps)
 - [ ] Slice 5: mega auction every 3 seasons, manager reputation and job offers, press conferences
 - [ ] Later: batting hand and matchups, rain and DLS, scenario mode
 

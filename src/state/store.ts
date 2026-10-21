@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { careerAchievements, unlock } from '@/sim/achievements'
 import { today } from '@/sim/calendar'
 import type { Career, Lineup } from '@/sim/career'
 import {
@@ -43,8 +44,9 @@ export interface GameState {
 
 export const useGame = create<GameState>(() => ({ career: null, live: null, notice: null }))
 
-/** Set the career and auto-save it. */
-function commit(career: Career) {
+/** Set the career (with any achievements it has now earned) and auto-save it. */
+function commit(next: Career) {
+  const career = unlock(next, careerAchievements(next))
   const result = writeSave(career)
   useGame.setState({ career, notice: result.ok ? null : result.error })
 }
@@ -104,7 +106,10 @@ export function startMyMatch(): boolean {
   if (!c || !f) return false
   c = ensureEleven(ensureEleven(c, f.homeId), f.awayId)
   commit(c)
-  useGame.setState({ live: { fixture: f, match: setupFixture(c, f) } })
+  const match = setupFixture(c, f)
+  // The manager is watching: he calls the toss, reviews and timeouts himself.
+  match.state.interactive = true
+  useGame.setState({ live: { fixture: f, match } })
   return true
 }
 

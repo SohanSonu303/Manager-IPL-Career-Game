@@ -1,5 +1,14 @@
 import type { Trait } from '../../data/types'
-import type { BowlPlan, DismissalKind, FieldSetting, MatchPlayer, Phase, Pitch } from './types'
+import { deliveryEffect, DELIVERY_EFFECT, expectedEffect } from './delivery'
+import type {
+  BowlingDelivery,
+  BowlPlan,
+  DismissalKind,
+  FieldSetting,
+  MatchPlayer,
+  Phase,
+  Pitch,
+} from './types'
 
 /**
  * Tunable constants of the ball model. Base rates come from real IPL data
@@ -9,9 +18,9 @@ import type { BowlPlan, DismissalKind, FieldSetting, MatchPlayer, Phase, Pitch }
 export const MODEL = {
   /** Legal-ball rates per phase for an average matchup at balanced intent. */
   base: {
-    powerplay: { wicket: 0.0372, dot: 0.375, four: 0.188, six: 0.066 },
-    middle: { wicket: 0.0482, dot: 0.262, four: 0.11, six: 0.065 },
-    death: { wicket: 0.0635, dot: 0.2, four: 0.17, six: 0.122 },
+    powerplay: { wicket: 0.0378, dot: 0.37, four: 0.2, six: 0.064 },
+    middle: { wicket: 0.0505, dot: 0.258, four: 0.118, six: 0.063 },
+    death: { wicket: 0.069, dot: 0.2, four: 0.168, six: 0.124 },
   } satisfies Record<Phase, { wicket: number; dot: number; four: number; six: number }>,
   /** Skill = (batting − bowling − center) / 10. Center = the average matchup. */
   skillCenter: -3,
@@ -23,7 +32,7 @@ export const MODEL = {
   twoShare: 0.124,
   threeShare: 0.004,
   /** Per delivery. */
-  wide: 0.0435,
+  wide: 0.0425,
   noball: 0.0041,
   /** Share of would-be dots that become leg-byes / byes. */
   legbyeOfDot: 0.058,
@@ -33,26 +42,30 @@ export const MODEL = {
    * Multiplier = set + (new − set) · e^(−balls / settle). Mean-centred by the base rates.
    */
   settle: 8,
-  newWicket: 1.3,
+  newWicket: 1.28,
   setWicket: 0.86,
   newBoundary: 0.82,
   setBoundary: 1.08,
   /** Pressure from a run of dot balls: extra false-shot risk at six dots in a row. */
-  pressureWicket: 0.25,
+  pressureWicket: 0.22,
   /** Rating points a bowler loses per over past two in a spell. */
   fatigue: 3,
   /** Rattled bowler: rating points lost and extra wide risk per boundary past one this over. */
   rattledRating: 3,
   rattledWide: 0.2,
+  /** Dew: extra wides, and the wet ball skids on to the bat. */
+  dewWide: 0.06,
+  dewBoundary: 0,
   /** Dropped catches: share of chances put down by a 60-rated fielder (keepers drop fewer). */
   drop: 0.15,
   /** Share of singles that become two through a misfield (60-rated fielder). */
   misfield: 0.02,
   /** Dismissal mix (given a wicket), from real IPL data; adjusted by bowler type. */
   dismissals: {
-    caught: 0.739,
+    // Raised and lowered from the real mix: some catches go down, and DRS adds lbws.
+    caught: 0.79,
     bowled: 0.141,
-    lbw: 0.051,
+    lbw: 0.032,
     runOut: 0.049,
     stumped: 0.017,
     hitWicket: 0.003,
@@ -89,14 +102,26 @@ export interface BallContext {
   spell?: number
   /** Boundaries the bowler has conceded in this over. */
   hitThisOver?: number
+  /** What was actually bowled. Missing: the plan's average over its deliveries. */
+  delivery?: BowlingDelivery
+  /** 0…1 dew on the ball (second innings). */
+  dew?: number
+  /** Rating points of refocus after a strategic timeout, per side. */
+  boost?: { bat: number; bowl: number }
 }
 
 /** Extra wide risk from the bowling plan, intent and a rattled bowler. */
-export function wideFactor({ plan, bowlIntent = 0, hitThisOver = 0 }: BallContext): number {
+export function wideFactor({
+  plan,
+  bowlIntent = 0,
+  hitThisOver = 0,
+  dew = 0,
+}: BallContext): number {
   return (
     (plan === 'wide' ? 1.6 : 1) *
     (bowlIntent > 0 ? 1.15 : 1) *
-    (1 + MODEL.rattledWide * Math.max(0, hitThisOver - 1))
+    (1 + MODEL.rattledWide * Math.max(0, hitThisOver - 1)) *
+    (1 + MODEL.dewWide * dew)
   )
 }
 
@@ -140,9 +165,16 @@ export function ballOdds(ctx: BallContext): Odds {
     plan = 'stock',
     ballsFaced,
     pressure = 0,
+    dew = 0,
+    boost,
   } = ctx
   const base = MODEL.base[phase]
-  const s = (batter.batting - (bowler.bowling - bowlerPenalty(ctx)) - MODEL.skillCenter) / 10
+  const s =
+    (batter.batting +
+      (boost?.bat ?? 0) -
+      (bowler.bowling + (boost?.bowl ?? 0) - bowlerPenalty(ctx)) -
+      MODEL.skillCenter) /
+    10
 
   let w = base.wicket * Math.exp(-MODEL.skill.wicket * s + MODEL.intent.wicket * intent)
   let b =
@@ -228,32 +260,23 @@ export function ballOdds(ctx: BallContext): Odds {
     b *= 0.92
     d *= 1.04
   }
-  // Line and length plan. Pace plans only bite for pace bowlers.
-  const pace = bowler.bowlingType === 'pace'
-  if (plan === 'yorkers' && pace) {
-    if (has(bowler, 'yorker-specialist')) {
-      b *= 0.85
-      w *= 1.1
-    } else if (bowler.bowling >= 60) {
-      b *= 0.92
-      w *= 1.04
-    } else b *= 1.05 // missed yorkers become full tosses
-    sixShare *= 0.9
-  } else if (plan === 'bouncers' && pace) {
-    if (has(bowler, 'bouncer-specialist')) w *= 1.15
-    else {
-      w *= 1.08
-      b *= 1.06
-    }
-    sixShare *= 1.15
-  } else if (plan === 'wide') {
-    b *= 0.88
-    w *= 0.9
-    d *= 1.04
-  } else if (plan === 'variations') {
-    w *= has(bowler, 'mystery-spinner') ? 1.12 : 1.06
-    b *= has(batter, 'big-hitter') ? 0.92 : 0.96
-  }
+  // What was bowled: one delivery, or the plan's average when none is given.
+  const e = deliveryEffect(
+    bowler.bowlingType,
+    ctx.delivery
+      ? DELIVERY_EFFECT[ctx.delivery]
+      : expectedEffect(plan, {
+          bowler,
+          phase,
+          penalty: bowlerPenalty(ctx),
+          dew: bowler.bowlingType ? dew : 0,
+        }),
+  )
+  w *= e.wicket
+  b *= e.boundary
+  sixShare *= e.six
+  d *= e.dot
+  b *= 1 + MODEL.dewBoundary * dew
 
   // Pitch.
   b *= 1 + 0.16 * pitch.flat

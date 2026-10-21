@@ -85,6 +85,8 @@ export interface Career {
   news: NewsItem[]
   /** Totals from finished seasons, per player. */
   careerStats: Record<string, SeasonStat>
+  /** Achievements unlocked, by id, with when. */
+  achievements: Record<string, { year: number; day: number }>
 }
 
 export interface Lineup {
@@ -124,6 +126,7 @@ export function newCareer(opts: {
     status: 'active',
     news: [],
     careerStats: {},
+    achievements: {},
   }
 }
 

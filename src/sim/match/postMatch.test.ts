@@ -68,7 +68,10 @@ describe('post-match step', () => {
   it('reports every player in both XIs, with fitness spent and bounded rating changes', () => {
     const { reports } = season(1)
     const r = reports[0] ?? []
-    expect(r).toHaveLength(22)
+    // Both XIs, plus anyone the Impact Player replaced.
+    expect(r.length).toBeGreaterThanOrEqual(22)
+    expect(r.length).toBeLessThanOrEqual(24)
+    expect(new Set(r.map((p) => p.id)).size).toBe(r.length)
     for (const p of r) {
       expect(p.fitnessAfter).toBeLessThan(100)
       expect(Math.abs(p.ratingChange.batting)).toBeLessThanOrEqual(2)
