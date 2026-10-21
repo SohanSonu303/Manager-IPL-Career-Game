@@ -123,7 +123,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 ## Phase 10 — Mobile UI (L)
 - [x] Design tokens in `src/theme` (colors, type scale, spacing, radii)
 - [x] Layout shell: top bar (purse, reputation), content, bottom action bar; safe-area insets
-- [x] Touch targets at least 48 px; text contrast at least 4.5:1
+- [ ] Touch targets at least 48 px; text contrast at least 4.5:1 (not verified yet; filter chips are 36 px)
 - [x] Shared components (reference direction from screenshots; own look, no copied art or icons):
   - [x] `Card`, `Button` (primary, secondary, danger), `Chip` (role, trait, e.g. "Specialist chasing")
   - [x] `RatingRing` (number inside, color by rating band), `StatBar` (segmented; also used for aggression)
