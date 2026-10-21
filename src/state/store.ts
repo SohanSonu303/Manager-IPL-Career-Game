@@ -1,5 +1,8 @@
 import { create } from 'zustand'
 import { advanceDay, advanceToNextEvent, newCareer, type Career } from '@/sim/career'
+import { applyPostMatch, type PlayerReport } from '@/sim/match/postMatch'
+import type { MatchState } from '@/sim/match/types'
+import { deriveSeed } from '@/sim/rng'
 import { parseSave } from './save'
 import { clearSave, readSave, writeSave } from './storage'
 
@@ -73,6 +76,22 @@ export function importSave(text: string): string | null {
 export function resetCareer() {
   clearSave()
   useGame.setState({ career: null, notice: null })
+}
+
+/**
+ * Apply a finished match to the career (fitness, form, injuries, rating changes).
+ * Used by the debug match screen for friendlies until fixtures arrive in Phase 8.
+ */
+export function applyMatchToCareer(match: MatchState): PlayerReport[] {
+  const { career } = useGame.getState()
+  if (!career || !match.result) return []
+  const { players, reports } = applyPostMatch(
+    career.players,
+    match,
+    deriveSeed(career.seed, 'match', match.seed),
+  )
+  commit({ ...career, players })
+  return reports
 }
 
 export const dismissNotice = () => useGame.setState({ notice: null })

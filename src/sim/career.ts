@@ -6,8 +6,20 @@ import { createRng, deriveSeed, randInt } from './rng'
 
 export const START_YEAR = 2026
 
+export type InjuryKind = 'minor' | 'serious' | 'longTerm'
+
+export interface Injury {
+  kind: InjuryKind
+  /** Team matches still to miss. */
+  matchesOut: number
+}
+
 /** A player as stored in a career: static data plus current condition. */
-export interface CareerPlayer extends Player, Condition {}
+export interface CareerPlayer extends Player, Condition {
+  injury: Injury | null
+  /** Rating change from match grades this season (capped; reset at rollover). */
+  seasonDev: { batting: number; bowling: number }
+}
 
 /**
  * Everything a career needs, as plain serializable data. Static data (teams, the season
@@ -28,7 +40,13 @@ export function newCareer(opts: { seed: number; managerName: string; teamId: str
     seed: opts.seed,
     manager: { name: opts.managerName, teamId: opts.teamId },
     calendar: { year: START_YEAR, day: 0 },
-    players: basePlayers.map((p) => ({ ...p, fitness: 100, form: randInt(rng, 40, 60) })),
+    players: basePlayers.map((p) => ({
+      ...p,
+      fitness: 100,
+      form: randInt(rng, 40, 60),
+      injury: null,
+      seasonDev: { batting: 0, bowling: 0 },
+    })),
   }
 }
 
@@ -53,6 +71,9 @@ export function seasonRollover(career: Career, endedYear: number): Career {
         age: p.age + 1,
         fitness: 100,
         form: 50,
+        // The off-season is months long; everyone starts the new season healed.
+        injury: null,
+        seasonDev: { batting: 0, bowling: 0 },
         contract: p.contract && { ...p.contract, years: Math.max(0, p.contract.years - 1) },
       }
     }),

@@ -64,30 +64,33 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [x] Unit tests for age curve and rating bounds
 
 ## Phase 4 — Ball-by-ball sim and calibration (XL, riskiest piece)
-- [ ] `BallEvent` type: over, ball, batter, bowler, runs, extras, wicket, dismissal, shot direction and distance, boundary flag, commentary key
-- [ ] `simBall(state, rng)` — batter vs bowler, phase (powerplay, middle, death), pitch, form, fitness, aggression
-- [ ] `simOver`, `simOvers(n)` (e.g. 5 overs), `simInnings`, `simMatch`, all built on `simBall`
-- [ ] Rules: wides, no-balls, free hit, extras, wickets, innings end, target and chase, super over (can be last)
-- [ ] Calibration harness: run 10,000 simulated matches and compare to real IPL numbers
-  - [ ] Source data: Cricsheet ball-by-ball (check the license)
-  - [ ] Targets: runs per over, first-innings total distribution, wickets per innings, boundary %, dot-ball %, powerplay vs death scoring, chase win %
-  - [ ] Tune until simulated ranges match; keep the harness as a test
-- [ ] Deterministic replay test: same seed gives the same match
+- [x] `BallEvent` type: over, ball, batter, bowler, runs, extras, wicket, dismissal, shot direction and distance, boundary flag, commentary key
+- [x] `simBall(state, rng)` — batter vs bowler, phase (powerplay, middle, death), pitch, form, fitness, aggression
+- [x] `simOver`, `simOvers(n)` (e.g. 5 overs), `simInnings`, `simMatch`, all built on `simBall`
+- [x] Rules: wides, no-balls, free hit, extras, wickets, innings end, target and chase, super over (repeats on a tie)
+- [x] Calibration harness: run 10,000 simulated matches and compare to real IPL numbers (`npm run calibrate`, 1.5 s; results in `src/sim/calibration/README.md`)
+  - [x] Source data: Cricsheet ball-by-ball, 2024–2026 (ODC-By licence: attribution given; only aggregates committed)
+  - [x] Targets: runs per over, first-innings total distribution, wickets per innings, boundary %, dot-ball %, powerplay vs death scoring, chase win %
+  - [x] Tune until simulated ranges match; keep the harness as a test (all metrics within about 2%)
+- [x] Deterministic replay test: same seed gives the same match, whatever the stepping (ball, over, innings)
 
 ## Phase 5 — Match inputs (M)
-- [ ] Playing XI selection (with auto-pick)
-- [ ] Batting order
-- [ ] Bowler over allocation (rules: max overs per bowler)
-- [ ] Batting aggression setting (safe, balanced, attack)
-- [ ] Opposition AI: picks XI, orders and bowlers
-- [ ] Overseas limit in the XI
+- [x] Playing XI selection (with auto-pick and validation) — engine side; the pick screen is Phase 10
+- [x] Batting order
+- [x] Bowler over allocation (max 4 overs, no back-to-back; manager plan or AI; auto plan as a starting point)
+- [x] Batting aggression setting: 5 levels (defend, rotate, balanced, attack, all-out), team default plus per-batter, changeable live
+- [x] Opposition AI: picks XI, orders and bowlers; reads the chase for intent
+- [x] Overseas limit in the XI (max 4)
+- [ ] Impact player substitute (real IPL rule since 2023) — decide whether v1 needs it
 
 ## Phase 6 — Post-match step (M)
-- [ ] Batting and bowling grades per player
-- [ ] Rating growth or decline from grades, with caps
-- [ ] Fitness drop and recovery
-- [ ] Injury roll (minor, serious, long-term) based on fitness and workload; matches-out counter
-- [ ] Form update
+- [x] Batting and bowling grades per player
+- [x] Rating growth or decline from grades, with caps (±1 per match, ±3 per skill per season, growth stops at potential)
+- [x] Fitness drop and recovery
+- [x] Injury roll (minor, serious, long-term) based on fitness and workload; matches-out counter
+- [x] Form update
+- [x] Save format v2 with migration from v1 (injuries, season development)
+- [ ] Call the post-match step from real fixtures (Phase 8); for now the debug match screen can apply a friendly
 
 ## Phase 7 — Contracts and squad (L)
 - [ ] Contract: cost, length, expiry
@@ -133,7 +136,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
   - [ ] Calendar
   - [ ] Finances
   - [ ] Settings (save, export, import, reset)
-- [ ] Debug page for the sim (one table, one "sim over" button) — build this before the real UI
+- [x] Debug page for the sim: pick teams, next ball / over / 5 overs / innings / match, live intent, commentary, scorecards, grades, apply to career
 - [ ] Desktop: centered phone-width column
 - [ ] Respect `prefers-reduced-motion`
 
@@ -164,7 +167,7 @@ Reference direction (from the uploaded screenshots): scoreboard card on top, the
 - [ ] Test on a low-end phone before polishing
 
 ## Phase 12 — QA and feedback (M)
-- [ ] Sim tests: determinism, bounds, rules (overs, wickets, targets)
+- [x] Sim tests: determinism, bounds, rules (overs, wickets, targets)
 - [x] Save tests: round-trip, migration, corrupted save recovery
 - [ ] Manual test pass on iOS Safari and Android Chrome
 - [ ] In-app "Send feedback" link (a form or mailto); no analytics backend

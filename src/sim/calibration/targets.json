@@ -1,0 +1,66 @@
+{
+  "source": "Cricsheet IPL ball-by-ball (https://cricsheet.org), seasons 2024+, ODC-By licence. Aggregates only.",
+  "matches": 213,
+  "runRate": 9.7,
+  "phaseRunRate": {
+    "powerplay": 9.76,
+    "middle": 9.05,
+    "death": 11
+  },
+  "phaseWicketPerBall": {
+    "powerplay": 0.0431,
+    "middle": 0.0465,
+    "death": 0.0819
+  },
+  "phasePerLegalBall": {
+    "powerplay": {
+      "dot": 0.37,
+      "four": 0.183,
+      "six": 0.074
+    },
+    "middle": {
+      "dot": 0.243,
+      "four": 0.107,
+      "six": 0.071
+    },
+    "death": {
+      "dot": 0.205,
+      "four": 0.131,
+      "six": 0.11
+    }
+  },
+  "perLegalBall": {
+    "dot": 0.274,
+    "single": 0.381,
+    "two": 0.059,
+    "three": 0.0018,
+    "four": 0.136,
+    "six": 0.08
+  },
+  "extrasPerInnings": {
+    "wides": 5.99,
+    "noballs": 0.47,
+    "byes": 0.51,
+    "legbyes": 1.9
+  },
+  "firstInnings": {
+    "mean": 191.9,
+    "sd": 37.4,
+    "p10": 147,
+    "p50": 195,
+    "p90": 238
+  },
+  "wicketsPerInnings": 6.08,
+  "chaseWinRate": 0.555,
+  "tieRate": 0.0094,
+  "dismissals": {
+    "caught": 0.716,
+    "bowled": 0.141,
+    "lbw": 0.051,
+    "run out": 0.049,
+    "caught and bowled": 0.023,
+    "stumped": 0.017,
+    "hit wicket": 0.002,
+    "obstructing the field": 0.001
+  }
+}

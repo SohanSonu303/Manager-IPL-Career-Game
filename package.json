@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "data": "tsx scripts/generate-data.ts"
+    "data": "tsx scripts/generate-data.ts",
+    "calibrate": "tsx scripts/calibrate.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

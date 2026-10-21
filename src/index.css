@@ -299,3 +299,188 @@ button.danger {
   place-items: center;
   font-weight: 700;
 }
+
+/* --- Match debug ------------------------------------------------------- */
+
+.match-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.match-pick select {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap);
+  padding: 0 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--surface-2);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.scorebug {
+  margin-top: 14px;
+}
+
+.score {
+  font-size: 32px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.score small {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.result {
+  font-weight: 700;
+  color: var(--money);
+}
+
+.last-six {
+  display: flex;
+  gap: 6px;
+}
+
+.ball {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 4px;
+  border-radius: 15px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.ball.b {
+  background: var(--warn);
+  color: #1b1d23;
+}
+
+.ball.w {
+  background: var(--danger);
+  color: #fff;
+}
+
+.ball.d {
+  color: var(--text-dim);
+}
+
+.crease {
+  margin-top: 10px;
+}
+
+.crease-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.crease-name small {
+  color: var(--text-dim);
+}
+
+.intent {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.intent span {
+  min-width: 64px;
+  text-align: center;
+}
+
+.intent button {
+  width: var(--tap);
+  padding: 0;
+  font-size: 20px;
+}
+
+.sim-buttons {
+  margin-top: 10px;
+}
+
+.sim-buttons button {
+  flex: 1 1 30%;
+  padding: 0 8px;
+}
+
+.commentary {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.commentary .ov {
+  display: inline-block;
+  min-width: 40px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.scorecard {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.scorecard summary {
+  min-height: 32px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.scorecard table,
+.grades {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.scorecard th,
+.scorecard td,
+.grades th,
+.grades td {
+  padding: 4px 2px;
+  text-align: right;
+  border-bottom: 1px solid var(--surface-2);
+}
+
+.scorecard th:first-child,
+.scorecard td:first-child,
+.grades th:first-child,
+.grades td:first-child {
+  text-align: left;
+}
+
+.scorecard td small,
+.grades td small {
+  display: block;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.grades td small.injury {
+  color: var(--danger);
+}
+
+a {
+  color: var(--accent);
+}

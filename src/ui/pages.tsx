@@ -13,6 +13,7 @@ import {
   useGame,
 } from '@/state/store'
 import { Crest } from './identity/Crest'
+import { MatchDebug } from './match/MatchDebug'
 import { SquadList } from './SquadList'
 
 const PHASE_LABEL = {
@@ -106,6 +107,7 @@ export function Debug() {
           </div>
         </>
       )}
+      <MatchDebug />
     </>
   )
 }

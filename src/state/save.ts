@@ -4,7 +4,7 @@ import type { Career } from '@/sim/career'
  * Save file format. Bump SAVE_VERSION whenever the `Career` shape changes, and add a
  * migration from the previous version to MIGRATIONS.
  */
-export const SAVE_VERSION = 1
+export const SAVE_VERSION = 2
 
 export interface SaveFile {
   version: number
@@ -15,9 +15,19 @@ export interface SaveFile {
 /** Upgrades a save from version `n` to `n + 1`. Inputs are untrusted JSON. */
 export type Migration = (save: Record<string, unknown>) => Record<string, unknown>
 
-/** Keyed by the version being migrated FROM. Example for a future v2:
- *  1: (s) => ({ ...s, version: 2, career: { ...(s.career as object), finances: initialFinances } }) */
-export const MIGRATIONS: Record<number, Migration> = {}
+/** Keyed by the version being migrated FROM. */
+export const MIGRATIONS: Record<number, Migration> = {
+  // v2 (Phase 6): players gain injuries and per-season development from match grades.
+  1: (s) => {
+    const career = s.career as Record<string, unknown>
+    const players = (career.players as Record<string, unknown>[]).map((p) => ({
+      injury: null,
+      seasonDev: { batting: 0, bowling: 0 },
+      ...p,
+    }))
+    return { ...s, version: 2, career: { ...career, players } }
+  },
+}
 
 export type ParseResult = { ok: true; save: SaveFile } | { ok: false; error: string }
 
@@ -41,7 +51,11 @@ export function migrate(
     const from = save.version as number
     const step = migrations[from]
     if (!step) return { ok: false, error: `No migration from save v${from}.` }
-    save = step(save)
+    try {
+      save = step(save)
+    } catch {
+      return { ok: false, error: `Could not upgrade the save from v${from}.` }
+    }
     if (save.version !== from + 1)
       return { ok: false, error: `Migration from v${from} did not bump the version.` }
   }

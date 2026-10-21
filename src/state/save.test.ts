@@ -104,3 +104,26 @@ describe('storage', () => {
     expect(store.data.has(SAVE_KEY)).toBe(false)
   })
 })
+
+describe('real migrations', () => {
+  it('upgrades a v1 save (no injuries) to the current version', () => {
+    const c = career()
+    const v1Players = c.players.map((p) => {
+      const old: Record<string, unknown> = { ...p }
+      delete old.injury
+      delete old.seasonDev
+      return old
+    })
+    const out = migrate({ version: 1, savedAt: '', career: { ...c, players: v1Players } })
+    expect(out.ok).toBe(true)
+    if (!out.ok) return
+    expect(out.save.version).toBe(SAVE_VERSION)
+    expect(out.save.career.players[0]?.injury).toBeNull()
+    expect(out.save.career.players[0]?.seasonDev).toEqual({ batting: 0, bowling: 0 })
+  })
+
+  it('reports a migration that crashes on bad data', () => {
+    const out = migrate({ version: 1, career: { players: 'nope' } })
+    expect(!out.ok && out.error).toMatch(/Could not upgrade/)
+  })
+})
