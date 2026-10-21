@@ -1598,27 +1598,6 @@ select.input {
 
 /* --- Timeline club home (mockup H) ------------------------------------------------------ */
 
-.tl-head {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: calc(var(--space) * -1) calc(var(--space) * -1) 6px;
-  padding: 14px var(--space) 12px;
-  background: var(--bg-deep);
-}
-
-.tl-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.tl-title h1 {
-  margin: 0;
-  font-size: 24px;
-  line-height: 1;
-}
-
 .tl-progress {
   display: grid;
   grid-template-columns: repeat(14, minmax(0, 1fr));
@@ -1639,28 +1618,12 @@ select.input {
   background: var(--blue);
 }
 
-.tl-chips {
-  display: flex;
-  gap: 8px;
-}
-
-.tl-chips button {
-  flex: 1;
-  min-height: 40px;
-  border-radius: var(--radius);
-  background: var(--surface);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-size: 14px;
-}
-
 .timeline {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 10px 0 96px;
+  padding: 12px 0 8px;
 }
 
 .timeline::before {
@@ -1668,7 +1631,7 @@ select.input {
   position: absolute;
   left: 15px;
   top: 14px;
-  bottom: 80px;
+  bottom: 18px;
   width: 2px;
   background: var(--surface-2);
 }
@@ -1768,53 +1731,11 @@ select.input {
   color: var(--text-dim);
 }
 
-.fab {
-  position: absolute;
-  right: 16px;
-  bottom: calc(var(--bar-h) + 16px);
-  z-index: 5;
-  height: 56px;
-  padding: 0 22px 0 16px;
-  border-radius: 28px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--blue);
-  color: #fff;
-  font-size: 18px;
-  font-weight: 700;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-}
-
-.fab-dot,
-.menu-dot {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--danger);
-  border: 2px solid var(--bg);
-}
-
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  padding-top: 8px;
-}
-
-.menu-item {
-  position: relative;
-  min-height: 64px;
+.tl-section {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--surface-2);
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 14px;
-  background: var(--surface);
-  font-size: 17px;
-  font-weight: 600;
-  text-align: left;
-  border-radius: var(--radius-lg);
+  flex-direction: column;
+  gap: 8px;
 }

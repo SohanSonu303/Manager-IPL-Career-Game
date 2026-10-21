@@ -2,22 +2,22 @@
 
 `players.json` and `teams.json` are **generated**. Do not edit them by hand: edit the sources in `scripts/source/` and run `npm run data`. The generator is deterministic (fixed seed), so the same sources always give the same output. `data.test.ts` checks the result.
 
-| File | What it is |
-| --- | --- |
-| `types.ts` | Schemas: `Player`, `Team`, `CrestSpec`, roles, skills (traits), nationalities |
-| `players.json` | About 320 real players: 10 squads of 23–25, plus a free-agent pool |
-| `teams.json` | 10 franchises (real league names with one word changed), colours and crest specs |
-| `names.ts` | `shortName` ("Virat Kohli" -> "V Kohli") |
+| File           | What it is                                                                       |
+| -------------- | -------------------------------------------------------------------------------- |
+| `types.ts`     | Schemas: `Player`, `Team`, `CrestSpec`, roles, skills (traits), nationalities    |
+| `players.json` | About 320 real players: 10 squads of 23–25, plus a free-agent pool               |
+| `teams.json`   | 10 franchises (real league names with one word changed), colours and crest specs |
+| `names.ts`     | `shortName` ("Virat Kohli" -> "V Kohli")                                         |
 
 ## Where the data comes from
 
-| Source file | Contents |
-| --- | --- |
-| `scripts/source/rosters.txt` | The IPL 2026 squads (who plays for whom), from the Wikipedia "2026 <franchise> season" pages: name, nationality, birth date, bowling style, real auction salary, keeper flag, replacements and withdrawn players |
+| Source file                        | Contents                                                                                                                                                                                                                                        |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/source/rosters.txt`       | The IPL 2026 squads (who plays for whom), from the Wikipedia "2026 <franchise> season" pages: name, nationality, birth date, bowling style, real auction salary, keeper flag, replacements and withdrawn players                                |
 | `scripts/source/player-stats.json` | Per-player aggregates since 2023 (runs, balls, outs, balls bowled, runs conceded, wickets, stumpings) built from [Cricsheet](https://cricsheet.org) ball-by-ball data (Open Data Commons Attribution License) by `scripts/cricsheet-players.ts` |
-| `scripts/source/real-players.ts` | An older hand list: a role and a rough tier for players it knows, and extra free agents |
-| `scripts/source/known-traits.ts` | Hand-set skills for about 80 well-known players |
-| `scripts/source/teams.ts` | The ten franchises: names, colours, crest glyphs, grounds |
+| `scripts/source/real-players.ts`   | An older hand list: a role and a rough tier for players it knows, and extra free agents                                                                                                                                                         |
+| `scripts/source/known-traits.ts`   | Hand-set skills for about 80 well-known players                                                                                                                                                                                                 |
+| `scripts/source/teams.ts`          | The ten franchises: names, colours, crest glyphs, grounds                                                                                                                                                                                       |
 
 To refresh the stats, download `https://cricsheet.org/downloads/ipl_json.zip`, unzip it, and run `npx tsx scripts/cricsheet-players.ts <dir> 2023`. To change a squad, edit `rosters.txt`.
 

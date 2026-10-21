@@ -21,7 +21,7 @@ import { quickSimMyMatch, resetCareer, startCareer, useGame } from '@/state/stor
 import { crore, ordinal, teamName, teamShort } from './format'
 import { Crest } from './identity/Crest'
 import { Icon, type IconName } from './kit/Icon'
-import { Meter, Screen, Sheet } from './kit/kit'
+import { FlatButton, HubButton, Meter, Screen, Sheet, Tile } from './kit/kit'
 import { describePitch } from './PreMatchPage'
 import { useNextAction } from './useNextAction'
 
@@ -86,19 +86,18 @@ function NewCareer() {
   )
 }
 
-// --- Club home: the season as a timeline ----------------------------------------------------
+// --- Club home: the hub on top, the season timeline below ------------------------------------
 
-type SheetName = 'board' | 'finances' | 'club' | 'review' | 'menu' | null
+type SheetName = 'board' | 'finances' | 'club' | 'review' | null
 
-const MENU: { icon: IconName; label: string; to: string }[] = [
-  { icon: 'squad', label: 'Squad', to: '/squad' },
-  { icon: 'lineup', label: 'Pick XI', to: '/lineup' },
-  { icon: 'market', label: 'Market', to: '/market' },
-  { icon: 'table', label: 'Table', to: '/table' },
-  { icon: 'stats', label: 'Statistics', to: '/stats' },
-  { icon: 'calendar', label: 'Fixtures', to: '/fixtures' },
-  { icon: 'club', label: 'News', to: '/news' },
-  { icon: 'settings', label: 'Settings', to: '/settings' },
+/** Six hub buttons on a circle; angles in degrees, 0 = right, clockwise. */
+const HUB: { icon: IconName; label: string; to: string; angle: number }[] = [
+  { icon: 'market', label: 'Market', to: '/market', angle: -90 },
+  { icon: 'stats', label: 'Statistics', to: '/stats', angle: -30 },
+  { icon: 'calendar', label: 'Fixtures', to: '/fixtures', angle: 30 },
+  { icon: 'lineup', label: 'Pick XI', to: '/lineup', angle: 90 },
+  { icon: 'table', label: 'Table', to: '/table', angle: 150 },
+  { icon: 'squad', label: 'Squad', to: '/squad', angle: 210 },
 ]
 
 /** One dot on the timeline: a result, today's card, or an upcoming fixture. */
@@ -137,6 +136,7 @@ function ClubHub({ career }: { career: Career }) {
     !!career.lineup &&
     managerSheet(career).battingOrder.join() !== career.lineup.battingOrder.join()
   const pending = career.news.filter((n) => isMyClub(n, me) && needsAction(n)).length
+  const latest = [...career.news].reverse().find((n) => isMyClub(n, me))
 
   const fixtures = schedule(career).filter((f) => f.homeId === me || f.awayId === me)
   const resultOf = new Map(career.season.results.map((r) => [r.fixtureId, r]))
@@ -146,29 +146,99 @@ function ClubHub({ career }: { career: Career }) {
   const playoffs = career.season.results.filter((r) => r.stage !== 'league')
   const oppOf = (f: Fixture) => (f.homeId === me ? f.awayId : f.homeId)
 
-  const badge = (to: string) =>
-    (to === '/squad' && injured.length > 0) ||
-    (to === '/market' && expiring.length > 0 && isWindowOpen(career)) ||
-    (to === '/lineup' && lineupStale) ||
-    (to === '/news' && pending > 0)
+  const news: { text: string; icon: IconName | null; go: () => void } = career.season.review
+    ? { text: 'Season review', icon: 'trophy', go: () => setSheet('review') }
+    : pending
+      ? {
+          text: `${pending} need${pending > 1 ? '' : 's'} you`,
+          icon: 'alert',
+          go: () => navigate('/news'),
+        }
+      : injured.length
+        ? { text: `${injured.length} injured`, icon: 'alert', go: () => navigate('/news') }
+        : { text: latest?.text ?? 'No news yet', icon: null, go: () => navigate('/news') }
 
   return (
     <Screen back={{ label: 'Settings', onClick: () => navigate('/settings') }} primary={next}>
-      <header className="tl-head">
-        <div className="tl-title">
-          {team && <Crest crest={team.crest} colors={team.colors} size={44} />}
-          <div>
-            <h1>
-              {team?.name} · {career.calendar.year}
-            </h1>
-            <span className="dim">
-              {started
-                ? `${ordinal(position)} · ${myRow?.points ?? 0} pts`
-                : PHASE_LABEL[day.phase]}{' '}
-              · board {Math.round(career.manager.boardConfidence)} ·{' '}
-              {crore(capRoom(career.players, me))}
+      <div className="hub-tabs">
+        <FlatButton onClick={() => setSheet('board')}>Board</FlatButton>
+        <FlatButton onClick={() => setSheet('finances')}>Finances</FlatButton>
+        <FlatButton onClick={() => setSheet('club')}>Club</FlatButton>
+      </div>
+
+      <div className="hub">
+        <div className="hub-ring" />
+        <div className="hub-ring inner" />
+        <div className="hub-center">
+          {team && <Crest crest={team.crest} colors={team.colors} size={112} />}
+          <strong>{team?.name}</strong>
+          <span>
+            {career.calendar.year} ·{' '}
+            {started ? `${ordinal(position)} · ${myRow?.points ?? 0} pts` : PHASE_LABEL[day.phase]}
+          </span>
+        </div>
+        {HUB.map((h) => {
+          const rad = (h.angle * Math.PI) / 180
+          const badge =
+            (h.to === '/squad' && injured.length > 0) ||
+            (h.to === '/market' && expiring.length > 0 && isWindowOpen(career)) ||
+            (h.to === '/lineup' && lineupStale)
+          return (
+            <div
+              key={h.to}
+              style={{
+                ['--x' as string]: `${50 + 37 * Math.cos(rad)}%`,
+                ['--y' as string]: `${50 + 37 * Math.sin(rad)}%`,
+              }}
+              className="hub-pos"
+            >
+              <HubButton
+                icon={h.icon}
+                label={h.label}
+                onClick={() => navigate(h.to)}
+                badge={badge}
+              />
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="tiles">
+        <Tile caption="Standings" onClick={() => navigate('/table')}>
+          {started ? (
+            <span className="big">
+              {position}
+              <sup>{ordinal(position).slice(-2)}</sup>
             </span>
-          </div>
+          ) : (
+            <span className="big">–</span>
+          )}
+        </Tile>
+        <Tile caption="Calendar" onClick={() => navigate('/fixtures')}>
+          <span className="big">{career.calendar.year}</span>
+        </Tile>
+        <Tile caption="News" onClick={news.go}>
+          {news.icon ? (
+            <>
+              <span className="bad">
+                <Icon name={news.icon} size={30} />
+              </span>
+              <span>{news.text}</span>
+            </>
+          ) : (
+            <span className="tile-news">{news.text}</span>
+          )}
+        </Tile>
+      </div>
+
+      <section className="tl-section" aria-label="Season timeline">
+        <div className="row-between">
+          <h2 className="section" style={{ margin: 0 }}>
+            Your season
+          </h2>
+          <span className="dim">
+            {played.length} of {fixtures.length} played · {crore(capRoom(career.players, me))} room
+          </span>
         </div>
         <div
           className="tl-progress"
@@ -182,129 +252,105 @@ function ClubHub({ career }: { career: Career }) {
             />
           ))}
         </div>
-        <div className="tl-chips">
-          <button onClick={() => setSheet('board')}>Board</button>
-          <button onClick={() => setSheet('finances')}>Finances</button>
-          <button onClick={() => setSheet('club')}>Club</button>
-        </div>
-      </header>
 
-      <div className="timeline">
-        {played.slice(-3).map((f) => {
-          const r = resultOf.get(f.id)
-          if (!r) return null
-          const won = r.winnerId === me
-          return (
+        <div className="timeline">
+          {played.slice(-3).map((f) => {
+            const r = resultOf.get(f.id)
+            if (!r) return null
+            const won = r.winnerId === me
+            return (
+              <TimelineRow
+                key={f.id}
+                mark={r.winnerId ? (won ? 'W' : 'L') : '–'}
+                tone={r.winnerId ? (won ? 'win' : 'loss') : 'draw'}
+              >
+                <span>
+                  R{f.round} {f.homeId === me ? 'vs' : '@'} {teamShort(oppOf(f))}
+                </span>
+                <span className="dim">
+                  {r.winnerId
+                    ? `${teamShort(r.winnerId)} ${r.margin.replace('won by ', '')}`
+                    : 'no result'}
+                </span>
+              </TimelineRow>
+            )
+          })}
+
+          {mine ? (
+            <TimelineRow mark={mine.round ? `R${mine.round}` : '★'} tone="today">
+              <div className="tl-today">
+                <span className="eyebrow">
+                  TODAY · {mine.homeId === me ? 'HOME' : 'AWAY'}
+                  {mine.stage !== 'league' ? ` · ${stageName(mine.stage).toUpperCase()}` : ''}
+                </span>
+                <strong className="tl-opp">vs {teamName(oppOf(mine))}</strong>
+                <span className="dim">
+                  {teamById.get(mine.homeId)?.ground}: {describePitch(pitchFor(mine.homeId))}.
+                </span>
+                <div className="button-row">
+                  <button className="primary grow2" onClick={() => navigate('/prematch')}>
+                    Play match
+                  </button>
+                  <button onClick={quickSimMyMatch}>Sim</button>
+                </div>
+              </div>
+            </TimelineRow>
+          ) : (
+            <TimelineRow mark="★" tone="today">
+              <div className="tl-today">
+                <span className="eyebrow">
+                  {PHASE_LABEL[day.phase].toUpperCase()} · WEEK {day.week}
+                </span>
+                <strong className="tl-opp">
+                  {career.season.review
+                    ? `${career.calendar.year} season complete`
+                    : day.event
+                      ? describeEvent(day.event)
+                      : day.day === 0
+                        ? 'A new season begins'
+                        : 'No match today'}
+                </strong>
+                {career.season.review ? (
+                  <button onClick={() => setSheet('review')}>Season review</button>
+                ) : isWindowOpen(career) ? (
+                  <span className="warn">
+                    Transfer window open
+                    {expiring.length
+                      ? ` · ${expiring.length} contract${expiring.length > 1 ? 's' : ''} ending`
+                      : ''}
+                  </span>
+                ) : (
+                  <span className="dim">Press Continue to move on.</span>
+                )}
+              </div>
+            </TimelineRow>
+          )}
+
+          {playoffs.map((r) => (
             <TimelineRow
-              key={f.id}
-              mark={r.winnerId ? (won ? 'W' : 'L') : '–'}
-              tone={r.winnerId ? (won ? 'win' : 'loss') : 'draw'}
+              key={r.fixtureId}
+              mark="★"
+              tone={r.winnerId === me ? 'win' : r.teams.includes(me) ? 'loss' : 'draw'}
             >
-              <span>
-                R{f.round} {f.homeId === me ? 'vs' : '@'} {teamShort(oppOf(f))}
-              </span>
+              <span>{stageName(r.stage)}</span>
               <span className="dim">
                 {r.winnerId
                   ? `${teamShort(r.winnerId)} ${r.margin.replace('won by ', '')}`
                   : 'no result'}
               </span>
             </TimelineRow>
-          )
-        })}
+          ))}
 
-        {mine ? (
-          <TimelineRow mark={mine.round ? `R${mine.round}` : '★'} tone="today">
-            <div className="tl-today">
-              <span className="eyebrow">
-                TODAY · {mine.homeId === me ? 'HOME' : 'AWAY'}
-                {mine.stage !== 'league' ? ` · ${stageName(mine.stage).toUpperCase()}` : ''}
+          {upcoming.map((f) => (
+            <TimelineRow key={f.id} mark={`R${f.round}`} tone="next">
+              <span>
+                {f.homeId === me ? 'vs' : '@'} {teamName(oppOf(f))}
               </span>
-              <strong className="tl-opp">vs {teamName(oppOf(mine))}</strong>
-              <span className="dim">
-                {teamById.get(mine.homeId)?.ground}: {describePitch(pitchFor(mine.homeId))}.
-              </span>
-              <div className="button-row">
-                <button className="primary grow2" onClick={() => navigate('/prematch')}>
-                  Play match
-                </button>
-                <button onClick={quickSimMyMatch}>Sim</button>
-              </div>
-            </div>
-          </TimelineRow>
-        ) : (
-          <TimelineRow mark="★" tone="today">
-            <div className="tl-today">
-              <span className="eyebrow">
-                {PHASE_LABEL[day.phase].toUpperCase()} · WEEK {day.week}
-              </span>
-              <strong className="tl-opp">
-                {career.season.review
-                  ? `${career.calendar.year} season complete`
-                  : day.event
-                    ? describeEvent(day.event)
-                    : day.day === 0
-                      ? 'A new season begins'
-                      : 'No match today'}
-              </strong>
-              {career.season.review ? (
-                <button onClick={() => setSheet('review')}>Season review</button>
-              ) : isWindowOpen(career) ? (
-                <span className="warn">
-                  Transfer window open
-                  {expiring.length
-                    ? ` · ${expiring.length} contract${expiring.length > 1 ? 's' : ''} ending`
-                    : ''}
-                </span>
-              ) : (
-                <span className="dim">Press Continue to move on.</span>
-              )}
-            </div>
-          </TimelineRow>
-        )}
+            </TimelineRow>
+          ))}
+        </div>
+      </section>
 
-        {playoffs.map((r) => (
-          <TimelineRow
-            key={r.fixtureId}
-            mark="★"
-            tone={r.winnerId === me ? 'win' : r.teams.includes(me) ? 'loss' : 'draw'}
-          >
-            <span>{stageName(r.stage)}</span>
-            <span className="dim">
-              {r.winnerId
-                ? `${teamShort(r.winnerId)} ${r.margin.replace('won by ', '')}`
-                : 'no result'}
-            </span>
-          </TimelineRow>
-        ))}
-
-        {upcoming.map((f) => (
-          <TimelineRow key={f.id} mark={`R${f.round}`} tone="next">
-            <span>
-              {f.homeId === me ? 'vs' : '@'} {teamName(oppOf(f))}
-            </span>
-          </TimelineRow>
-        ))}
-      </div>
-
-      <button className="fab" onClick={() => setSheet('menu')} aria-label="Open menu">
-        <Icon name="menu" size={22} />
-        Menu
-        {(injured.length > 0 || pending > 0 || lineupStale) && <span className="fab-dot" />}
-      </button>
-
-      {sheet === 'menu' && (
-        <Sheet title="Menu" onClose={() => setSheet(null)}>
-          <div className="menu-grid">
-            {MENU.map((m) => (
-              <button key={m.to} className="menu-item" onClick={() => navigate(m.to)}>
-                <Icon name={m.icon} size={26} />
-                {m.label}
-                {badge(m.to) && <span className="menu-dot" aria-label="Needs attention" />}
-              </button>
-            ))}
-          </div>
-        </Sheet>
-      )}
       {sheet === 'board' && (
         <BoardSheet
           career={career}

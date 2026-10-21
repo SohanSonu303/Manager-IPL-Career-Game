@@ -207,7 +207,7 @@ Reference direction (from the uploaded screenshots): scoreboard card on top, the
 - [x] Real IPL 2026 squads (23–25 per club) from Wikipedia season pages, real auction salaries, withdrawn/unsold players as free agents
 - [x] Ratings from real performance (Cricsheet 2023+: average, strike rate, economy, wickets per over), shrunk towards a salary prior for small samples; roles from real usage
 - [x] Market filters: search, role, nationality, bowling, age, rating, skill, price, availability, sort, reset; League tab to browse other clubs' players; same bar on the Squad screen
-- [x] Mockup H integrated: Timeline club home (progress bar, results, Today card, upcoming, Menu sheet) and Pick XI on a field diagram
+- [x] Mockup H integrated: Pick XI on a field diagram; club home keeps the radial hub and tiles on top with the season timeline (progress bar, results, Today card, upcoming) below
 - [x] Repo ignore rules (`.claude`, `.code-review-graph`, `.design-directions`, `.env*`, `*.tsbuildinfo`)
 - [ ] Re-check a few players against the official IPL site before a public pitch (see `src/data/README.md`)
 - [ ] Other mockups (F, G, I, J) not used; more design rounds later
