@@ -1,0 +1,15 @@
+:root {
+  --bg: #1b1d23;
+  --surface: #262932;
+  --surface-2: #30343f;
+  --text: #f1f2f6;
+  --text-dim: #a9adbb;
+  --accent: #8b9cff;
+  --money: #4cc38a;
+  --warn: #f5b942;
+  --danger: #ef6461;
+  --radius: 14px;
+  --space: 12px;
+  --tap: 48px;
+  --col-width: 430px;
+}

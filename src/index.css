@@ -1,0 +1,66 @@
+@import './theme/tokens.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #0f1014;
+  color: var(--text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: var(--col-width);
+  margin: 0 auto;
+  background: var(--bg);
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.shell main {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space);
+}
+
+.shell nav {
+  display: flex;
+  background: var(--surface);
+}
+
+.shell nav a {
+  flex: 1;
+  min-height: var(--tap);
+  display: grid;
+  place-items: center;
+  color: var(--text-dim);
+  text-decoration: none;
+}
+
+.shell nav a.active {
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
