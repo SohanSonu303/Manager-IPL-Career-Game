@@ -2,13 +2,12 @@
 
 `players.json` and `teams.json` are **generated**. Do not edit them by hand: edit the sources in `scripts/source/` and run `npm run data`. The generator is deterministic (fixed seed `20261`), so the same sources always give the same output. `data.test.ts` checks the result.
 
-| File | What it is |
-| --- | --- |
-| `types.ts` | Schemas: `Player`, `Team`, `CrestSpec`, roles, traits, nationalities |
-| `players.json` | 215 players: 165 real, 50 generated |
-| `teams.json` | 10 fictional franchises with colors and crest specs |
-| `name-pools.json` | First/last name pools per nationality (fictional-names toggle, generated players) |
-| `names.ts` | `displayName` (toggle-aware), `fictionalName`, `shortName` |
+| File           | What it is                                                                           |
+| -------------- | ------------------------------------------------------------------------------------ |
+| `types.ts`     | Schemas: `Player`, `Team`, `CrestSpec`, roles, traits, nationalities                 |
+| `players.json` | 211 real players                                                                     |
+| `teams.json`   | 10 franchises (real league names with one word changed), with colors and crest specs |
+| `names.ts`     | `shortName` ("Virat Kohli" -> "V Kohli")                                             |
 
 ## Real players: what is real and what is not
 
@@ -32,13 +31,14 @@
 6. **Overall rating:** `overallRating` in `src/sim/player.ts`, weighted by role.
 7. **Salary (lakhs per year)** = `max(20, ((overall − 40) / 45)^2.2 × 1800)`, rounded to 5. Contract length is 1–3 years.
 
-## Generated players
+## Players are real only
 
-There are 50 generated Indian players, aged 18–24 and in tiers 1–2. Their names come from `name-pools.json` and are checked against the real names so they never match one. These are marked `real: false`.
+Every player is a real cricketer; there are no generated or made-up names. To add depth or new players, add them to `scripts/source/real-players.ts`.
 
 ## Squads
 
 The squads come from a balanced snake draft (best available player by overall rating). It works under these rules:
+
 - 18 players per squad.
 - At most 6 overseas players per squad during the draft. The league rule of at most 8 comes later, in Phase 7.
 - Each squad has exactly 2 keepers, at least 4 batters, at least 3 all-rounders and at least 5 bowlers.
@@ -48,8 +48,8 @@ Leftover players become free agents (`teamId: null`, `contract: null`).
 
 ## Ids
 
-Player ids are `p` + a base-36 hash of the source name. They never contain a real name, so URLs and saves stay clean when the fictional-names toggle is on.
+Player ids are `p` + a base-36 hash of the source name. They are stable as long as the name is unchanged.
 
 ## Teams
 
-The franchise names are placeholders (see "Open decisions" in `TODO.md`). They use cities without a real franchise, and each color pair differs from every real league palette. Each crest is a seeded, unique combination of shape and glyph.
+The franchises follow the real league's teams. Each keeps most of the real name with one word changed (for example, Sunrisers Hyderabad becomes Sunrisers Falcons). Colors loosely echo the real teams. Crests are our own seeded shape and glyph designs, not real logos.

@@ -1,34 +1,23 @@
-import { displayName, players, shortName, teamById, teams } from '@/data'
+import { players, shortName, teamById, teams } from '@/data'
 import { overallRating } from '@/sim/player'
-import { setFictionalNames, useGame } from '@/state/store'
 import { Avatar } from './identity/Avatar'
 import { ringStatus } from './identity/avatarSpec'
 import { Crest } from './identity/Crest'
 
 /** Dev page: all crests and 100 avatars on one screen, to check variety and style. */
 export function Gallery() {
-  const fictional = useGame((s) => s.settings.fictionalNames)
   return (
     <div className="gallery">
       <h1>Identity gallery</h1>
-      <label className="toggle">
-        <input
-          type="checkbox"
-          checked={fictional}
-          onChange={(e) => setFictionalNames(e.target.checked)}
-        />
-        Fictional names
-      </label>
-
       <h2>Crests</h2>
       <div className="crest-grid">
         {teams.map((t) => (
           <figure key={t.id}>
-            <Crest crest={t.crest} colors={t.colors} size={64} title={`${t.city} ${t.nickname}`} />
+            <Crest crest={t.crest} colors={t.colors} size={64} title={t.name} />
             <figcaption>
               {t.short}
               <br />
-              {t.nickname}
+              {t.name}
             </figcaption>
           </figure>
         ))}
@@ -49,9 +38,9 @@ export function Gallery() {
                 size={64}
                 ring={i % 4 === 0 ? ringStatus(overallRating(p)) : undefined}
                 badge={team ? { crest: team.crest, colors: team.colors } : undefined}
-                title={displayName(p, fictional)}
+                title={p.name}
               />
-              <figcaption>{shortName(displayName(p, fictional))}</figcaption>
+              <figcaption>{shortName(p.name)}</figcaption>
             </figure>
           )
         })}

@@ -5,9 +5,7 @@
  *   npm run data
  */
 import { writeFileSync } from 'node:fs'
-import { fictionalName } from '../src/data/names.ts'
 import {
-  CREST_GLYPHS,
   CREST_SHAPES,
   type BowlingType,
   type CrestSpec,
@@ -35,7 +33,6 @@ const START_YEAR = 2026
 const SQUAD_SIZE = 18
 /** Draft cap for balance. The league rule (max 8 per squad) is enforced in Phase 7. */
 const DRAFT_OVERSEAS_CAP = 6
-const GENERATED_COUNT = 50
 
 /** Mean of the main skill per tier. */
 const TIER_MEAN = { 1: 50, 2: 58, 3: 66, 4: 74, 5: 82 } as const
@@ -46,7 +43,6 @@ const clamp = (v: number) => Math.max(1, Math.min(99, Math.round(v)))
 
 interface Draft {
   name: string
-  real: boolean
   nationality: Nationality
   age: number
   role: Role
@@ -120,7 +116,6 @@ function salaryFor(overall: number): number {
 const drafts: Draft[] = realPlayers.map(
   ([name, nationality, role, bowlingType, tier, birthYear]) => ({
     name,
-    real: true,
     nationality,
     age: START_YEAR - birthYear,
     role,
@@ -129,43 +124,15 @@ const drafts: Draft[] = realPlayers.map(
   }),
 )
 
-const usedNames = new Set(drafts.map((d) => d.name))
-for (let i = 0; drafts.length < realPlayers.length + GENERATED_COUNT; i++) {
-  const name = fictionalName(`gen-${i}`, 'IND')
-  if (usedNames.has(name)) continue
-  usedNames.add(name)
-  const role = pickWeighted<Role>(rng, [
-    ['batter', 30],
-    ['wicketkeeper', 10],
-    ['allrounder', 25],
-    ['bowler', 35],
-  ])
-  const bowls = role === 'allrounder' || role === 'bowler'
-  drafts.push({
-    name,
-    real: false,
-    nationality: 'IND',
-    age: randInt(rng, 18, 24),
-    role,
-    bowlingType: bowls
-      ? pickWeighted<BowlingType>(rng, [
-          ['pace', 6],
-          ['spin', 4],
-        ])
-      : null,
-    tier: pickWeighted<Tier>(rng, [
-      [1, 6],
-      [2, 4],
-    ]),
-  })
-}
+const dupes = drafts.filter((d, i) => drafts.findIndex((o) => o.name === d.name) !== i)
+if (dupes.length)
+  throw new Error(`Duplicate names in source: ${dupes.map((d) => d.name).join(', ')}`)
 
 const players: Player[] = drafts.map((d) => {
   const ratings = makeRatings(d)
   return {
-    id: 'p' + hashString(`${d.real ? 'real' : 'gen'}:${d.name}`).toString(36),
+    id: 'p' + hashString(`real:${d.name}`).toString(36),
     name: d.name,
-    real: d.real,
     nationality: d.nationality,
     age: d.age,
     role: d.role,
@@ -226,10 +193,10 @@ for (let round = 0; round < SQUAD_SIZE; round++) {
 // --- Crests -----------------------------------------------------------------
 
 const usedCrests = new Set<string>()
-const teams: Team[] = sourceTeams.map((t) => {
+const teams: Team[] = sourceTeams.map(({ glyph, ...t }) => {
   let crest: CrestSpec
   do {
-    crest = { shape: pick(rng, CREST_SHAPES), glyph: pick(rng, CREST_GLYPHS), band: rng() < 0.5 }
+    crest = { shape: pick(rng, CREST_SHAPES), glyph, band: rng() < 0.5 }
   } while (usedCrests.has(`${crest.shape}/${crest.glyph}`))
   usedCrests.add(`${crest.shape}/${crest.glyph}`)
   return { ...t, crest }
@@ -242,9 +209,7 @@ writeFileSync(new URL('players.json', out), JSON.stringify(players, null, 2) + '
 writeFileSync(new URL('teams.json', out), JSON.stringify(teams, null, 2) + '\n')
 
 const free = players.filter((p) => p.teamId === null).length
-console.log(
-  `players: ${players.length} (${players.filter((p) => p.real).length} real), free agents: ${free}`,
-)
+console.log(`players: ${players.length}, free agents: ${free}`)
 for (const id of order) {
   const sq = squads.get(id) as Player[]
   const avg = sq.reduce((s, p) => s + overallRating(p), 0) / sq.length

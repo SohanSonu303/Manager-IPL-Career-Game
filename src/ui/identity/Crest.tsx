@@ -114,16 +114,18 @@ export function Crest({ crest, colors, size = 48, title }: CrestProps) {
       </defs>
       <path d={outline} fill={colors.primary} />
       {crest.band && (
-        <rect
-          x={-20}
-          y={41}
-          width={140}
-          height={18}
-          transform="rotate(-35 50 50)"
-          fill={colors.secondary}
-          opacity={0.28}
-          clipPath={`url(#${clip})`}
-        />
+        // Clip on the group, not the rotated rect, so the clip outline is not rotated too.
+        <g clipPath={`url(#${clip})`}>
+          <rect
+            x={-20}
+            y={41}
+            width={140}
+            height={18}
+            transform="rotate(-35 50 50)"
+            fill={colors.secondary}
+            opacity={0.28}
+          />
+        </g>
       )}
       <g transform={GLYPH_FIT[crest.shape]}>
         <Glyph glyph={crest.glyph} fg={colors.secondary} bg={colors.primary} />

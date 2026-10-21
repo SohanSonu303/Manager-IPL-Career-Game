@@ -34,11 +34,10 @@ export interface Contract {
 }
 
 export interface Player {
-  /** Opaque id (hash of the source name), so ids never reveal real names. */
+  /** Short stable id (hash of the name). */
   id: string
+  /** Real player name. */
   name: string
-  /** True for real cricketers, false for generated players. */
-  real: boolean
   nationality: Nationality
   age: number
   role: Role
@@ -76,8 +75,10 @@ export interface CrestSpec {
 
 export interface Team {
   id: string
+  /** Home city (venue). */
   city: string
-  nickname: string
+  /** Full display name, e.g. "Sunrisers Falcons". */
+  name: string
   /** Three-letter code for scorebugs. */
   short: string
   colors: { primary: string; secondary: string }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { overallRating } from '../sim/player'
-import { displayName, fictionalName, shortName } from './names'
+import { shortName } from './names'
 import { players, playersByTeam, teams } from './index'
 import { BOWLING_TYPES, NATIONALITIES, ROLES, TRAITS } from './types'
 
@@ -27,7 +27,7 @@ describe('players.json', () => {
     }
   })
 
-  it('ids do not contain real names', () => {
+  it('ids are short hashes', () => {
     for (const p of players) expect(p.id).toMatch(/^p[0-9a-z]+$/)
   })
 })
@@ -56,8 +56,9 @@ describe('squads', () => {
 })
 
 describe('teams.json', () => {
-  it('has 10 teams with unique ids, codes and crests', () => {
+  it('has 10 teams with unique ids, names, codes and crests', () => {
     expect(teams).toHaveLength(10)
+    expect(new Set(teams.map((t) => t.name)).size).toBe(10)
     expect(new Set(teams.map((t) => t.id)).size).toBe(10)
     expect(new Set(teams.map((t) => t.short)).size).toBe(10)
     expect(new Set(teams.map((t) => `${t.crest.shape}/${t.crest.glyph}`)).size).toBe(10)
@@ -65,22 +66,6 @@ describe('teams.json', () => {
 })
 
 describe('names', () => {
-  const kohli = players.find((p) => p.name === 'Virat Kohli')
-
-  it('fictional toggle replaces real names with a stable made-up one', () => {
-    expect(kohli).toBeDefined()
-    if (!kohli) return
-    expect(displayName(kohli, false)).toBe('Virat Kohli')
-    const fake = displayName(kohli, true)
-    expect(fake).not.toBe('Virat Kohli')
-    expect(fake).toBe(fictionalName(kohli.id, 'IND'))
-  })
-
-  it('fictional names never reuse a real player name', () => {
-    const real = new Set(players.filter((p) => p.real).map((p) => p.name))
-    for (const p of players) expect(real.has(displayName(p, true))).toBe(false)
-  })
-
   it('shortName', () => {
     expect(shortName('Virat Kohli')).toBe('V Kohli')
     expect(shortName('Nitish Kumar Reddy')).toBe('NK Reddy')

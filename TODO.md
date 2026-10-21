@@ -1,13 +1,13 @@
 # Cricket Manager (working title) — v1 TODO
 
-Mobile-first career-mode cricket management sim, played in the browser. League is IPL-style but fully fictional (teams, logos, avatars). Prototype for testing, client pitching and phone-user feedback.
+Mobile-first career-mode cricket management sim, played in the browser. League is IPL-style: real player names; franchises based on the real teams with one word of each name changed; own crests and avatars (no real logos). Prototype for testing, client pitching and phone-user feedback.
 
 ## Decisions so far
 - **Stack:** React 19 (pinned `~19.3` to stay in `@react-three/fiber` v9's peer range), TypeScript (strict), Vite. Client-side only, no backend. Deploy on Vercel.
 - **3D:** three.js for the match screen only, lazy-loaded. v1 uses a top-down orthographic camera only (no tilted broadcast camera).
 - **Storage:** `localStorage` for saves (versioned, with JSON export/import).
 - **Mobile-first:** design for 360–430 px wide; on desktop show a centered phone-width column. Installable as a PWA.
-- **Names and art:** real player names only (public). Stats and ratings are generated. Teams, crests and avatars are fictional and procedural (SVG). Photos deferred.
+- **Names and art:** real player names only; no fictional or generated names. Stats and ratings are generated. Team names are the real franchises with one word changed (e.g. Sunrisers Hyderabad -> Sunrisers Falcons). Crests and avatars are our own procedural SVG; no real logos. Photos deferred.
 - **UI look:** own layout and visual identity. Palette direction from the approved mockups (charcoal, periwinkle blue, green for money, amber for warnings). Procedural face avatars in our own layered SVG style are allowed. No radial hub, no mascot crests.
 - **Scope v1:** manager career mode. One league (10 teams), no promotion or relegation.
 - **Deferred:** AI photos, training, youth academy, sponsors, stadium building, weather, DRS, loans, coin economy, backend and accounts, tilted/broadcast camera, radial hub home screen, image-based player portraits.
@@ -16,7 +16,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [ ] Sim is pure TypeScript in `src/sim`. No React, no DOM, no `window`. UI and 3D only read its output.
 - [ ] One seeded RNG; the seed is stored in the save so any match or bug replays exactly.
 - [ ] Sim emits a stream of `BallEvent`s. Scoreboard, commentary and 3D view all consume the same stream.
-- [ ] All players and teams live in JSON data files, so names can be swapped (fictional-names toggle).
+- [ ] All players and teams live in JSON data files, generated from `scripts/source/`.
 - [ ] No dates in this file. Sizes only: S (hours), M (a day or two), L (several days), XL (a week or more).
 
 ## Phase 0 — Project setup (S)
@@ -33,8 +33,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 ## Phase 1 — Data and identity (M)
 - [x] Player schema: id, name, age, role, batting and bowling ratings, traits, overseas flag, contract
 - [x] Players JSON: real names, generated ratings (documented in `src/data/README.md`; regenerate with `npm run data`)
-- [x] 10 fictional franchises: city + original nickname, own colors (not matching real team palettes)
-- [x] Fictional-names toggle for players (for public pitches)
+- [x] 10 franchises: real team names with one word changed, own crests; colors loosely echo the real teams
 - [x] SVG crest generator (seeded: shape + glyph + two colors)
 - [x] SVG avatar generator: procedural face avatar, own style, one consistent look
   - [x] Layered parts: head shape, skin tone (6 to 8), hair style (about 10) and color, facial hair (about 5), eyebrows, kit collar in club colors, optional small club badge in the corner
@@ -96,7 +95,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [ ] Basic negotiation: offer, counter, accept or decline
 - [ ] Free-agent market with refresh
 - [ ] Trades between clubs (loans deferred)
-- [ ] Season pool: generated young players each year, retirements
+- [ ] Season pool: new real players added through data updates (no generated names), retirements
 - [ ] Overseas player rules
 
 ## Phase 8 — League (M)
@@ -132,7 +131,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
   - [ ] Standings
   - [ ] Calendar
   - [ ] Finances
-  - [ ] Settings (save, export, import, reset, fictional-names toggle)
+  - [ ] Settings (save, export, import, reset)
 - [ ] Debug page for the sim (one table, one "sim over" button) — build this before the real UI
 - [ ] Desktop: centered phone-width column
 - [ ] Respect `prefers-reduced-motion`
@@ -177,12 +176,11 @@ Reference direction (from the uploaded screenshots): scoreboard card on top, the
 ## Phase 13 — Deploy and pitch (S)
 - [ ] Vercel production deploy and a stable URL
 - [ ] Changelog and known-issues page
-- [ ] Pitch build: fictional-names toggle on, no real names visible
 - [ ] Short demo script: new career, pick XI, sim a match, sign a player, play a season
 
 ## Open decisions
 - [ ] League format: double round-robin (18 matches each) or a custom 14-match schedule
-- [ ] Game name and fictional franchise names
+- [ ] Game name; final franchise names (current ones are a first pass)
 - [ ] Final palette and fonts (from the mockups)
 - [ ] Salary cap size and starting budget
 - [ ] How many seasons a career runs, and what "winning" means
@@ -195,7 +193,7 @@ Reference direction (from the uploaded screenshots): scoreboard card on top, the
 - Sim calibration: believable results take iteration. Plan for it, do not assume it works first time.
 - `localStorage` limits and browser clearing. Export/import is the safety net.
 - Three.js performance on low-end phones. The 2D fallback is the insurance.
-- Real player names without a license. Keep the data swappable.
+- Real player names and near-real team names without a license. Get the legal check done before any public pitch.
 - Crowd and stand visuals cost performance. Keep them instanced and simple.
 - Avatars can look repetitive. Needs enough part combinations and the 100-avatar check.
 - Scope creep from the deferred list. Resist until v1 is playable end to end.

@@ -1,161 +1,161 @@
 [
   {
-    "id": "pun",
-    "city": "Pune",
-    "nickname": "Monsoons",
-    "short": "PNM",
+    "id": "hyd",
+    "city": "Hyderabad",
+    "name": "Sunrisers Falcons",
+    "short": "SRF",
     "colors": {
-      "primary": "#2e7d4f",
-      "secondary": "#f2e6c9"
+      "primary": "#d0793f",
+      "secondary": "#12404a"
     },
-    "ground": "Riverside Oval",
+    "ground": "Deccan Park",
+    "crest": {
+      "shape": "circle",
+      "glyph": "wing",
+      "band": false
+    }
+  },
+  {
+    "id": "che",
+    "city": "Chennai",
+    "name": "Chennai Super Lions",
+    "short": "CSL",
+    "colors": {
+      "primary": "#e8c26a",
+      "secondary": "#3d3a8f"
+    },
+    "ground": "Marina Ground",
+    "crest": {
+      "shape": "hexagon",
+      "glyph": "star",
+      "band": false
+    }
+  },
+  {
+    "id": "mum",
+    "city": "Mumbai",
+    "name": "Mumbai Mariners",
+    "short": "MUM",
+    "colors": {
+      "primary": "#0f4c8a",
+      "secondary": "#d9b77e"
+    },
+    "ground": "Harbour Stadium",
+    "crest": {
+      "shape": "hexagon",
+      "glyph": "wave",
+      "band": true
+    }
+  },
+  {
+    "id": "blr",
+    "city": "Bengaluru",
+    "name": "Royal Strikers Bengaluru",
+    "short": "RSB",
+    "colors": {
+      "primary": "#1f1f23",
+      "secondary": "#e0453a"
+    },
+    "ground": "Garden City Oval",
     "crest": {
       "shape": "pennant",
+      "glyph": "bolt",
+      "band": false
+    }
+  },
+  {
+    "id": "kol",
+    "city": "Kolkata",
+    "name": "Kolkata Knight Warriors",
+    "short": "KKW",
+    "colors": {
+      "primary": "#4b2a7a",
+      "secondary": "#e8c26a"
+    },
+    "ground": "Hooghly Park",
+    "crest": {
+      "shape": "circle",
       "glyph": "flame",
       "band": true
     }
   },
   {
-    "id": "ind",
-    "city": "Indore",
-    "nickname": "Falcons",
-    "short": "INF",
+    "id": "del",
+    "city": "Delhi",
+    "name": "Delhi Commanders",
+    "short": "DLC",
     "colors": {
-      "primary": "#7a1f3d",
-      "secondary": "#d9b77e"
+      "primary": "#1f3f8f",
+      "secondary": "#ef6461"
     },
-    "ground": "Malwa Park",
-    "crest": {
-      "shape": "hexagon",
-      "glyph": "star",
-      "band": true
-    }
-  },
-  {
-    "id": "koc",
-    "city": "Kochi",
-    "nickname": "Mariners",
-    "short": "KCM",
-    "colors": {
-      "primary": "#0f7c80",
-      "secondary": "#ff7f6b"
-    },
-    "ground": "Harbour Ground",
-    "crest": {
-      "shape": "shield",
-      "glyph": "wave",
-      "band": false
-    }
-  },
-  {
-    "id": "nag",
-    "city": "Nagpur",
-    "nickname": "Blaze",
-    "short": "NGB",
-    "colors": {
-      "primary": "#2b2d31",
-      "secondary": "#b5e61d"
-    },
-    "ground": "Central Arena",
-    "crest": {
-      "shape": "hexagon",
-      "glyph": "wave",
-      "band": false
-    }
-  },
-  {
-    "id": "viz",
-    "city": "Vizag",
-    "nickname": "Waves",
-    "short": "VZW",
-    "colors": {
-      "primary": "#3d3a8f",
-      "secondary": "#3fc1c9"
-    },
-    "ground": "Beach Road Stadium",
-    "crest": {
-      "shape": "hexagon",
-      "glyph": "sun",
-      "band": true
-    }
-  },
-  {
-    "id": "guw",
-    "city": "Guwahati",
-    "nickname": "Rhinos",
-    "short": "GWR",
-    "colors": {
-      "primary": "#4a5866",
-      "secondary": "#7fd1ae"
-    },
-    "ground": "Brahmaputra Park",
+    "ground": "Yamuna Ground",
     "crest": {
       "shape": "pennant",
       "glyph": "star",
-      "band": false
-    }
-  },
-  {
-    "id": "ran",
-    "city": "Ranchi",
-    "nickname": "Thunder",
-    "short": "RNT",
-    "colors": {
-      "primary": "#6b4226",
-      "secondary": "#e8c26a"
-    },
-    "ground": "Plateau Ground",
-    "crest": {
-      "shape": "hexagon",
-      "glyph": "leaf",
       "band": true
     }
   },
   {
-    "id": "dha",
-    "city": "Dharamshala",
-    "nickname": "Peaks",
-    "short": "DHP",
+    "id": "pun",
+    "city": "Mohali",
+    "name": "Punjab Panthers",
+    "short": "PBP",
     "colors": {
-      "primary": "#3a3f47",
-      "secondary": "#9cc9e8"
+      "primary": "#b3262e",
+      "secondary": "#c9ccd6"
     },
-    "ground": "Snowline Oval",
+    "ground": "Five Rivers Stadium",
     "crest": {
-      "shape": "shield",
+      "shape": "hexagon",
       "glyph": "peak",
       "band": false
     }
   },
   {
-    "id": "cut",
-    "city": "Cuttack",
-    "nickname": "Comets",
-    "short": "CTC",
+    "id": "raj",
+    "city": "Jaipur",
+    "name": "Rajasthan Rangers",
+    "short": "RJR",
     "colors": {
-      "primary": "#5d6b22",
-      "secondary": "#f4f1e8"
+      "primary": "#d6408f",
+      "secondary": "#1f3f8f"
     },
-    "ground": "Mahanadi Ground",
+    "ground": "Pink City Park",
     "crest": {
-      "shape": "shield",
+      "shape": "circle",
       "glyph": "sun",
       "band": false
     }
   },
   {
-    "id": "rai",
-    "city": "Raipur",
-    "nickname": "Stallions",
-    "short": "RPS",
+    "id": "luc",
+    "city": "Lucknow",
+    "name": "Lucknow Super Nawabs",
+    "short": "LSN",
     "colors": {
-      "primary": "#12404a",
-      "secondary": "#d0793f"
+      "primary": "#0f7c80",
+      "secondary": "#ff7f6b"
     },
-    "ground": "Stallion Park",
+    "ground": "Gomti Oval",
+    "crest": {
+      "shape": "diamond",
+      "glyph": "leaf",
+      "band": false
+    }
+  },
+  {
+    "id": "guj",
+    "city": "Ahmedabad",
+    "name": "Gujarat Thunder",
+    "short": "GJT",
+    "colors": {
+      "primary": "#1b2a4a",
+      "secondary": "#7fd1ae"
+    },
+    "ground": "Sabarmati Arena",
     "crest": {
       "shape": "circle",
-      "glyph": "flame",
+      "glyph": "bolt",
       "band": false
     }
   }
