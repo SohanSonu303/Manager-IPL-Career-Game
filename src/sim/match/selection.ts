@@ -43,11 +43,11 @@ function value(p: Selectable): number {
  * a fourth bowler, two all-rounders, four batters, then the best of the rest, never more
  * than four overseas players and always at least five bowling options.
  */
-export function autoPickXI(squad: Selectable[]): Selectable[] {
+export function autoPickXI<T extends Selectable>(squad: T[]): T[] {
   const pool = squad.filter(isAvailable).sort((a, b) => value(b) - value(a))
-  const xi: Selectable[] = []
+  const xi: T[] = []
   const overseas = () => xi.filter((p) => p.overseas).length
-  const take = (test: (p: Selectable) => boolean, n: number) => {
+  const take = (test: (p: T) => boolean, n: number) => {
     for (const p of pool) {
       if (n <= 0 || xi.length >= XI_SIZE) break
       if (xi.includes(p) || !test(p)) continue
@@ -57,7 +57,7 @@ export function autoPickXI(squad: Selectable[]): Selectable[] {
     }
   }
   const byBowling = [...pool].sort((a, b) => b.ratings.bowling - a.ratings.bowling)
-  const takeBowlers = (test: (p: Selectable) => boolean, n: number) => {
+  const takeBowlers = (test: (p: T) => boolean, n: number) => {
     for (const p of byBowling) {
       if (n <= 0) break
       if (xi.includes(p) || !test(p) || (p.overseas && overseas() >= MAX_OVERSEAS_IN_XI)) continue

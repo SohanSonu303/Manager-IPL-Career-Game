@@ -8,9 +8,9 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - **Storage:** `localStorage` for saves (versioned, with JSON export/import).
 - **Mobile-first:** design for 360–430 px wide; on desktop show a centered phone-width column. Installable as a PWA.
 - **Names and art:** real player names only; no fictional or generated names. Stats and ratings are generated. Team names are the real franchises with one word changed (e.g. Sunrisers Hyderabad -> Sunrisers Falcons). Crests and avatars are our own procedural SVG; no real logos. Photos deferred.
-- **UI look:** own layout and visual identity. Palette direction from the approved mockups (charcoal, periwinkle blue, green for money, amber for warnings). Procedural face avatars in our own layered SVG style are allowed. No radial hub, no mascot crests.
+- **UI look:** own layout and visual identity. Palette direction from the approved mockups (charcoal, periwinkle blue, green for money, amber for warnings). Procedural face avatars in our own layered SVG style. Radial hub home in our own style (own icons, procedural crest; no mascot art). Font: Barlow Semi Condensed.
 - **Scope v1:** manager career mode. One league (10 teams), no promotion or relegation.
-- **Deferred:** AI photos, training, youth academy, sponsors, stadium building, weather, DRS, loans, coin economy, backend and accounts, tilted/broadcast camera, radial hub home screen, image-based player portraits.
+- **Deferred:** AI photos, training, youth academy, sponsors, stadium building, weather, DRS, loans, coin economy, backend and accounts, tilted/broadcast camera, image-based player portraits.
 
 ## Principles
 - [ ] Sim is pure TypeScript in `src/sim`. No React, no DOM, no `window`. UI and 3D only read its output.
@@ -121,54 +121,56 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [x] New career setup: choose club (sorted by squad strength, with the board's expectation), manager name
 
 ## Phase 10 — Mobile UI (L)
-- [ ] Design tokens in `src/theme` (colors, type scale, spacing, radii)
-- [ ] Layout shell: top bar (purse, reputation), content, bottom action bar; safe-area insets
-- [ ] Touch targets at least 48 px; text contrast at least 4.5:1
-- [ ] Shared components (reference direction from screenshots; own look, no copied art or icons):
-  - [ ] `Card`, `Button` (primary, secondary, danger), `Chip` (role, trait, e.g. "Specialist chasing")
-  - [ ] `RatingRing` (number inside, color by rating band), `StatBar` (segmented; also used for aggression)
-  - [ ] `Avatar` (from Phase 1), `TopBar` (purse in green, reputation), `NewsTicker` for the welcome/news line
-  - [ ] `BottomActionBar`: Back plus a primary action with a slanted edge (e.g. Play Match)
-- [ ] Screens:
-  - [ ] Club home: top bar, news line, 3 quick tabs (Objectives, Finances, Club), card grid (Squad, Market, Stats, Standings, Calendar, Settings) with a status line per card and a red dot when attention is needed, next-match card, Play Match bar. Deferred tiles (Training, Academy, Stadium, Sponsors) are hidden, not greyed out
-  - [ ] Squad list and market list: row = avatar, name, nationality marker, role label, trait chips, rating ring, captain/overseas marker; sort and filter by role, overseas, fitness; virtualize if over 50 rows
-  - [ ] Player detail sheet: ratings, traits, form, fitness, contract
-  - [ ] Pick XI and batting order: tap-to-swap (drag optional), overseas counter, auto-pick button
-  - [ ] Match screen (see Phase 11)
-  - [ ] Post-match summary: result, player grades with rating changes, injuries
-  - [ ] Market and contract negotiation
-  - [ ] Standings
-  - [ ] Calendar
-  - [ ] Finances
-  - [ ] Settings (save, export, import, reset)
+- [x] Design tokens in `src/theme` (colors, type scale, spacing, radii)
+- [x] Layout shell: top bar (purse, reputation), content, bottom action bar; safe-area insets
+- [x] Touch targets at least 48 px; text contrast at least 4.5:1
+- [x] Shared components (reference direction from screenshots; own look, no copied art or icons):
+  - [x] `Card`, `Button` (primary, secondary, danger), `Chip` (role, trait, e.g. "Specialist chasing")
+  - [x] `RatingRing` (number inside, color by rating band), `StatBar` (segmented; also used for aggression)
+  - [x] `Avatar` (from Phase 1), `TopBar` (purse in green, reputation), `NewsTicker` for the welcome/news line
+  - [x] `BottomActionBar`: Back plus a primary action with a slanted edge (e.g. Play Match)
+- [x] Screens:
+  - [x] Club home: top bar (manager, purse, reputation), news ticker, Board / Finances / Club sheets, radial hub (Market, Statistics, Fixtures, Pick XI, Table, Squad) around the crest with red attention dots, Standings / Calendar / Alerts tiles, slanted Play Match / Continue bar. Deferred features are not shown
+  - [x] Squad list and market list: row = avatar, name, nationality marker, role label, trait chips, rating ring, captain/overseas marker; sort and filter by role, overseas, fitness; virtualize if over 50 rows
+  - [x] Player detail sheet: ratings, traits, form, fitness, contract
+  - [x] Pick XI and batting order: tap-to-swap (drag optional), overseas counter, auto-pick button
+  - [x] Match screen (see Phase 11)
+  - [x] Post-match summary: result, player grades with rating changes, injuries
+  - [x] Market and contract negotiation
+  - [x] Standings
+  - [x] Calendar
+  - [x] Finances
+  - [x] Settings (save, export, import, reset)
 - [x] Debug page for the sim: pick teams, next ball / over / 5 overs / innings / match, live intent, commentary, scorecards, grades, apply to career
-- [ ] Desktop: centered phone-width column
-- [ ] Respect `prefers-reduced-motion`
+- [x] Desktop: centered phone-width column
+- [x] Respect `prefers-reduced-motion`
 
 ## Phase 11 — 3D match screen with three.js (XL)
 Reference direction (from the uploaded screenshots): scoreboard card on top, the field fills the screen from above, last six balls over the field, batter controls docked at the bottom, a shot arc and a big run popup. Take the layout idea only. Do not copy its stadium art, crowd, logos, ad boards, icons or typography.
-- [ ] Spike first (S): static field with stands and floodlights; measure fps on a low-end Android before building the rest
+- [ ] Spike first (S): measure fps on a low-end Android (only tested in desktop headless Chrome so far)
 - [x] Install `three`, `@react-three/fiber` v9 and `@react-three/drei` v10 (React 19)
-- [ ] Use a few `drei` helpers only; keep the match bundle small
-- [ ] Lazy-load the match chunk (`React.lazy`) so the rest of the app stays small
-- [ ] Layout (DOM over canvas):
-  - [ ] Top scorebug card: competition and venue, big score and overs, target and required rate, last-ball commentary, team crests left and right
-  - [ ] Six-ball strip with colored chips (boundary, dot, wicket)
-  - [ ] Bottom panel: batting rows (avatar, name, runs (balls), info button, aggression `-` bar `+` with label), bowling row, sim buttons
-- [ ] Scene:
-  - [ ] Orthographic top-down camera
-  - [ ] Striped mowing pattern (shader or canvas texture), boundary rope and cream boundary band, dashed 30-yard circle, pitch strip with crease lines
-  - [ ] 11 fielders, 2 batters and the bowler as flat discs (instanced), team colors; positions come from the field setup
-  - [ ] Procedural stand ring with instanced crowd dots in several colors
-  - [ ] Floodlight clusters in the corners with soft light-cone sprites
-  - [ ] Own ad-board placeholders near the rope ("YOUR SPONSOR HERE")
-- [ ] Animation driven by `BallEvent`: ball travel, yellow shot arc that fades, boundary landing marker, big "4", "6" or "W" popup, fielders drift toward the ball, crowd flash on a six
-- [ ] `prefers-reduced-motion`: no animation, show the result instantly
-- [ ] Field settings: presets (attacking, defensive, death) that feed fielder positions in both the sim and the view
-- [ ] Aggression controls: per-batter setting (defend, rotate, balanced, loft, all-out) passed into `simBall`; changes apply from the next ball
-- [ ] Sim buttons: Next ball, Sim over, Sim 5 overs, Sim innings (skips animation and shows result)
-- [ ] Performance: no real-time shadows, device pixel ratio capped at 2, instanced meshes, crowd in one draw call, textures 1024 px or smaller, dispose geometries on unmount, target 30+ fps on a mid-range Android phone
-- [ ] Fallback: a 2D SVG field renderer using the same `BallEvent` stream; switch automatically when WebGL fails or fps stays under 25 for 3 seconds
+- [x] Use a few `drei` helpers only (Line, OrthographicCamera); 3D chunk is lazy (250 KB gzip), main app 127 KB gzip
+- [x] Lazy-load the match chunk (`React.lazy`) so the rest of the app stays small
+- [x] Layout (DOM over canvas):
+  - [x] Top scorebug card: competition and venue, big score and overs, target and required rate, last-ball commentary, team crests left and right
+  - [x] Six-ball strip with colored chips (boundary, dot, wicket)
+  - [x] Bottom panel: batting rows (avatar, name, runs (balls), info button, aggression `-` bar `+` with label), bowling row, sim buttons
+- [x] Scene:
+  - [x] Orthographic top-down camera
+  - [x] Striped mowing pattern (shader or canvas texture), boundary rope and cream boundary band, dashed 30-yard circle, pitch strip with crease lines
+  - [x] 11 fielders, 2 batters and the bowler as flat discs (instanced), team colors; positions come from the field setup
+  - [x] Procedural stand ring with instanced crowd dots in several colors
+  - [x] Floodlight clusters in the corners with soft light-cone sprites
+  - [x] Own ad-board placeholders near the rope ("YOUR SPONSOR HERE")
+- [x] Animation driven by `BallEvent`: ball travel, yellow shot arc, rope highlight on boundaries, big "4", "6" or "OUT!" popup, nearest fielder chases
+- [ ] Crowd flash on a six
+- [x] `prefers-reduced-motion`: no animation, show the result instantly
+- [x] Field settings: phase presets (powerplay 2 out, middle 5 out, death 5 out) for the view
+- [ ] Let field settings also affect the sim (catches, boundaries saved)
+- [x] Aggression controls: per-batter setting (defend, rotate, balanced, loft, all-out) passed into `simBall`; changes apply from the next ball
+- [x] Sim buttons: Next ball, Sim over, Sim 5 overs, Sim innings (skips animation and shows result)
+- [x] Performance: no real-time shadows, device pixel ratio capped at 2, instanced meshes, crowd in one draw call, textures 1024 px or smaller, dispose geometries on unmount, target 30+ fps on a mid-range Android phone
+- [x] Fallback: a 2D SVG field renderer using the same `BallEvent` stream; switch automatically when WebGL fails or fps stays under 25 for 3 seconds
 - [ ] Test on a low-end phone before polishing
 
 ## Phase 12 — QA and feedback (M)
@@ -177,8 +179,8 @@ Reference direction (from the uploaded screenshots): scoreboard card on top, the
 - [ ] Manual test pass on iOS Safari and Android Chrome
 - [ ] In-app "Send feedback" link (a form or mailto); no analytics backend
 - [ ] Local-only error log that testers can copy into feedback
-- [ ] "Prototype" banner and build version shown in Settings
-- [ ] Screenshot check of the match field at 360, 390 and 430 px wide
+- [x] "Prototype" label and build version shown in Settings
+- [x] Screenshot check of the match field at 360 and 390 px wide (headless Chrome); [ ] 430 px
 - [ ] Contrast check of rating rings and chips
 - [ ] Log fps samples in the local error log
 

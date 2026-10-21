@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { today } from '@/sim/calendar'
-import type { Career } from '@/sim/career'
+import type { Career, Lineup } from '@/sim/career'
 import {
   continueCareer,
   ensureEleven,
@@ -127,6 +127,12 @@ export function simToSeasonEnd() {
     c = mine ? quickSim(c, mine) : continueCareer(c)
   }
   commit(c)
+}
+
+/** Save the manager's XI, batting order, keeper and default intent. */
+export function setLineup(lineup: Lineup | undefined) {
+  const c = current()
+  if (c) commit({ ...c, lineup })
 }
 
 // --- Market -----------------------------------------------------------------------

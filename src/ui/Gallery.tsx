@@ -3,11 +3,12 @@ import { overallRating } from '@/sim/player'
 import { Avatar } from './identity/Avatar'
 import { ringStatus } from './identity/avatarSpec'
 import { Crest } from './identity/Crest'
+import { Screen } from './kit/kit'
 
 /** Dev page: all crests and 100 avatars on one screen, to check variety and style. */
 export function Gallery() {
   return (
-    <div className="gallery">
+    <Screen className="gallery">
       <h1>Identity gallery</h1>
       <h2>Crests</h2>
       <div className="crest-grid">
@@ -45,6 +46,6 @@ export function Gallery() {
           )
         })}
       </div>
-    </div>
+    </Screen>
   )
 }

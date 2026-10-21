@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom'
 import { SAVE_VERSION } from '@/state/save'
 import { downloadSave } from '@/state/storage'
 import { importSave, resetCareer, simToSeasonEnd, useGame } from '@/state/store'
+import { Screen } from './kit/kit'
 import { MatchDebug } from './match/MatchDebug'
+import { readViewMode, VIEW_KEY, type ViewMode } from './MatchPage'
 
 export function Debug() {
   const career = useGame((s) => s.career)
   return (
-    <>
+    <Screen>
       <h1>Sim debug</h1>
       <p>
         <Link to="/gallery">Identity gallery</Link>
@@ -22,7 +24,7 @@ export function Debug() {
         </>
       )}
       <MatchDebug />
-    </>
+    </Screen>
   )
 }
 
@@ -31,6 +33,15 @@ export function Settings() {
   const [paste, setPaste] = useState('')
   const [message, setMessage] = useState<string | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
+  const [view, setView] = useState<ViewMode>(readViewMode)
+  const chooseView = (v: ViewMode) => {
+    setView(v)
+    try {
+      localStorage.setItem(VIEW_KEY, v)
+    } catch {
+      // Per-device preference only; fine to lose.
+    }
+  }
 
   const doImport = (text: string) => {
     const error = importSave(text)
@@ -39,7 +50,7 @@ export function Settings() {
   }
 
   return (
-    <>
+    <Screen>
       <h1>Settings</h1>
       <p>
         <Link to="/debug">Sim debug</Link> · <Link to="/gallery">Identity gallery</Link>
@@ -47,6 +58,22 @@ export function Settings() {
       <p className="dim">
         Save format v{SAVE_VERSION}. Your career saves automatically in this browser.
       </p>
+
+      <h2 className="section">Match view</h2>
+      <div className="filters">
+        {(
+          [
+            ['auto', 'Auto'],
+            ['3d', '3D stadium'],
+            ['2d', '2D (lighter)'],
+          ] as const
+        ).map(([v, label]) => (
+          <button key={v} className={view === v ? 'on' : ''} onClick={() => chooseView(v)}>
+            {label}
+          </button>
+        ))}
+      </div>
+      <p className="dim">Auto uses 3D and drops to 2D if your phone struggles.</p>
 
       <h2 className="section">Backup</h2>
       <div className="button-row">
@@ -85,6 +112,9 @@ export function Settings() {
       >
         Reset career
       </button>
-    </>
+      <p className="dim" style={{ marginTop: 24 }}>
+        Prototype build · {__APP_VERSION__}
+      </p>
+    </Screen>
   )
 }

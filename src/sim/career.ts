@@ -3,6 +3,7 @@ import type { Player } from '../data/types'
 import type { Awards, FixtureResult, SeasonStat, StandingRow } from './league'
 import { START_CONFIDENCE, START_REPUTATION, type Finish, type Objective } from './board'
 import type { CalendarState } from './calendar'
+import type { Aggression } from './match/types'
 import { developRatings, driftForm, recoverFitness, type Condition } from './player'
 import { createRng, deriveSeed, randInt } from './rng'
 
@@ -75,6 +76,15 @@ export interface Career {
     log: TransferLog[]
   }
   status: 'active' | 'sacked'
+  /** The manager's chosen XI (optional; auto-pick is used when missing or invalid). */
+  lineup?: Lineup
+}
+
+export interface Lineup {
+  /** 11 player ids in batting order. */
+  battingOrder: string[]
+  keeperId: string
+  aggression: Aggression
 }
 
 export function newCareer(opts: {

@@ -2,32 +2,31 @@ import { teamById } from '@/data'
 import { isPlayed, schedule, stageName, standings } from '@/sim/game'
 import type { FixtureResult } from '@/sim/league'
 import { useGame } from '@/state/store'
+import { teamShort } from './format'
 import { Crest } from './identity/Crest'
+import { Chip, Screen } from './kit/kit'
+import { useNextAction } from './useNextAction'
 
-const short = (id: string) => teamById.get(id)?.short ?? id
-
-function score(r: FixtureResult) {
+export function scoreLine(r: FixtureResult) {
   return r.innings.length
     ? r.innings
         .slice(0, 2)
-        .map((i) => `${short(i.teamId)} ${i.runs}/${i.wickets}`)
+        .map((i) => `${teamShort(i.teamId)} ${i.runs}/${i.wickets}`)
         .join(' · ')
     : 'walkover'
 }
 
-/** Points table, playoffs and the manager's fixtures. */
+/** Points table and playoffs. */
 export function TablePage() {
   const career = useGame((s) => s.career)
-  if (!career) return <p className="dim">Start a career first.</p>
+  const next = useNextAction()
+  if (!career) return null
   const me = career.manager.teamId
   const table = standings(career)
   const playoffs = career.season.results.filter((r) => r.stage !== 'league')
-  const resultById = new Map(career.season.results.map((r) => [r.fixtureId, r]))
-  const myFixtures = schedule(career).filter((f) => f.homeId === me || f.awayId === me)
-
   return (
-    <>
-      <h1>{career.calendar.year} table</h1>
+    <Screen primary={next}>
+      <h1>{career.calendar.year} standings</h1>
       <table className="standings">
         <thead>
           <tr>
@@ -50,7 +49,7 @@ export function TablePage() {
               >
                 <td>{i + 1}</td>
                 <td className="team-cell">
-                  {t && <Crest crest={t.crest} colors={t.colors} size={22} />}
+                  {t && <Crest crest={t.crest} colors={t.colors} size={26} />}
                   {t?.short}
                 </td>
                 <td>{r.played}</td>
@@ -66,15 +65,14 @@ export function TablePage() {
         </tbody>
       </table>
       <p className="dim">Top four reach the playoffs.</p>
-
       {playoffs.length > 0 && (
         <>
           <h2 className="section">Playoffs</h2>
-          <ul className="fixtures">
+          <ul className="list">
             {playoffs.map((r) => (
               <li key={r.fixtureId}>
                 <strong>{stageName(r.stage)}</strong>
-                <span>{score(r)}</span>
+                <span>{scoreLine(r)}</span>
                 <span className="dim">
                   {r.winnerId ? `${teamById.get(r.winnerId)?.name} ${r.margin}` : 'No result'}
                 </span>
@@ -83,32 +81,57 @@ export function TablePage() {
           </ul>
         </>
       )}
+    </Screen>
+  )
+}
 
-      <h2 className="section">Your fixtures</h2>
-      <ul className="fixtures">
-        {myFixtures.map((f) => {
+/** The manager's fixtures and results. */
+export function FixturesPage() {
+  const career = useGame((s) => s.career)
+  const next = useNextAction()
+  if (!career) return null
+  const me = career.manager.teamId
+  const resultById = new Map(career.season.results.map((r) => [r.fixtureId, r]))
+  const mine = schedule(career).filter((f) => f.homeId === me || f.awayId === me)
+  return (
+    <Screen primary={next}>
+      <h1>{career.calendar.year} fixtures</h1>
+      <ul className="list">
+        {mine.map((f) => {
           const r = resultById.get(f.id)
           const opp = f.homeId === me ? f.awayId : f.homeId
+          const t = teamById.get(opp)
           return (
             <li key={f.id}>
-              <strong>
-                R{f.round} {f.homeId === me ? 'vs' : '@'} {teamById.get(opp)?.name}
-              </strong>
-              {isPlayed(career, f) && r ? (
-                <>
-                  <span>{score(r)}</span>
-                  <span className={r.winnerId === me ? 'good' : 'warn'}>
-                    {r.winnerId === me ? 'Won' : r.winnerId ? 'Lost' : 'No result'}
-                    {r.winnerId ? ` · ${short(r.winnerId)} ${r.margin}` : ''}
+              <div className="row-between">
+                <span className="team-cell">
+                  {t && <Crest crest={t.crest} colors={t.colors} size={30} />}
+                  <span>
+                    <strong>
+                      R{f.round} {f.homeId === me ? 'vs' : '@'} {t?.name}
+                    </strong>
+                    <br />
+                    <span className="dim">{teamById.get(f.homeId)?.ground}</span>
                   </span>
-                </>
-              ) : (
-                <span className="dim">To play</span>
+                </span>
+                {isPlayed(career, f) && r ? (
+                  <Chip tone={r.winnerId === me ? 'good' : r.winnerId ? 'bad' : 'plain'}>
+                    {r.winnerId === me ? 'WON' : r.winnerId ? 'LOST' : 'N/R'}
+                  </Chip>
+                ) : (
+                  <Chip>To play</Chip>
+                )}
+              </div>
+              {r && (
+                <span className="dim">
+                  {scoreLine(r)} ·{' '}
+                  {r.winnerId ? `${teamShort(r.winnerId)} ${r.margin}` : 'no result'}
+                </span>
               )}
             </li>
           )
         })}
       </ul>
-    </>
+    </Screen>
   )
 }

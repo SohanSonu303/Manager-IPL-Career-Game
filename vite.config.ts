@@ -5,11 +5,20 @@ import { defineConfig } from 'vitest/config'
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(
+      `v${process.env.npm_package_version ?? '0.0.0'} · ${new Date().toISOString().slice(0, 10)}`,
+    ),
+  },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
+  // The 3D match view is a lazy chunk (three.js); only it exceeds the default limit.
+  build: { chunkSizeWarningLimit: 1000 },
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Fonts are bundled, so cache them too for offline play.
+      workbox: { globPatterns: ['**/*.{js,css,html,woff2,png,svg}'] },
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Cricket Manager',

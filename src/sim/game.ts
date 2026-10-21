@@ -32,7 +32,7 @@ import {
 } from './market'
 import { simMatch, type Match } from './match/engine'
 import { applyPostMatch } from './match/postMatch'
-import { autoTeamSheet, isAvailable, type Selectable } from './match/selection'
+import { autoTeamSheet, isAvailable, validateSheet, type Selectable } from './match/selection'
 import { setupMatch } from './match/setup'
 import type { MatchState, TeamSheet } from './match/types'
 import { createRng, deriveSeed } from './rng'
@@ -134,8 +134,7 @@ export const fixtureSeed = (career: Career, f: Fixture) => deriveSeed(career.see
 export function setupFixture(career: Career, f: Fixture, userSheet?: TeamSheet): Match {
   const me = career.manager.teamId
   const sheets: Partial<Record<string, TeamSheet>> = {}
-  if (involves(f, me))
-    sheets[me] = userSheet ?? autoTeamSheet(me, squadOf(career.players, me), false)
+  if (involves(f, me)) sheets[me] = userSheet ?? managerSheet(career)
   return setupMatch({
     seed: fixtureSeed(career, f),
     homeId: f.homeId,
@@ -143,6 +142,25 @@ export function setupFixture(career: Career, f: Fixture, userSheet?: TeamSheet):
     squads: squadsOf(career, [f.homeId, f.awayId]),
     sheets,
   })
+}
+
+/**
+ * The manager's team sheet: the saved line-up if it is still valid (nobody injured or
+ * gone), otherwise the auto-pick. Human-controlled either way.
+ */
+export function managerSheet(career: Career): TeamSheet {
+  const me = career.manager.teamId
+  const squad = squadOf(career.players, me)
+  const auto = autoTeamSheet(me, squad, false)
+  const l = career.lineup
+  if (!l) return auto
+  const sheet: TeamSheet = {
+    ...auto,
+    battingOrder: l.battingOrder,
+    keeperId: l.keeperId,
+    aggression: l.aggression,
+  }
+  return validateSheet(sheet, squad).length === 0 ? sheet : auto
 }
 
 /** Store a finished match: post-match step for both squads, result, season stats. */
