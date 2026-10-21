@@ -484,3 +484,150 @@ button.danger {
 a {
   color: var(--accent);
 }
+
+/* --- Career screens ------------------------------------------------------ */
+
+.grow {
+  flex: 1;
+}
+
+.row-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.good {
+  color: var(--money);
+}
+
+.warn {
+  color: var(--warn);
+}
+
+.money {
+  color: var(--money);
+  font-weight: 600;
+}
+
+.card + .card {
+  margin-top: 10px;
+}
+
+.meter {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.meter span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.review {
+  border: 1px solid var(--accent);
+  margin-bottom: 10px;
+}
+
+.awards {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-dim);
+}
+
+.chip.bad {
+  background: color-mix(in srgb, var(--danger) 30%, var(--surface-2));
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin: 12px 0;
+  overflow-x: auto;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
+.tabs button.active {
+  background: var(--accent);
+  color: #11131a;
+  font-weight: 600;
+}
+
+.market-list,
+.fixtures {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.market-list li,
+.fixtures li {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.negotiate,
+.trade {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field select {
+  min-height: var(--tap);
+  padding: 0 8px;
+  border-radius: var(--radius);
+  border: 1px solid var(--surface-2);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.standings {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.standings th,
+.standings td {
+  padding: 8px 4px;
+  text-align: right;
+  border-bottom: 1px solid var(--surface-2);
+}
+
+.standings th:nth-child(2),
+.standings td:nth-child(2) {
+  text-align: left;
+}
+
+.standings tr.mine td {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.standings tr.cut td {
+  border-bottom: 2px solid var(--accent);
+}
+
+.team-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

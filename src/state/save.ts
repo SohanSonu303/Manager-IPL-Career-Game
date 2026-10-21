@@ -1,10 +1,12 @@
+import { START_CONFIDENCE, START_REPUTATION } from '@/sim/board'
 import type { Career } from '@/sim/career'
+import { objectiveFor } from '@/sim/game'
 
 /**
  * Save file format. Bump SAVE_VERSION whenever the `Career` shape changes, and add a
  * migration from the previous version to MIGRATIONS.
  */
-export const SAVE_VERSION = 2
+export const SAVE_VERSION = 3
 
 export interface SaveFile {
   version: number
@@ -26,6 +28,21 @@ export const MIGRATIONS: Record<number, Migration> = {
       ...p,
     }))
     return { ...s, version: 2, career: { ...career, players } }
+  },
+  // v3 (Phases 7–9): league results and stats, market, board and history.
+  2: (s) => {
+    const career = s.career as Record<string, unknown>
+    const manager = career.manager as Record<string, unknown>
+    const upgraded = {
+      ...career,
+      manager: { reputation: START_REPUTATION, boardConfidence: START_CONFIDENCE, ...manager },
+      season: { results: [], stats: {}, review: null, objective: { targetPosition: 6, text: '' } },
+      history: [],
+      market: { talks: {}, log: [] },
+      status: 'active',
+    } as unknown as Career
+    const objective = objectiveFor(upgraded)
+    return { ...s, version: 3, career: { ...upgraded, season: { ...upgraded.season, objective } } }
   },
 }
 

@@ -100,8 +100,14 @@ export function chooseBowler(state: MatchState, inn: InningsState): string {
     const quotas = new Map([...unit].map((u) => [u, quota(u) - (u === id ? 1 : 0)]))
     if (feasible(quotas, remaining - 1, id)) return id
   }
-  const fallback = scored[0]?.id ?? options.find(eligible)
-  if (!fallback) throw new Error('No eligible bowler')
+  // A short side may run out of legal options: relax the over limit, then the
+  // no-consecutive rule, rather than abandon the match.
+  const fallback =
+    scored[0]?.id ??
+    options.find(eligible) ??
+    options.find((id) => id !== sheet.keeperId && id !== inn.lastOverBowlerId) ??
+    options[0]
+  if (!fallback) throw new Error('No bowler at all')
   return fallback
 }
 

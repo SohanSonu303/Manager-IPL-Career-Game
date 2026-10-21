@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { newCareer, type CareerPlayer } from '../career'
+import type { CareerPlayer } from '../career'
+import { startCareer } from '../game'
 import { deriveSeed } from '../rng'
 import { simMatch } from './engine'
 import {
@@ -29,7 +30,7 @@ const spell = (overs: number, runs: number, wickets: number) => ({
 
 /** Play `n` matches between two career squads, applying the post-match step each time. */
 function season(n: number, seed = 1) {
-  let players: CareerPlayer[] = newCareer({ seed, managerName: 'T', teamId: 'hyd' }).players
+  let players: CareerPlayer[] = startCareer({ seed, managerName: 'T', teamId: 'hyd' }).players
   const reports = []
   for (let i = 0; i < n; i++) {
     const squads = {

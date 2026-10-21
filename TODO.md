@@ -90,30 +90,35 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [x] Injury roll (minor, serious, long-term) based on fitness and workload; matches-out counter
 - [x] Form update
 - [x] Save format v2 with migration from v1 (injuries, season development)
-- [ ] Call the post-match step from real fixtures (Phase 8); for now the debug match screen can apply a friendly
+- [x] Call the post-match step from real fixtures
 
 ## Phase 7 — Contracts and squad (L)
-- [ ] Contract: cost, length, expiry
-- [ ] Salary purse (cap); block signings over budget
-- [ ] Player willingness check (reputation, role, pay, form)
-- [ ] Basic negotiation: offer, counter, accept or decline
-- [ ] Free-agent market with refresh
-- [ ] Trades between clubs (loans deferred)
-- [ ] Season pool: new real players added through data updates (no generated names), retirements
-- [ ] Overseas player rules
+- [x] Contract: cost, length, expiry (unrenewed contracts expire at the turn of the year; AI clubs keep most good players)
+- [x] Salary purse (cap ₹140 cr); block signings over budget
+- [x] Player willingness check (club strength, manager reputation, role in the XI, pay, contract length, form via asking price)
+- [x] Basic negotiation: offer, counter, accept or decline; walks away after 3 rounds; renewals use the same talks
+- [x] Free-agent market; AI clubs restock at the turn of the year (needs first, then one upgrade)
+- [x] Trades between clubs, 1-for-1 in the UI (engine allows more); AI wants 5% more value (loans deferred)
+- [x] Retirements (long T20 careers; fading players go sooner)
+- [ ] Season pool: new real players added through data updates (no generated names) — **needs a decision, see Risks**
+- [x] Overseas player rules (max 8 in squad, 4 in the XI); squad size 18–25
+- [x] Safety nets: manager keeps 11 if contracts lapse, emergency signings, short sides, walkovers
+- [x] Market screen: free agents, my squad (renew/release), trade, transfer log
 
 ## Phase 8 — League (M)
-- [ ] 10 teams; fixture generator (decide format, see open decisions)
-- [ ] Standings: points, net run rate
-- [ ] Playoffs: Qualifier 1, Eliminator, Qualifier 2, Final
-- [ ] Sim other teams' matches quickly (no event stream needed)
-- [ ] Season end: awards, contracts expiring, rollover
+- [x] 10 teams; fixture generator: 14 matches each (every pair once, five rounds replayed home/away swapped, no back-to-back rematches)
+- [x] Standings: points, net run rate (all out = 20 overs; walkovers count points only)
+- [x] Playoffs: Qualifier 1, Eliminator, Qualifier 2, Final
+- [x] Sim other teams' matches quickly (same engine, no UI; a whole season takes well under a second)
+- [x] Season end: awards (Orange Cap, Purple Cap, MVP, Emerging), contracts expiring, rollover, history
+- [x] Play your match live (intent control) or quick-sim it; Continue plays the rest of the round
+- [x] Table screen: standings, playoffs, your fixtures and results
 
 ## Phase 9 — Career layer (S–M)
-- [ ] Reputation
-- [ ] Board objectives (e.g. reach playoffs) with progress
-- [ ] Sack condition and game-over screen
-- [ ] New career setup: choose club, manager name
+- [x] Reputation (moves with finish, trophies and objectives; makes players keener to sign)
+- [x] Board objectives from squad strength, with live progress on the club screen
+- [x] Sack condition (board confidence below 25 after a season review) and game-over screen
+- [x] New career setup: choose club (sorted by squad strength, with the board's expectation), manager name
 
 ## Phase 10 — Mobile UI (L)
 - [ ] Design tokens in `src/theme` (colors, type scale, spacing, radii)
@@ -183,15 +188,17 @@ Reference direction (from the uploaded screenshots): scoreboard card on top, the
 - [ ] Short demo script: new career, pick XI, sim a match, sign a player, play a season
 
 ## Open decisions
-- [ ] League format: double round-robin (18 matches each) or a custom 14-match schedule
+- [x] League format: 14 matches each (IPL style). Revisit if needed
 - [ ] Game name; final franchise names (current ones are a first pass)
 - [ ] Final palette and fonts (from the mockups)
-- [ ] Salary cap size and starting budget
+- [ ] Salary cap size and starting budget (₹140 cr for now; squads start at ₹122–136 cr)
 - [ ] How many seasons a career runs, and what "winning" means
 - [ ] Whether to add an auction instead of a free-agent market
 - [ ] Nationality marker: own simple flag glyphs or a country-code chip
 - [ ] Aggression levels and their exact effect on the sim
 - [ ] Font choice (a condensed sans for the scorebug)
+- [ ] Where new players come from each season (see Risks: shrinking pool)
+- [ ] Release costs (currently free) and mid-season injury replacements
 
 ## Risks
 - Sim calibration: believable results take iteration. Plan for it, do not assume it works first time.
@@ -200,4 +207,5 @@ Reference direction (from the uploaded screenshots): scoreboard card on top, the
 - Real player names and near-real team names without a license. Get the legal check done before any public pitch.
 - Crowd and stand visuals cost performance. Keep them instanced and simple.
 - Avatars can look repetitive. Needs enough part combinations and the 100-avatar check.
+- **Shrinking player pool.** Real names only and no youth intake: about 10–15 players retire each year. Squads stay full for about three seasons, then free agents run out and weaker clubs shrink (safety nets keep matches playable). Needs one of: a yearly real-player data update, an academy with generated players, or smaller squads.
 - Scope creep from the deferred list. Resist until v1 is playable end to end.

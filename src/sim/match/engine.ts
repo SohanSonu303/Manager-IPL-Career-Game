@@ -54,7 +54,7 @@ export function createMatch(setup: MatchSetup): Match {
     innings: [],
     result: null,
   }
-  startInnings(state, order[0], order[1], 20, 10, null)
+  startInnings(state, order[0], order[1], 20, allOutAt(state, order[0]), null)
   return { state, rng: createRng(deriveSeed(setup.seed, 'balls')) }
 }
 
@@ -101,6 +101,11 @@ function startInnings(
   })
 }
 
+/** All out at 10 wickets, or one fewer than the number of batters in a short side. */
+function allOutAt(state: MatchState, teamId: string): number {
+  return Math.max(1, Math.min(10, sheetOf(state, teamId).battingOrder.length - 1))
+}
+
 export function currentInnings(state: MatchState): InningsState {
   const inn = state.innings[state.innings.length - 1]
   if (!inn) throw new Error('Match has no innings')
@@ -114,7 +119,14 @@ function nextStage(state: MatchState) {
   const n = state.innings.length
   const last = currentInnings(state)
   if (n === 1) {
-    startInnings(state, state.order[1], state.order[0], 20, 10, last.runs + 1)
+    startInnings(
+      state,
+      state.order[1],
+      state.order[0],
+      20,
+      allOutAt(state, state.order[1]),
+      last.runs + 1,
+    )
     return
   }
   if (n % 2 === 0) {

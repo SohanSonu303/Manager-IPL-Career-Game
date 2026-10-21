@@ -42,6 +42,11 @@ export function SquadList({ players }: { players: CareerPlayer[] }) {
               <div className="squad-meta">
                 {roleLabel(p)} · {p.age}
                 {p.overseas && <span className="chip">Overseas · {p.nationality}</span>}
+                {p.injury && (
+                  <span className="chip bad">
+                    Injured · {p.injury.matchesOut} match{p.injury.matchesOut > 1 ? 'es' : ''}
+                  </span>
+                )}
               </div>
               <div className="squad-meta">
                 Form {Math.round(p.form)} · Fitness {Math.round(p.fitness)}

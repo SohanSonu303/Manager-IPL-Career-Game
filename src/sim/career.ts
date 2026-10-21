@@ -1,6 +1,8 @@
 import { players as basePlayers } from '../data'
 import type { Player } from '../data/types'
-import { nextDay, SEASON, type CalendarState } from './calendar'
+import type { Awards, FixtureResult, SeasonStat, StandingRow } from './league'
+import { START_CONFIDENCE, START_REPUTATION, type Finish, type Objective } from './board'
+import type { CalendarState } from './calendar'
 import { developRatings, driftForm, recoverFitness, type Condition } from './player'
 import { createRng, deriveSeed, randInt } from './rng'
 
@@ -21,24 +23,75 @@ export interface CareerPlayer extends Player, Condition {
   seasonDev: { batting: number; bowling: number }
 }
 
+export interface TransferLog {
+  year: number
+  kind: 'signed' | 'renewed' | 'released' | 'traded'
+  playerId: string
+  /** The club the player joined (or left, for a release). */
+  teamId: string
+  salary: number
+}
+
+export interface SeasonReview {
+  year: number
+  championId: string
+  runnerUpId: string
+  /** Final league table (compact). */
+  table: Pick<StandingRow, 'teamId' | 'points' | 'nrr'>[]
+  position: number
+  finish: Finish
+  objective: Objective
+  objectiveMet: boolean
+  awards: Awards
+  message: string
+  reputationAfter: number
+  confidenceAfter: number
+  /** Names of players who retired at the end of this season. */
+  retired: string[]
+}
+
 /**
  * Everything a career needs, as plain serializable data. Static data (teams, the season
- * schedule) is not stored. Size budget: squads, finances, standings and match summaries
- * only; ball-by-ball data stays in memory for the current match.
+ * schedule, fixtures) is derived, not stored. Ball-by-ball data stays in memory for the
+ * current match; only summaries are saved.
  */
 export interface Career {
   /** Career seed. All randomness derives from it (see `deriveSeed`). */
   seed: number
-  manager: { name: string; teamId: string }
+  manager: { name: string; teamId: string; reputation: number; boardConfidence: number }
   calendar: CalendarState
   players: CareerPlayer[]
+  season: {
+    results: FixtureResult[]
+    stats: Record<string, SeasonStat>
+    objective: Objective
+    /** Set on the season-end day. */
+    review: SeasonReview | null
+  }
+  history: SeasonReview[]
+  market: {
+    /** Contract talks this window, per player. */
+    talks: Record<string, { rounds: number; walkedAway: boolean }>
+    log: TransferLog[]
+  }
+  status: 'active' | 'sacked'
 }
 
-export function newCareer(opts: { seed: number; managerName: string; teamId: string }): Career {
+export function newCareer(opts: {
+  seed: number
+  managerName: string
+  teamId: string
+  objective: Objective
+}): Career {
   const rng = createRng(deriveSeed(opts.seed, 'start-form'))
   return {
     seed: opts.seed,
-    manager: { name: opts.managerName, teamId: opts.teamId },
+    manager: {
+      name: opts.managerName,
+      teamId: opts.teamId,
+      reputation: START_REPUTATION,
+      boardConfidence: START_CONFIDENCE,
+    },
     calendar: { year: START_YEAR, day: 0 },
     players: basePlayers.map((p) => ({
       ...p,
@@ -47,49 +100,33 @@ export function newCareer(opts: { seed: number; managerName: string; teamId: str
       injury: null,
       seasonDev: { batting: 0, bowling: 0 },
     })),
+    season: { results: [], stats: {}, objective: opts.objective, review: null },
+    history: [],
+    market: { talks: {}, log: [] },
+    status: 'active',
   }
 }
 
 /** Daily upkeep: fitness recovers and form drifts towards neutral. */
-function restDay(p: CareerPlayer): CareerPlayer {
+export function restDay(p: CareerPlayer): CareerPlayer {
   return { ...p, fitness: recoverFitness(p.fitness, p.age), form: driftForm(p.form) }
 }
 
 /**
- * Season rollover for the season that just ended: development by age curve, birthday,
- * fresh fitness, neutral form, one contract year used. Expiring contracts are handled in
- * Phase 7/8 (renewals, release to the market).
+ * A player's turn of the year: development by age curve, birthday, fresh fitness,
+ * neutral form, healed, one contract year used.
  */
-export function seasonRollover(career: Career, endedYear: number): Career {
+export function agePlayer(p: CareerPlayer, seed: number, endedYear: number): CareerPlayer {
+  const rng = createRng(deriveSeed(seed, 'develop', endedYear, p.id))
   return {
-    ...career,
-    players: career.players.map((p) => {
-      const rng = createRng(deriveSeed(career.seed, 'develop', endedYear, p.id))
-      return {
-        ...p,
-        ratings: developRatings(p, rng),
-        age: p.age + 1,
-        fitness: 100,
-        form: 50,
-        // The off-season is months long; everyone starts the new season healed.
-        injury: null,
-        seasonDev: { batting: 0, bowling: 0 },
-        contract: p.contract && { ...p.contract, years: Math.max(0, p.contract.years - 1) },
-      }
-    }),
+    ...p,
+    ratings: developRatings(p, rng),
+    age: p.age + 1,
+    fitness: 100,
+    form: 50,
+    // The off-season is months long; everyone starts the new season healed.
+    injury: null,
+    seasonDev: { batting: 0, bowling: 0 },
+    contract: p.contract && { ...p.contract, years: Math.max(0, p.contract.years - 1) },
   }
-}
-
-/** Advance one day, rolling over into a new season after the season-end day. */
-export function advanceDay(career: Career): Career {
-  const { calendar, rolledOver } = nextDay(career.calendar)
-  const rested = { ...career, calendar, players: career.players.map(restDay) }
-  return rolledOver ? seasonRollover(rested, career.calendar.year) : rested
-}
-
-/** Advance day by day until a day with an event (a match day or season end). */
-export function advanceToNextEvent(career: Career): Career {
-  let c = advanceDay(career)
-  while (!SEASON[c.calendar.day]?.event) c = advanceDay(c)
-  return c
 }

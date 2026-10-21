@@ -15,6 +15,7 @@ import {
   type Team,
   type Trait,
 } from '../src/data/types.ts'
+import { salaryFor } from '../src/sim/market.ts'
 import { overallRating, potentialFor } from '../src/sim/player.ts'
 import {
   createRng,
@@ -105,11 +106,6 @@ function makeTraits(d: Draft, r: Player['ratings']): Trait[] {
   return traits
 }
 
-/** Yearly salary in lakhs: steep curve on overall rating, floor of 20. */
-function salaryFor(overall: number): number {
-  const x = Math.max(0, (overall - 40) / 45)
-  return Math.max(20, Math.round((x ** 2.2 * 1800) / 5) * 5)
-}
 
 // --- Build the pool ---------------------------------------------------------
 

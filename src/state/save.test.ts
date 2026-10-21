@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { advanceToNextEvent, newCareer } from '@/sim/career'
+import { continueCareer, startCareer } from '@/sim/game'
 import { migrate, parseSave, SAVE_VERSION, serializeSave, type Migration } from './save'
 import { DAMAGED_KEY, readSave, SAVE_KEY, writeSave, type KeyValueStore } from './storage'
 
-const career = () =>
-  advanceToNextEvent(newCareer({ seed: 7, managerName: 'Tester', teamId: 'mum' }))
+const career = () => continueCareer(startCareer({ seed: 7, managerName: 'Tester', teamId: 'mum' }))
 
 function memoryStore(): KeyValueStore & { data: Map<string, string> } {
   const data = new Map<string, string>()
@@ -106,7 +105,7 @@ describe('storage', () => {
 })
 
 describe('real migrations', () => {
-  it('upgrades a v1 save (no injuries) to the current version', () => {
+  it('upgrades a v1 save (no injuries, no league) to the current version', () => {
     const c = career()
     const v1Players = c.players.map((p) => {
       const old: Record<string, unknown> = { ...p }
@@ -114,12 +113,21 @@ describe('real migrations', () => {
       delete old.seasonDev
       return old
     })
-    const out = migrate({ version: 1, savedAt: '', career: { ...c, players: v1Players } })
+    const v1 = {
+      seed: c.seed,
+      manager: { name: c.manager.name, teamId: c.manager.teamId },
+      calendar: { year: 2026, day: 0 },
+      players: v1Players,
+    }
+    const out = migrate({ version: 1, savedAt: '', career: v1 })
     expect(out.ok).toBe(true)
     if (!out.ok) return
     expect(out.save.version).toBe(SAVE_VERSION)
     expect(out.save.career.players[0]?.injury).toBeNull()
     expect(out.save.career.players[0]?.seasonDev).toEqual({ batting: 0, bowling: 0 })
+    expect(out.save.career.manager.reputation).toBeGreaterThan(0)
+    expect(out.save.career.season.objective.text).not.toBe('')
+    expect(out.save.career.status).toBe('active')
   })
 
   it('reports a migration that crashes on bad data', () => {

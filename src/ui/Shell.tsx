@@ -17,8 +17,11 @@ export function Shell() {
         <Outlet />
       </main>
       <nav>
-        <NavLink to="/">Home</NavLink>
-        <NavLink to="/debug">Debug</NavLink>
+        <NavLink to="/" end>
+          Home
+        </NavLink>
+        <NavLink to="/table">Table</NavLink>
+        <NavLink to="/market">Market</NavLink>
         <NavLink to="/settings">Settings</NavLink>
       </nav>
     </div>
