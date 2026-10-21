@@ -3,7 +3,7 @@
 Mobile-first career-mode cricket management sim, played in the browser. League is IPL-style but fully fictional (teams, logos, avatars). Prototype for testing, client pitching and phone-user feedback.
 
 ## Decisions so far
-- **Stack:** React 18, TypeScript (strict), Vite. Client-side only, no backend. Deploy on Vercel.
+- **Stack:** React 19 (pinned `~19.3` to stay in `@react-three/fiber` v9's peer range), TypeScript (strict), Vite. Client-side only, no backend. Deploy on Vercel.
 - **3D:** three.js for the match screen only, lazy-loaded. v1 uses a top-down orthographic camera only (no tilted broadcast camera).
 - **Storage:** `localStorage` for saves (versioned, with JSON export/import).
 - **Mobile-first:** design for 360–430 px wide; on desktop show a centered phone-width column. Installable as a PWA.
@@ -20,7 +20,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [ ] No dates in this file. Sizes only: S (hours), M (a day or two), L (several days), XL (a week or more).
 
 ## Phase 0 — Project setup (S)
-- [x] `npm create vite@latest` with the React + TypeScript template; pin React 18
+- [x] `npm create vite@latest` with the React + TypeScript template (moved from React 18 to 19 before Phase 1 so current R3F/drei work)
 - [x] TypeScript `strict`, ESLint, Prettier
 - [x] Vitest for sim tests
 - [x] Zustand for game state (one store, plain serializable data)
@@ -139,7 +139,8 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 ## Phase 11 — 3D match screen with three.js (XL)
 Reference direction (from the uploaded screenshots): scoreboard card on top, the field fills the screen from above, last six balls over the field, batter controls docked at the bottom, a shot arc and a big run popup. Take the layout idea only. Do not copy its stadium art, crowd, logos, ad boards, icons or typography.
 - [ ] Spike first (S): static field with stands and floodlights; measure fps on a low-end Android before building the rest
-- [ ] Use `three` with `@react-three/fiber` v8 (v9 needs React 19) and a few `drei` helpers
+- [x] Install `three`, `@react-three/fiber` v9 and `@react-three/drei` v10 (React 19)
+- [ ] Use a few `drei` helpers only; keep the match bundle small
 - [ ] Lazy-load the match chunk (`React.lazy`) so the rest of the app stays small
 - [ ] Layout (DOM over canvas):
   - [ ] Top scorebug card: competition and venue, big score and overs, target and required rate, last-ball commentary, team crests left and right
