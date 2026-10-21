@@ -26,6 +26,14 @@ describe('field geometry', () => {
     expect(len(shotEnd({ angle: 30, distance: 20, aerial: false }, null, 70))).toBeLessThan(70)
   })
 
+  it('attacking fields bring riders in; defensive keeps them out', () => {
+    const out = (f: { x: number; y: number }[]) => f.filter((p) => len(p) > 50).length
+    expect(out(fielderPositions('death', 70, 'attacking'))).toBe(4)
+    expect(out(fielderPositions('middle', 70, 'attacking'))).toBe(3)
+    expect(out(fielderPositions('powerplay', 70, 'attacking'))).toBe(1)
+    expect(out(fielderPositions('death', 70, 'defensive'))).toBe(5)
+  })
+
   it('places nine fielders inside the rope, with the right number out', () => {
     for (const phase of ['powerplay', 'middle', 'death'] as const) {
       const f = fielderPositions(phase, 70)

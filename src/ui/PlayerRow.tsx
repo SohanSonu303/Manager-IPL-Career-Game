@@ -2,8 +2,11 @@ import { Fragment, type ReactNode } from 'react'
 import { teamById } from '@/data'
 import type { CareerPlayer } from '@/sim/career'
 import { askingSalary } from '@/sim/market'
+import { mergeStats } from '@/sim/game'
+import type { SeasonStat } from '@/sim/league'
 import { overallRating } from '@/sim/player'
-import { crore, roleLabel, TRAIT_LABEL } from './format'
+import { useGame } from '@/state/store'
+import { crore, roleLabel, TRAIT_INFO, TRAIT_LABEL } from './format'
 import { Avatar } from './identity/Avatar'
 import { ringStatus } from './identity/avatarSpec'
 import { Chip, Meter, RatingRing, ratingColor, Sheet } from './kit/kit'
@@ -61,7 +64,48 @@ export function PlayerRow({
   )
 }
 
-/** Everything about one player. */
+function StatsTable({ season, total }: { season?: SeasonStat; total?: SeasonStat }) {
+  const rows: [string, SeasonStat | undefined][] = [
+    ['Season', season],
+    ['Career', total],
+  ]
+  const avg = (runs: number, outs: number) =>
+    outs ? (runs / outs).toFixed(1) : runs ? `${runs}*` : '–'
+  const sr = (runs: number, balls: number) => (balls ? ((runs / balls) * 100).toFixed(0) : '–')
+  const econ = (r: number, b: number) => (b ? ((r / b) * 6).toFixed(2) : '–')
+  return (
+    <table className="grades">
+      <thead>
+        <tr>
+          <th />
+          <th>M</th>
+          <th>Runs</th>
+          <th>Avg</th>
+          <th>SR</th>
+          <th>HS</th>
+          <th>Wkts</th>
+          <th>Econ</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map(([label, s]) => (
+          <tr key={label}>
+            <td>{label}</td>
+            <td>{s?.matches ?? 0}</td>
+            <td>{s?.runs ?? 0}</td>
+            <td>{s ? avg(s.runs, s.outs) : '–'}</td>
+            <td>{s ? sr(s.runs, s.balls) : '–'}</td>
+            <td>{s?.highScore ?? 0}</td>
+            <td>{s?.wickets ?? 0}</td>
+            <td>{s ? econ(s.runsConceded, s.ballsBowled) : '–'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
+/** Everything about one player: ratings, condition, skills, numbers, contract. */
 export function PlayerSheet({
   p,
   onClose,
@@ -71,7 +115,12 @@ export function PlayerSheet({
   onClose: () => void
   actions?: ReactNode
 }) {
+  const career = useGame((s) => s.career)
   const team = p.teamId ? teamById.get(p.teamId) : undefined
+  const season = career?.season.stats[p.id]
+  const past = career?.careerStats[p.id]
+  const total =
+    season && past ? mergeStats({ [p.id]: past }, { [p.id]: season })[p.id] : (past ?? season)
   const rows: [string, number][] = [
     ['Batting', p.ratings.batting],
     ['Bowling', p.ratings.bowling],
@@ -79,6 +128,7 @@ export function PlayerSheet({
     ['Potential', p.potential],
     ['Form', Math.round(p.form)],
     ['Fitness', Math.round(p.fitness)],
+    ['Morale', Math.round(p.morale)],
   ]
   return (
     <Sheet title={p.name} onClose={onClose}>
@@ -99,19 +149,25 @@ export function PlayerSheet({
             </Fragment>
           ))}
         </div>
+        {p.morale < 35 && (
+          <span className="warn">Unhappy — he wants more game time or a move.</span>
+        )}
       </div>
       {p.traits.length > 0 && (
         <div className="card">
-          <strong>Traits</strong>
-          <span className="prow-meta">
-            {p.traits.map((t) => (
-              <Chip key={t} tone={t === 'poor-vs-spin' ? 'warn' : 'good'}>
-                {TRAIT_LABEL[t]}
-              </Chip>
-            ))}
-          </span>
+          <strong>Skills</strong>
+          {p.traits.map((t) => (
+            <span key={t} className="prow-meta">
+              <Chip tone={t === 'poor-vs-spin' ? 'warn' : 'good'}>{TRAIT_LABEL[t]}</Chip>
+              {TRAIT_INFO[t]}
+            </span>
+          ))}
         </div>
       )}
+      <div className="card">
+        <strong>Numbers</strong>
+        <StatsTable season={season} total={total} />
+      </div>
       <div className="card">
         <div className="row-between">
           <span>Club</span>

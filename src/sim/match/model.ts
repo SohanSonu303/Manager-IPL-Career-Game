@@ -1,5 +1,5 @@
 import type { Trait } from '../../data/types'
-import type { DismissalKind, MatchPlayer, Phase, Pitch } from './types'
+import type { BowlPlan, DismissalKind, FieldSetting, MatchPlayer, Phase, Pitch } from './types'
 
 /**
  * Tunable constants of the ball model. Base rates come from real IPL data
@@ -9,9 +9,9 @@ import type { DismissalKind, MatchPlayer, Phase, Pitch } from './types'
 export const MODEL = {
   /** Legal-ball rates per phase for an average matchup at balanced intent. */
   base: {
-    powerplay: { wicket: 0.042, dot: 0.375, four: 0.186, six: 0.064 },
-    middle: { wicket: 0.046, dot: 0.268, four: 0.105, six: 0.06 },
-    death: { wicket: 0.056, dot: 0.212, four: 0.143, six: 0.098 },
+    powerplay: { wicket: 0.039, dot: 0.375, four: 0.188, six: 0.066 },
+    middle: { wicket: 0.045, dot: 0.262, four: 0.11, six: 0.065 },
+    death: { wicket: 0.06, dot: 0.205, four: 0.165, six: 0.114 },
   } satisfies Record<Phase, { wicket: number; dot: number; four: number; six: number }>,
   /** Skill = (batting − bowling − center) / 10. Center = the average matchup. */
   skillCenter: -3,
@@ -56,12 +56,32 @@ export interface BallContext {
   pitch: Pitch
   /** −2…+2 (already includes free-hit and situation adjustments). */
   intent: number
+  /** Bowling side's tactics (defaults: balanced, 0, stock). */
+  field?: FieldSetting
+  /** −1 (contain) … +1 (attack). */
+  bowlIntent?: number
+  plan?: BowlPlan
+}
+
+/** Extra wide risk from the bowling plan and intent. */
+export function wideFactor({ plan, bowlIntent = 0 }: BallContext): number {
+  return (plan === 'wide' ? 1.6 : 1) * (bowlIntent > 0 ? 1.15 : 1)
 }
 
 const has = (p: MatchPlayer, t: Trait) => p.traits.includes(t)
 
 /** Probabilities of each outcome of a legal delivery. Sums to 1. */
-export function ballOdds({ batter, bowler, phase, pitch, intent }: BallContext): Odds {
+export function ballOdds(ctx: BallContext): Odds {
+  const {
+    batter,
+    bowler,
+    phase,
+    pitch,
+    intent,
+    field = 'balanced',
+    bowlIntent = 0,
+    plan = 'stock',
+  } = ctx
   const base = MODEL.base[phase]
   const s = (batter.batting - bowler.bowling - MODEL.skillCenter) / 10
 
@@ -100,6 +120,73 @@ export function ballOdds({ batter, bowler, phase, pitch, intent }: BallContext):
     b *= 0.88
   }
   if (bowler.bowlingType === 'spin' && phase === 'death') b *= 1.08
+  if (has(batter, 'spin-basher') && bowler.bowlingType === 'spin') {
+    b *= 1.15
+    w *= 0.9
+  }
+  if (has(batter, 'pace-hitter') && bowler.bowlingType === 'pace') b *= 1.1
+  if (has(batter, 'powerplay-hitter') && phase === 'powerplay') {
+    b *= 1.12
+    w *= 1.04
+  }
+  if (has(bowler, 'yorker-specialist') && phase === 'death') b *= 0.9
+  if (has(bowler, 'swing-bowler') && phase === 'powerplay') {
+    w *= 1.15
+    b *= 0.95
+  }
+  if (has(bowler, 'mystery-spinner')) {
+    w *= 1.1
+    d *= 1.04
+  }
+  if (has(bowler, 'economical')) {
+    b *= 0.9
+    w *= 0.96
+  }
+
+  // Field placement.
+  if (field === 'attacking') {
+    w *= 1.1
+    b *= 1.12
+  } else if (field === 'defensive') {
+    w *= 0.9
+    b *= 0.82
+    d *= 0.92
+  }
+  // Bowler intent.
+  if (bowlIntent > 0) {
+    w *= 1.1
+    b *= 1.08
+  } else if (bowlIntent < 0) {
+    w *= 0.9
+    b *= 0.92
+    d *= 1.04
+  }
+  // Line and length plan. Pace plans only bite for pace bowlers.
+  const pace = bowler.bowlingType === 'pace'
+  if (plan === 'yorkers' && pace) {
+    if (has(bowler, 'yorker-specialist')) {
+      b *= 0.85
+      w *= 1.1
+    } else if (bowler.bowling >= 60) {
+      b *= 0.92
+      w *= 1.04
+    } else b *= 1.05 // missed yorkers become full tosses
+    sixShare *= 0.9
+  } else if (plan === 'bouncers' && pace) {
+    if (has(bowler, 'bouncer-specialist')) w *= 1.15
+    else {
+      w *= 1.08
+      b *= 1.06
+    }
+    sixShare *= 1.15
+  } else if (plan === 'wide') {
+    b *= 0.88
+    w *= 0.9
+    d *= 1.04
+  } else if (plan === 'variations') {
+    w *= has(bowler, 'mystery-spinner') ? 1.12 : 1.06
+    b *= has(batter, 'big-hitter') ? 0.92 : 0.96
+  }
 
   // Pitch.
   b *= 1 + 0.1 * pitch.flat

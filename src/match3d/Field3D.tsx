@@ -324,8 +324,8 @@ function Disc({
 }
 
 /** Fielders, batters, ball and shot arc for the latest delivery. */
-function Play({ radius, phase, event, eventKey, batColor, reducedMotion }: FieldProps) {
-  const fielders = useMemo(() => fielderPositions(phase, radius), [phase, radius])
+function Play({ radius, phase, field, event, eventKey, batColor, reducedMotion }: FieldProps) {
+  const fielders = useMemo(() => fielderPositions(phase, radius, field), [phase, radius, field])
   const flight = useMemo(() => {
     if (!event?.shot) return null
     const end = shotEnd(event.shot, event.boundary, radius)

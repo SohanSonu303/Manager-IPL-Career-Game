@@ -1,4 +1,4 @@
-import type { BallEvent, Phase } from '@/sim/match/types'
+import type { BallEvent, FieldSetting, Phase } from '@/sim/match/types'
 
 /*
  * Field geometry shared by the 3D and 2D renderers. Units are metres; the origin is the
@@ -121,10 +121,38 @@ const FIELDS: Record<Phase, [number, number][]> = {
   ],
 }
 
-export function fielderPositions(phase: Phase, radius: number): Point[] {
-  return FIELDS[phase].map(([angle, dist]) => {
+/** Boundary riders for each phase and field setting (powerplay rules allow two). */
+const OUT: Record<Phase, Record<FieldSetting, number>> = {
+  powerplay: { attacking: 1, balanced: 2, defensive: 2 },
+  middle: { attacking: 3, balanced: 5, defensive: 5 },
+  death: { attacking: 4, balanced: 5, defensive: 5 },
+}
+
+/**
+ * Fielder positions for the phase and setting. Attacking brings riders into catching
+ * positions; defensive also drops the ring fielders back to save the single.
+ */
+export function fielderPositions(
+  phase: Phase,
+  radius: number,
+  setting: FieldSetting = 'balanced',
+): Point[] {
+  const base = FIELDS[phase]
+  let out = base.filter(([, d]) => d === 0).length
+  const want = OUT[phase][setting]
+  const spots = base.map(([angle, dist]) => [angle, dist] as [number, number])
+  // Bring riders in (from the end of the list) until the count matches.
+  for (let i = spots.length - 1; i >= 0 && out > want; i--) {
+    const s = spots[i] as [number, number]
+    if (s[1] === 0) {
+      s[1] = 22
+      out--
+    }
+  }
+  return spots.map(([angle, dist]) => {
     const d = direction(angle)
-    const t = dist === 0 ? rayToCircle(STRIKER, d, radius) - 4 : dist
+    const ring = setting === 'defensive' && dist > 0 && dist < 30 ? dist + 6 : dist
+    const t = ring === 0 ? rayToCircle(STRIKER, d, radius) - 4 : ring
     return along(STRIKER, d, t)
   })
 }

@@ -1,10 +1,15 @@
+import type { Trait } from '../../data/types'
 import {
   aggressionValue,
   phaseOf,
+  type BowlIntent,
+  type BowlPlan,
+  type FieldSetting,
   type InningsState,
   type MatchPlayer,
   type MatchState,
   type Phase,
+  type TeamSheet,
 } from './types'
 
 export const MAX_OVERS_PER_BOWLER = 4
@@ -144,4 +149,53 @@ export function batterIntent(state: MatchState, inn: InningsState, batterId: str
   }
   if (inn.freeHitNext) a += 1
   return Math.max(-2, Math.min(2, a))
+}
+
+/**
+ * The AI captain's bowling tactics for an over: field, intent and plan from the phase,
+ * the bowler's skills and the match situation.
+ */
+export function aiBowlingTactics(
+  state: MatchState,
+  inn: InningsState,
+  bowlerId: string,
+): Pick<TeamSheet, 'field' | 'bowlIntent' | 'bowlPlan'> {
+  const bowler = state.players[bowlerId]
+  const over = Math.floor(inn.legalBalls / 6)
+  const phase = inn.maxOvers === 1 ? 'death' : phaseOf(over)
+  const pace = bowler?.bowlingType === 'pace'
+  const has = (t: Trait) => bowler?.traits.includes(t) ?? false
+  let field: FieldSetting = 'balanced'
+  let bowlIntent: BowlIntent = 'balanced'
+  let bowlPlan: BowlPlan = 'stock'
+
+  if (phase === 'powerplay') {
+    if (inn.wickets <= 1 && (has('swing-bowler') || has('powerplay-specialist'))) {
+      field = 'attacking'
+      bowlIntent = 'attack'
+    }
+  } else if (phase === 'middle') {
+    if (has('mystery-spinner')) bowlPlan = 'variations'
+    const rate = inn.legalBalls ? (inn.runs / inn.legalBalls) * 6 : 0
+    if (rate > 10.5) field = 'defensive'
+  } else {
+    field = 'defensive'
+    if (pace)
+      bowlPlan = has('yorker-specialist') || (bowler?.bowling ?? 0) >= 70 ? 'yorkers' : 'variations'
+    if (has('bouncer-specialist') && inn.wickets <= 4) bowlPlan = 'bouncers'
+  }
+
+  // Defending: squeeze when the chase is slipping away, attack when it is close.
+  if (inn.target !== null) {
+    const ballsLeft = inn.maxOvers * 6 - inn.legalBalls
+    const rrr = ((inn.target - inn.runs) / Math.max(1, ballsLeft)) * 6
+    if (rrr < 7) {
+      field = 'attacking'
+      bowlIntent = 'attack'
+    } else if (rrr > 12) {
+      field = 'defensive'
+      bowlIntent = 'contain'
+    }
+  }
+  return { field, bowlIntent, bowlPlan }
 }

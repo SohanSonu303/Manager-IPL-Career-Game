@@ -6,7 +6,7 @@ import { objectiveFor } from '@/sim/game'
  * Save file format. Bump SAVE_VERSION whenever the `Career` shape changes, and add a
  * migration from the previous version to MIGRATIONS.
  */
-export const SAVE_VERSION = 3
+export const SAVE_VERSION = 4
 
 export interface SaveFile {
   version: number
@@ -43,6 +43,12 @@ export const MIGRATIONS: Record<number, Migration> = {
     } as unknown as Career
     const objective = objectiveFor(upgraded)
     return { ...s, version: 3, career: { ...upgraded, season: { ...upgraded.season, objective } } }
+  },
+  // v4: player morale, news feed, career stats.
+  3: (s) => {
+    const career = s.career as Record<string, unknown>
+    const players = (career.players as Record<string, unknown>[]).map((p) => ({ morale: 65, ...p }))
+    return { ...s, version: 4, career: { news: [], careerStats: {}, ...career, players } }
   },
 }
 

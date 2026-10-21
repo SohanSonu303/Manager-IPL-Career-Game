@@ -1,8 +1,9 @@
 import { createRng, deriveSeed, pickWeighted, type Rng } from '../rng'
-import { ballOdds, dismissalWeights, MODEL, type Odds } from './model'
-import { batterIntent, chooseBowler } from './tactics'
+import { ballOdds, dismissalWeights, MODEL, wideFactor, type Odds } from './model'
+import { aiBowlingTactics, batterIntent, chooseBowler, MAX_OVERS_PER_BOWLER } from './tactics'
 import {
   AGGRESSION,
+  bowlIntentValue,
   phaseOf,
   type BallEvent,
   type DismissalKind,
@@ -256,7 +257,11 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
   if (isOver(state)) throw new Error('Match is over')
   const inn = currentInnings(state)
 
-  if (inn.bowlerId === null) inn.bowlerId = chooseBowler(state, inn)
+  if (inn.bowlerId === null) {
+    inn.bowlerId = chooseBowler(state, inn)
+    const bowling = sheetOf(state, inn.bowlingTeamId)
+    if (bowling.ai) Object.assign(bowling, aiBowlingTactics(state, inn, inn.bowlerId))
+  }
   const bowlerId = inn.bowlerId
   const bowler = state.players[bowlerId] as MatchPlayer
   const batterId = inn.strikerId
@@ -266,6 +271,17 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
   const over = Math.floor(inn.legalBalls / 6)
   const phase = inn.maxOvers === 1 ? 'death' : phaseOf(over)
   const intent = batterIntent(state, inn, batterId)
+  const tactics = sheetOf(state, inn.bowlingTeamId)
+  const ctx = {
+    batter,
+    bowler,
+    phase,
+    pitch: state.pitch,
+    intent,
+    field: tactics.field,
+    bowlIntent: bowlIntentValue(tactics.bowlIntent),
+    plan: tactics.bowlPlan,
+  }
 
   const bat = (inn.batting[batterId] ??= { runs: 0, balls: 0, fours: 0, sixes: 0, out: null })
   inn.batting[inn.nonStrikerId] ??= { runs: 0, balls: 0, fours: 0, sixes: 0, out: null }
@@ -287,20 +303,21 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
   let key: string
 
   const r = rng()
-  if (r < MODEL.wide) {
+  const wide = MODEL.wide * wideFactor(ctx)
+  if (r < wide) {
     legal = false
     const fiveWides = rng() < 0.03
     extra = { kind: 'wide', runs: fiveWides ? 5 : 1 }
     bowl.wides++
     key = 'wide'
   } else {
-    const noBall = r < MODEL.wide + MODEL.noball
+    const noBall = r < wide + MODEL.noball
     if (noBall) {
       legal = false
       extra = { kind: 'noball', runs: 1 }
       bowl.noballs++
     }
-    const odds = ballOdds({ batter, bowler, phase, pitch: state.pitch, intent })
+    const odds = ballOdds(ctx)
     let outcome = rollOutcome(rng, odds)
     let kind: DismissalKind | null = null
     if (outcome === 'wicket') {
@@ -452,37 +469,72 @@ export function setLiveIntent(state: MatchState, teamId: string, batterId: strin
   sheet.intent = { ...sheet.intent, [batterId]: next }
 }
 
-/** Bowl until the current over ends (or the innings/match ends). */
+/**
+ * True between innings: the current innings is over but the match is not. The stepping
+ * functions below stop here; call `startNextInnings` to go on (a hard stop, so "sim 5
+ * overs" near the end of an innings never runs into the next one).
+ */
+export function atInningsBreak(state: MatchState): boolean {
+  return !isOver(state) && currentInnings(state).complete
+}
+
+/** Start the next innings (or super over) after a break. No balls are bowled. */
+export function startNextInnings(state: MatchState) {
+  if (atInningsBreak(state)) nextStage(state)
+}
+
+/** Bowlers the bowling side may use for the next over (manager's choice). */
+export function eligibleBowlers(state: MatchState): string[] {
+  const inn = currentInnings(state)
+  const sheet = sheetOf(state, inn.bowlingTeamId)
+  const cap = inn.maxOvers === 1 ? 1 : MAX_OVERS_PER_BOWLER
+  return sheet.battingOrder.filter(
+    (id) =>
+      id !== sheet.keeperId &&
+      id !== inn.lastOverBowlerId &&
+      Math.floor((inn.bowling[id]?.legalBalls ?? 0) / 6) < cap,
+  )
+}
+
+/** The manager picks who bowls the next over (only between overs). */
+export function setLiveBowler(state: MatchState, bowlerId: string): boolean {
+  if (atInningsBreak(state) || isOver(state)) return false
+  const inn = currentInnings(state)
+  if (inn.bowlerId !== null || !eligibleBowlers(state).includes(bowlerId)) return false
+  inn.bowlerId = bowlerId
+  return true
+}
+
+/** The manager's live bowling tactics: field, bowler intent, plan. */
+export function setLiveTactics(
+  state: MatchState,
+  teamId: string,
+  t: Partial<Pick<TeamSheet, 'field' | 'bowlIntent' | 'bowlPlan'>>,
+) {
+  Object.assign(sheetOf(state, teamId), t)
+}
+
+/** Bowl until the current over ends (or the innings/match ends). Stops at a break. */
 export function simOver(state: MatchState, rng: Rng): BallEvent[] {
-  const events = [simBall(state, rng)]
-  const idx = events[0]?.innings
-  while (!isOver(state)) {
-    const inn = currentInnings(state)
-    if (inn.index !== idx || inn.complete || inn.bowlerId === null) break
+  const events: BallEvent[] = []
+  while (!isOver(state) && !atInningsBreak(state)) {
     events.push(simBall(state, rng))
+    if (currentInnings(state).bowlerId === null) break
   }
   return events
 }
 
 export function simOvers(state: MatchState, rng: Rng, n: number): BallEvent[] {
   const events: BallEvent[] = []
-  for (let i = 0; i < n && !isOver(state); i++) {
-    const over = simOver(state, rng)
-    events.push(...over)
-    if (currentInnings(state).complete || currentInnings(state).index !== over[0]?.innings) break
-  }
+  for (let i = 0; i < n && !isOver(state) && !atInningsBreak(state); i++)
+    events.push(...simOver(state, rng))
   return events
 }
 
-/** Bowl until the current innings ends (starting the next one first if needed). */
+/** Bowl until the current innings ends. Stops at a break. */
 export function simInnings(state: MatchState, rng: Rng): BallEvent[] {
-  const events = [simBall(state, rng)]
-  const idx = events[0]?.innings
-  while (!isOver(state)) {
-    const inn = currentInnings(state)
-    if (inn.index !== idx || inn.complete) break
-    events.push(simBall(state, rng))
-  }
+  const events: BallEvent[] = []
+  while (!isOver(state) && !atInningsBreak(state)) events.push(simBall(state, rng))
   return events
 }
 

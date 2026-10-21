@@ -44,7 +44,9 @@ function value(p: Selectable): number {
  * than four overseas players and always at least five bowling options.
  */
 export function autoPickXI<T extends Selectable>(squad: T[]): T[] {
-  const pool = squad.filter(isAvailable).sort((a, b) => value(b) - value(a))
+  // Rotation: worn-out players (fitness under 45) are only picked if there's no one else.
+  const tired = (p: T) => (p.fitness < 45 ? 1 : 0)
+  const pool = squad.filter(isAvailable).sort((a, b) => tired(a) - tired(b) || value(b) - value(a))
   const xi: T[] = []
   const overseas = () => xi.filter((p) => p.overseas).length
   const take = (test: (p: T) => boolean, n: number) => {
@@ -130,6 +132,9 @@ export function autoTeamSheet(teamId: string, squad: Selectable[], ai: boolean):
     keeperId: pickKeeper(xi),
     aggression: 'balanced',
     intent: {},
+    field: 'balanced',
+    bowlIntent: 'balanced',
+    bowlPlan: 'stock',
     ai,
   }
 }

@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { players, teams } from '../../data'
 import { deriveSeed } from '../rng'
-import { simBall, simInnings, simMatch, simOver, simOvers } from './engine'
+import {
+  atInningsBreak,
+  simBall,
+  simInnings,
+  simMatch,
+  simOver,
+  simOvers,
+  startNextInnings,
+} from './engine'
 import { MAX_OVERS_PER_BOWLER } from './tactics'
 import { setupMatch } from './setup'
 import type { Selectable } from './selection'
@@ -140,6 +148,18 @@ describe('determinism and stepping', () => {
     expect(mixed.state).toEqual(whole.state)
   })
 
+  it('sim 5 overs near the end of an innings stops at the innings end', () => {
+    const m = match(11)
+    simOvers(m.state, m.rng, 17)
+    const inn0 = m.state.innings[0] as InningsState
+    if (!inn0.complete) {
+      const ev = simOvers(m.state, m.rng, 5)
+      expect(ev.every((e) => e.innings === 0)).toBe(true)
+      expect(atInningsBreak(m.state)).toBe(true)
+      expect(m.state.innings).toHaveLength(1)
+    }
+  })
+
   it('simOver stays within one over; simInnings within one innings', () => {
     const m = match(3)
     const over = simOver(m.state, m.rng)
@@ -147,7 +167,13 @@ describe('determinism and stepping', () => {
     expect(over.filter((e) => e.legal)).toHaveLength(6)
     const rest = simInnings(m.state, m.rng)
     expect(new Set(rest.map((e) => e.innings))).toEqual(new Set([0]))
+    // Hard stop at the innings break: stepping does nothing until the next innings starts.
+    expect(atInningsBreak(m.state)).toBe(true)
+    expect(simOvers(m.state, m.rng, 5)).toEqual([])
+    expect(simOver(m.state, m.rng)).toEqual([])
+    startNextInnings(m.state)
     const next = simInnings(m.state, m.rng)
     expect(next[0]?.innings).toBe(1)
+    expect(new Set(next.map((e) => e.innings))).toEqual(new Set([1]))
   })
 })

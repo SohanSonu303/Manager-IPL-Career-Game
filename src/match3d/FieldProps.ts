@@ -1,10 +1,12 @@
-import type { BallEvent, Phase } from '@/sim/match/types'
+import type { BallEvent, FieldSetting, Phase } from '@/sim/match/types'
 
 /** What both field renderers (3D and 2D) draw. */
 export interface FieldProps {
   /** Boundary radius in metres. */
   radius: number
   phase: Phase
+  /** The bowling side's field setting. */
+  field: FieldSetting
   /** The latest delivery (null before the first ball). */
   event: BallEvent | null
   /** Changes on every delivery, to restart the animation. */

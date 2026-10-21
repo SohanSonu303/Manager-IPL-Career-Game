@@ -24,6 +24,7 @@ import {
 export default function Field2D({
   radius,
   phase,
+  field,
   event,
   eventKey,
   batColor,
@@ -31,7 +32,7 @@ export default function Field2D({
 }: FieldProps) {
   const ext = radius + STANDS_GAP + STANDS_DEPTH - 2
   const inner = radius + STANDS_GAP
-  const fielders = useMemo(() => fielderPositions(phase, radius), [phase, radius])
+  const fielders = useMemo(() => fielderPositions(phase, radius, field), [phase, radius, field])
   const crowd = useMemo(() => {
     const rng = createRng(42)
     const palette = ['#f2f2f2', '#e5484d', '#f5c542', '#4b62a8', '#3cc26a', '#ff8a3d', '#9b5de5']

@@ -4,6 +4,7 @@ import { Home } from '@/ui/Home'
 import { LineupPage } from '@/ui/LineupPage'
 import { MarketPage } from '@/ui/MarketPage'
 import { MatchPage } from '@/ui/MatchPage'
+import { NewsPage } from '@/ui/NewsPage'
 import { Debug, Settings } from '@/ui/pages'
 import { PreMatchPage } from '@/ui/PreMatchPage'
 import { Shell } from '@/ui/Shell'
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="table" element={<TablePage />} />
           <Route path="fixtures" element={<FixturesPage />} />
           <Route path="stats" element={<StatsPage />} />
+          <Route path="news" element={<NewsPage />} />
           <Route path="prematch" element={<PreMatchPage />} />
           <Route path="match" element={<MatchPage />} />
           <Route path="settings" element={<Settings />} />

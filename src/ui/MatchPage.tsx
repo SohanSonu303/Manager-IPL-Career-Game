@@ -1,29 +1,41 @@
 import { lazy, Suspense, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { teamById } from '@/data'
+import { BATTING_TRAITS, teamById } from '@/data'
 import Field2D from '@/match3d/Field2D'
 import { hasWebGL } from '@/match3d/FieldProps'
 import type { CareerPlayer } from '@/sim/career'
 import { stageName } from '@/sim/game'
 import {
+  type Match,
+  atInningsBreak,
   currentInnings,
+  eligibleBowlers,
+  setLiveBowler,
   setLiveIntent,
+  setLiveTactics,
   simBall,
   simInnings,
   simMatch,
   simOver,
   simOvers,
-  type Match,
+  startNextInnings,
 } from '@/sim/match/engine'
 import { ballLabel, chaseStatus, economy, oversText } from '@/sim/match/scorecard'
-import { AGGRESSION, phaseOf, type MatchState } from '@/sim/match/types'
+import {
+  AGGRESSION,
+  BOWL_INTENTS,
+  BOWL_PLANS,
+  FIELD_SETTINGS,
+  phaseOf,
+  type MatchState,
+} from '@/sim/match/types'
 import { finishMyMatch, useGame } from '@/state/store'
-import { teamShort } from './format'
+import { TRAIT_LABEL, teamShort } from './format'
 import { Avatar } from './identity/Avatar'
 import { ringStatus } from './identity/avatarSpec'
 import { Crest } from './identity/Crest'
 import { Icon } from './kit/Icon'
-import { Screen, StatBar } from './kit/kit'
+import { Chip, Screen, StatBar } from './kit/kit'
 import { commentary } from './match/commentary'
 import { INTENT_LABEL, PostMatch, Scorecard } from './match/MatchView'
 
@@ -84,6 +96,7 @@ export function MatchPage() {
   const fieldProps = {
     radius: state.pitch.boundary,
     phase,
+    field: state.sheets[inn.bowlingTeamId]?.field ?? 'balanced',
     event: last,
     eventKey: inn.events.length + inn.index * 1000,
     batColor: batTeam?.colors.primary ?? '#14b8a6',
@@ -181,7 +194,29 @@ export function MatchPage() {
         </p>
       )}
 
-      {!state.result && (
+      {!state.result && atInningsBreak(state) && (
+        <div className="crease-panel break">
+          <span className="label">INNINGS BREAK</span>
+          <strong>
+            {batTeam?.short} {inn.runs}/{inn.wickets} ({oversText(inn.legalBalls)} ov)
+          </strong>
+          <span>
+            {bowlTeam?.short} need {inn.runs + 1} to win
+            {inn.maxOvers === 1 ? ' the super over' : ''}.
+          </span>
+          <button
+            className="primary"
+            onClick={() => {
+              startNextInnings(state)
+              setTick((t) => t + 1)
+            }}
+          >
+            {state.innings.length >= 2 ? 'Start super over' : 'Start 2nd innings'}
+          </button>
+        </div>
+      )}
+
+      {!state.result && !atInningsBreak(state) && (
         <>
           <div className="crease-panel">
             <span className="label">BATTING</span>
@@ -206,6 +241,14 @@ export function MatchPage() {
             ))}
             <span className="label">BOWLING</span>
             <BowlRow state={state} players={players} />
+            {inn.bowlingTeamId === me && (
+              <BowlingControls
+                state={state}
+                me={me}
+                players={players}
+                onChange={() => setTick((t) => t + 1)}
+              />
+            )}
           </div>
           <div className="sim-row">
             <button onClick={() => step(simBall)}>Ball</button>
@@ -334,6 +377,125 @@ function BowlRow({ state, players }: { state: MatchState; players: Map<string, C
             : 'Yet to bowl'}
         </span>
       </span>
+    </div>
+  )
+}
+
+const FIELD_LABEL = {
+  attacking: 'Attacking',
+  balanced: 'Balanced',
+  defensive: 'Defensive',
+} as const
+const BOWL_INTENT_LABEL = { contain: 'Contain', balanced: 'Balanced', attack: 'Attack' } as const
+const PLAN_LABEL = {
+  stock: 'Stock',
+  yorkers: 'Yorkers',
+  bouncers: 'Bouncers',
+  wide: 'Wide line',
+  variations: 'Variations',
+} as const
+
+/** The manager's bowling: who bowls the next over, the field, the bowler's approach. */
+function BowlingControls({
+  state,
+  me,
+  players,
+  onChange,
+}: {
+  state: MatchState
+  me: string
+  players: Map<string, CareerPlayer>
+  onChange: () => void
+}) {
+  const inn = currentInnings(state)
+  const sheet = state.sheets[me]
+  if (!sheet) return null
+  const choosing = inn.bowlerId === null
+  return (
+    <div className="bowl-ctl">
+      {choosing && (
+        <div className="choose-bowler">
+          <span className="label">CHOOSE BOWLER · OVER {Math.floor(inn.legalBalls / 6) + 1}</span>
+          {eligibleBowlers(state)
+            .map((id) => ({ id, p: players.get(id), b: inn.bowling[id], m: state.players[id] }))
+            .filter((x) => x.m && (x.m.role === 'bowler' || x.m.role === 'allrounder' || x.b))
+            .sort((x, y) => (y.m?.bowling ?? 0) - (x.m?.bowling ?? 0))
+            .map(({ id, p, b, m }) => (
+              <button
+                key={id}
+                className="bowler-pick"
+                onClick={() => {
+                  setLiveBowler(state, id)
+                  onChange()
+                }}
+              >
+                <span className="who">
+                  <strong>{m?.name}</strong>
+                  <span className="dim">
+                    {m?.bowlingType === 'spin' ? 'Spin' : 'Pace'} ·{' '}
+                    {b ? `${oversText(b.legalBalls)}-${b.runs}-${b.wickets}` : '0-0-0'}
+                    {p?.traits
+                      .filter((t) => !(BATTING_TRAITS as readonly string[]).includes(t))
+                      .map((t) => ` · ${TRAIT_LABEL[t]}`)}
+                  </span>
+                </span>
+                <Chip tone="blue">{Math.round(m?.bowling ?? 0)}</Chip>
+              </button>
+            ))}
+          <span className="dim">Or press a sim button and the captain picks.</span>
+        </div>
+      )}
+      <div className="tactic">
+        <span className="dim">Field</span>
+        <div className="seg three">
+          {FIELD_SETTINGS.map((f) => (
+            <button
+              key={f}
+              className={sheet.field === f ? 'on' : ''}
+              onClick={() => {
+                setLiveTactics(state, me, { field: f })
+                onChange()
+              }}
+            >
+              {FIELD_LABEL[f]}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="tactic">
+        <span className="dim">Bowler</span>
+        <div className="seg three">
+          {BOWL_INTENTS.map((b) => (
+            <button
+              key={b}
+              className={sheet.bowlIntent === b ? 'on' : ''}
+              onClick={() => {
+                setLiveTactics(state, me, { bowlIntent: b })
+                onChange()
+              }}
+            >
+              {BOWL_INTENT_LABEL[b]}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="tactic">
+        <span className="dim">Plan</span>
+        <div className="filters">
+          {BOWL_PLANS.map((pl) => (
+            <button
+              key={pl}
+              className={sheet.bowlPlan === pl ? 'on' : ''}
+              onClick={() => {
+                setLiveTactics(state, me, { bowlPlan: pl })
+                onChange()
+              }}
+            >
+              {PLAN_LABEL[pl]}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

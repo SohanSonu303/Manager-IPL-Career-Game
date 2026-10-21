@@ -2,7 +2,11 @@ import { today } from './calendar'
 import type { Career, CareerPlayer } from './career'
 import { autoPickXI } from './match/selection'
 import { overallRating } from './player'
-import { randInt, type Rng } from './rng'
+import { addNews, updateNews } from './news'
+import { createRng, deriveSeed, randInt, shuffle, type Rng } from './rng'
+import { teams } from '../data'
+
+const teamLabel = (id: string) => teams.find((t) => t.id === id)?.short ?? id
 
 /*
  * Contracts, squad rules, the free-agent market and trades. Salaries are in lakhs per
@@ -15,8 +19,6 @@ export const SALARY_CAP = 14_000
 export const SQUAD_MIN = 18
 export const SQUAD_MAX = 25
 export const SQUAD_OVERSEAS_MAX = 8
-/** Offers a player will hear before walking away for this window. */
-export const MAX_ROUNDS = 3
 
 export const squadOf = (players: CareerPlayer[], teamId: string) =>
   players.filter((p) => p.teamId === teamId)
@@ -132,11 +134,40 @@ export function requiredSalary(
   const appeal = clubAppeal(career, teamId, teamIds)
   const starts = wouldStart(career.players, teamId, p)
   const role = starts ? 1 : overallRating(p) >= 75 ? 0.85 : 0.95
-  const loyalty = renewal ? 1.05 : 1
+  // A happy player gives his own club a discount; an unhappy one wants out.
+  const loyalty = renewal ? (p.morale < 35 ? 0.85 : 1.05) : 1
   return round5(askingSalary(p) / (appeal * role * loyalty * yearsFit(p.age, years)))
 }
 
-/** The player's answer to an offer. Deterministic: same situation, same answer. */
+export interface Agent {
+  /** Hidden: how far below (−) or above (+) his stated demand he will really go. */
+  greed: number
+  /** Rounds of talks before he walks away. */
+  patience: number
+  label: 'Keen' | 'Fair' | 'Tough'
+}
+
+/**
+ * Every player's agent has a personality (seeded per career): some are keen and will
+ * take a little less than they ask, some play hardball and lose patience quickly.
+ */
+export function agentOf(career: Career, p: CareerPlayer): Agent {
+  const rng = createRng(deriveSeed(career.seed, 'agent', p.id))
+  const greed = -0.12 + rng() * 0.2
+  const patience = randInt(rng, 2, 5)
+  return { greed, patience, label: greed < -0.05 ? 'Keen' : greed > 0.03 ? 'Tough' : 'Fair' }
+}
+
+/** What he will actually accept (hidden from the manager). */
+function reservation(career: Career, p: CareerPlayer, years: number, teamIds: string[]): number {
+  return round5(requiredSalary(career, p, years, teamIds) * (1 + agentOf(career, p).greed))
+}
+
+/**
+ * The player's answer to an offer. Deterministic: same situation, same answer.
+ * Meet his (hidden) price and he signs; get close and he comes down halfway; lowball
+ * him and he loses patience.
+ */
 export function answerOffer(
   career: Career,
   playerId: string,
@@ -144,19 +175,32 @@ export function answerOffer(
   teamIds: string[],
 ): OfferAnswer {
   const p = career.players.find((x) => x.id === playerId) as CareerPlayer
-  const need = requiredSalary(career, p, offer.years, teamIds)
-  const rounds = (career.market.talks[playerId]?.rounds ?? 0) + 1
-  if (offer.salary >= need) return { kind: 'accept' }
-  if (rounds >= MAX_ROUNDS)
-    return { kind: 'reject', message: `${p.name} has heard enough and ends the talks.` }
-  if (offer.salary >= need * 0.8) {
-    const years = preferredYears(p.age)
-    return {
-      kind: 'counter',
-      salary: requiredSalary(career, p, years, teamIds),
-      years,
-      message: `${p.name} wants more. He would sign for ${years} season${years > 1 ? 's' : ''}.`,
-    }
+  const agent = agentOf(career, p)
+  const res = reservation(career, p, offer.years, teamIds)
+  const talks = career.market.talks[playerId]
+  const rounds = (talks?.rounds ?? 0) + 1
+  if (offer.salary >= res) return { kind: 'accept' }
+  if (rounds >= agent.patience) {
+    return { kind: 'reject', message: `${p.name}'s agent has heard enough and ends the talks.` }
+  }
+  if (offer.salary >= res * 0.75) {
+    // He comes down halfway towards your offer, but never below his real price.
+    const ask = talks?.ask ?? requiredSalary(career, p, offer.years, teamIds)
+    const years =
+      offer.years === preferredYears(p.age) || agent.label !== 'Tough'
+        ? offer.years
+        : preferredYears(p.age)
+    const salary = Math.max(
+      reservation(career, p, years, teamIds),
+      round5((ask + offer.salary) / 2),
+    )
+    const tone =
+      agent.label === 'Keen'
+        ? `${p.name} is keen to make this work.`
+        : agent.label === 'Tough'
+          ? `${p.name}'s agent is playing hardball.`
+          : `${p.name} wants a little more.`
+    return { kind: 'counter', salary, years, message: tone }
   }
   return { kind: 'reject', message: `${p.name} says the offer is far too low.` }
 }
@@ -172,15 +216,36 @@ export function makeOffer(
   if (blocked) return { career, answer: { kind: 'reject', message: blocked } }
   const answer = answerOffer(career, playerId, offer, teamIds)
   const prev = career.market.talks[playerId] ?? { rounds: 0, walkedAway: false }
+  const p = career.players.find((x) => x.id === playerId) as CareerPlayer
   const talks = {
     ...career.market.talks,
     [playerId]: {
       rounds: prev.rounds + 1,
-      walkedAway: answer.kind === 'reject' && prev.rounds + 1 >= MAX_ROUNDS,
+      walkedAway: answer.kind === 'reject' && prev.rounds + 1 >= agentOf(career, p).patience,
+      ask: answer.kind === 'counter' ? answer.salary : prev.ask,
     },
   }
   let next: Career = { ...career, market: { ...career.market, talks } }
-  if (answer.kind === 'accept') next = signPlayer(next, playerId, career.manager.teamId, offer)
+  if (answer.kind === 'accept') {
+    const me = career.manager.teamId
+    const renewal = p.teamId === me
+    next = signPlayer(next, playerId, me, offer)
+    next = addNews(next, {
+      kind: renewal ? 'contract' : 'transfer',
+      teamIds: [me],
+      playerId,
+      text: renewal
+        ? `${p.name} signs a new ${offer.years}-season deal with ${teamLabel(me)}.`
+        : `${teamLabel(me)} sign ${p.name} on a ${offer.years}-season deal.`,
+    })
+    // A new deal cheers a player up.
+    next = {
+      ...next,
+      players: next.players.map((x) =>
+        x.id === playerId ? { ...x, morale: Math.min(100, x.morale + 15) } : x,
+      ),
+    }
+  }
   return { career: next, answer }
 }
 
@@ -224,6 +289,17 @@ export function releaseBlocker(career: Career, playerId: string): string | null 
 /** Release a player to the free-agent market (his salary comes off your payroll). */
 export function releasePlayer(career: Career, playerId: string): Career {
   if (releaseBlocker(career, playerId)) return career
+  const name = career.players.find((x) => x.id === playerId)?.name ?? ''
+  const me = career.manager.teamId
+  return addNews(released(career, playerId), {
+    kind: 'transfer',
+    teamIds: [me],
+    playerId,
+    text: `${teamLabel(me)} release ${name}.`,
+  })
+}
+
+function released(career: Career, playerId: string): Career {
   return {
     ...career,
     players: career.players.map((x) =>
@@ -315,30 +391,199 @@ export function executeTrade(career: Career, give: string[], get: string[]): Car
   const check = evaluateTrade(career, give, get)
   if (!check.ok) return career
   const them = career.players.find((p) => p.id === get[0])?.teamId as string
-  const me = career.manager.teamId
-  return {
-    ...career,
-    players: swap(career.players, give, get, me, them),
-    market: {
-      ...career.market,
-      log: [
-        ...career.market.log,
-        ...give.map((playerId) => ({
-          year: career.calendar.year,
-          kind: 'traded' as const,
-          playerId,
-          teamId: them,
-          salary: 0,
-        })),
-        ...get.map((playerId) => ({
-          year: career.calendar.year,
-          kind: 'traded' as const,
-          playerId,
-          teamId: me,
-          salary: 0,
-        })),
-      ],
+  return doTrade(career, career.manager.teamId, give, them, get)
+}
+
+/** Swap players between two clubs: contracts move with them; log and news the deal. */
+export function doTrade(
+  career: Career,
+  a: string,
+  aIds: string[],
+  b: string,
+  bIds: string[],
+): Career {
+  const year = career.calendar.year
+  const name = (id: string) => career.players.find((p) => p.id === id)?.name ?? id
+  const players = career.players.map((p) =>
+    aIds.includes(p.id)
+      ? { ...p, teamId: b, morale: Math.max(p.morale, 60) }
+      : bIds.includes(p.id)
+        ? { ...p, teamId: a, morale: Math.max(p.morale, 60) }
+        : p,
+  )
+  const log = [
+    ...career.market.log,
+    ...aIds.map((playerId) => ({ year, kind: 'traded' as const, playerId, teamId: b, salary: 0 })),
+    ...bIds.map((playerId) => ({ year, kind: 'traded' as const, playerId, teamId: a, salary: 0 })),
+  ]
+  return addNews(
+    { ...career, players, market: { ...career.market, log } },
+    {
+      kind: 'trade',
+      teamIds: [a, b],
+      text: `Trade: ${aIds.map(name).join(', ')} moves to ${teamLabel(b)}; ${bIds.map(name).join(', ')} heads to ${teamLabel(a)}.`,
     },
+  )
+}
+
+/** Ideal squad shape the AI aims for when it trades. */
+const IDEAL: Record<CareerPlayer['role'], number> = {
+  wicketkeeper: 2,
+  batter: 5,
+  allrounder: 4,
+  bowler: 6,
+}
+const ROLES = Object.keys(IDEAL) as CareerPlayer['role'][]
+const countRole = (squad: CareerPlayer[], r: CareerPlayer['role']) =>
+  squad.filter((p) => p.role === r).length
+const deficits = (squad: CareerPlayer[]) =>
+  ROLES.filter((r) => countRole(squad, r) < IDEAL[r]).sort(
+    (x, y) => countRole(squad, x) - IDEAL[x] - (countRole(squad, y) - IDEAL[y]),
+  )
+const surpluses = (squad: CareerPlayer[]) => ROLES.filter((r) => countRole(squad, r) > IDEAL[r])
+
+/** Players a club would part with: not among its six most valuable; unhappy ones first. */
+function tradeable(squad: CareerPlayer[], role: CareerPlayer['role']): CareerPlayer[] {
+  const core = new Set(
+    [...squad]
+      .sort((a, b) => tradeValue(b) - tradeValue(a))
+      .slice(0, 6)
+      .map((p) => p.id),
+  )
+  return squad
+    .filter((p) => p.role === role && !p.injury && (!core.has(p.id) || p.morale < 30))
+    .sort((a, b) => a.morale - b.morale || tradeValue(a) - tradeValue(b))
+}
+
+/** Both sides still legal (overseas, cap with a little slack) after a swap. */
+function swapOk(
+  players: CareerPlayer[],
+  a: string,
+  aIds: string[],
+  b: string,
+  bIds: string[],
+): boolean {
+  const after = players.map((p) =>
+    aIds.includes(p.id) ? { ...p, teamId: b } : bIds.includes(p.id) ? { ...p, teamId: a } : p,
+  )
+  return [a, b].every(
+    (t) =>
+      squadOf(after, t).filter((p) => p.overseas).length <= SQUAD_OVERSEAS_MAX &&
+      squadOf(after, t).some((p) => p.role === 'wicketkeeper') &&
+      payroll(after, t) <= SALARY_CAP * 1.05,
+  )
+}
+
+/**
+ * AI clubs trade with each other in the windows: each fixes its biggest gap by sending
+ * a spare player to a club with the opposite problem, at similar value.
+ */
+export function aiTrades(career: Career, teamIds: string[], rng: Rng, max = 3): Career {
+  let c = career
+  let done = 0
+  for (const a of shuffle(
+    rng,
+    teamIds.filter((t) => t !== career.manager.teamId),
+  )) {
+    if (done >= max) break
+    const sa = squadOf(c.players, a)
+    for (const need of deficits(sa)) {
+      const partner = shuffle(rng, teamIds).find((b) => {
+        if (b === a || b === career.manager.teamId) return false
+        const sb = squadOf(c.players, b)
+        return surpluses(sb).includes(need) || countRole(sb, need) > IDEAL[need]
+      })
+      if (!partner) continue
+      const sb = squadOf(c.players, partner)
+      const theirs = tradeable(sb, need)[0]
+      if (!theirs) continue
+      const give = surpluses(sa)
+        .flatMap((r) => tradeable(sa, r))
+        .find((p) => {
+          const ratio = tradeValue(p) / tradeValue(theirs)
+          return ratio > 0.8 && ratio < 1.25 && swapOk(c.players, a, [p.id], partner, [theirs.id])
+        })
+      if (!give) continue
+      c = doTrade(c, a, [give.id], partner, [theirs.id])
+      done++
+      break
+    }
+  }
+  return c
+}
+
+/**
+ * AI clubs come to the manager with trade offers: they want one of his spare (or
+ * unhappy) players and offer one of similar value, ideally where he is short.
+ */
+export function aiTradeOffers(career: Career, teamIds: string[], rng: Rng, max = 2): Career {
+  const me = career.manager.teamId
+  const mine = squadOf(career.players, me)
+  const myNeeds = deficits(mine)
+  const spare = [
+    ...surpluses(mine).flatMap((r) => tradeable(mine, r)),
+    ...mine.filter((p) => p.morale < 30),
+  ]
+  let c = career
+  let made = 0
+  for (const b of shuffle(
+    rng,
+    teamIds.filter((t) => t !== me),
+  )) {
+    if (made >= max) break
+    const sb = squadOf(c.players, b)
+    const want = spare.find((p) => deficits(sb).includes(p.role) || p.morale < 30)
+    if (!want) continue
+    const offer = [
+      ...myNeeds.flatMap((r) => tradeable(sb, r)),
+      ...surpluses(sb).flatMap((r) => tradeable(sb, r)),
+    ].find((p) => {
+      const ratio = tradeValue(p) / tradeValue(want)
+      return ratio > 0.85 && ratio < 1.2 && swapOk(c.players, me, [want.id], b, [p.id])
+    })
+    if (!offer) continue
+    c = addNews(c, {
+      kind: 'offer',
+      teamIds: [me, b],
+      playerId: want.id,
+      text: `${teamLabel(b)} offer ${offer.name} for your ${want.name}.`,
+      offer: { fromTeamId: b, give: [want.id], get: [offer.id], status: 'pending' },
+    })
+    made++
+  }
+  return c
+}
+
+/** Accept or decline a trade offer from the news feed. */
+export function answerTradeOffer(
+  career: Career,
+  newsId: string,
+  accept: boolean,
+): { career: Career; message: string } {
+  const item = career.news.find((n) => n.id === newsId)
+  const o = item?.offer
+  if (!item || !o || o.status !== 'pending')
+    return { career, message: 'This offer is no longer open.' }
+  const setStatus = (c: Career, status: 'accepted' | 'declined' | 'expired') =>
+    updateNews(c, newsId, (n) => ({ ...n, offer: { ...o, status } }))
+  if (!accept) return { career: setStatus(career, 'declined'), message: 'Offer declined.' }
+  const me = career.manager.teamId
+  const stillThere =
+    o.give.every((id) => career.players.find((p) => p.id === id)?.teamId === me) &&
+    o.get.every((id) => career.players.find((p) => p.id === id)?.teamId === o.fromTeamId)
+  if (
+    !isWindowOpen(career) ||
+    !stillThere ||
+    !swapOk(career.players, me, o.give, o.fromTeamId, o.get)
+  ) {
+    return {
+      career: setStatus(career, 'expired'),
+      message: 'The deal is off: things have changed.',
+    }
+  }
+  return {
+    career: setStatus(doTrade(career, me, o.give, o.fromTeamId, o.get), 'accepted'),
+    message: 'Trade done!',
   }
 }
 
@@ -365,8 +610,15 @@ function aiNeeds(squad: CareerPlayer[]): ((p: CareerPlayer) => boolean)[] {
 export function aiSignings(career: Career, teamIds: string[], rng: Rng): Career {
   let players = career.players
   const log = [...career.market.log]
+  const news: Parameters<typeof addNews>[1][] = []
   const sign = (p: CareerPlayer, teamId: string) => {
     const salary = askingSalary(p)
+    news.push({
+      kind: 'transfer',
+      teamIds: [teamId],
+      playerId: p.id,
+      text: `${teamLabel(teamId)} sign free agent ${p.name}.`,
+    })
     players = players.map((x) =>
       x.id === p.id ? { ...x, teamId, contract: { salary, years: randInt(rng, 1, 3) } } : x,
     )
@@ -410,7 +662,7 @@ export function aiSignings(career: Career, teamIds: string[], rng: Rng): Career 
       if (target) sign(target, teamId)
     }
   }
-  return { ...career, players, market: { ...career.market, log } }
+  return addNews({ ...career, players, market: { ...career.market, log } }, ...news)
 }
 
 // --- Season turnover ------------------------------------------------------------
@@ -466,7 +718,18 @@ export function expireContracts(career: Career, rng: Rng): Career {
           : { ...x, teamId: null, contract: null },
     )
   }
-  return { ...career, players }
+  const leaving = career.players.filter(
+    (p) => p.teamId === me && players.find((x) => x.id === p.id)?.teamId === null,
+  )
+  return addNews(
+    { ...career, players },
+    ...leaving.map((p) => ({
+      kind: 'contract' as const,
+      teamIds: [me],
+      playerId: p.id,
+      text: `${p.name} leaves ${teamLabel(me)} as his contract ends.`,
+    })),
+  )
 }
 
 function medianOverall(squad: CareerPlayer[]): number {

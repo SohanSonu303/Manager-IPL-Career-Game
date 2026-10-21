@@ -4,6 +4,7 @@ import { teamById, teams } from '@/data'
 import { objectiveForRank } from '@/sim/board'
 import { today } from '@/sim/calendar'
 import type { Career, SeasonReview } from '@/sim/career'
+import { isMyClub, needsAction } from '@/sim/news'
 import { managerSheet, standings, startCareer as previewCareer, TEAM_IDS } from '@/sim/game'
 import { capRoom, isWindowOpen, payroll, SALARY_CAP, squadOf, strengthRanking } from '@/sim/market'
 import { resetCareer, startCareer, useGame } from '@/state/store'
@@ -108,17 +109,19 @@ function ClubHub({ career }: { career: Career }) {
     (r) => r.stage === 'league' && r.teams.includes(me),
   ).length
 
-  const alert: { text: string; icon: IconName; go: () => void } | null = career.season.review
+  const pending = career.news.filter((n) => isMyClub(n, me) && needsAction(n)).length
+  const latest = [...career.news].reverse().find((n) => isMyClub(n, me))
+  const alert: { text: string; icon: IconName | null; go: () => void } = career.season.review
     ? { text: 'Season review', icon: 'trophy', go: () => setSheet('review') }
-    : injured.length
-      ? { text: `${injured.length} injured`, icon: 'alert', go: () => navigate('/squad') }
-      : expiring.length && isWindowOpen(career)
-        ? {
-            text: `${expiring.length} contracts ending`,
-            icon: 'alert',
-            go: () => navigate('/market'),
-          }
-        : null
+    : pending
+      ? {
+          text: `${pending} need${pending > 1 ? '' : 's'} you`,
+          icon: 'alert',
+          go: () => navigate('/news'),
+        }
+      : injured.length
+        ? { text: `${injured.length} injured`, icon: 'alert', go: () => navigate('/news') }
+        : { text: latest?.text ?? 'No news yet', icon: null, go: () => navigate('/news') }
 
   return (
     <Screen back={{ label: 'Settings', onClick: () => navigate('/settings') }} primary={next}>
@@ -181,8 +184,8 @@ function ClubHub({ career }: { career: Career }) {
         <Tile caption="Calendar" onClick={() => navigate('/fixtures')}>
           <span className="big">{career.calendar.year}</span>
         </Tile>
-        <Tile caption="Alerts" onClick={alert?.go}>
-          {alert ? (
+        <Tile caption="News" onClick={alert.go}>
+          {alert.icon ? (
             <>
               <span className="bad">
                 <Icon name={alert.icon} size={30} />
@@ -190,7 +193,7 @@ function ClubHub({ career }: { career: Career }) {
               <span>{alert.text}</span>
             </>
           ) : (
-            <span className="dim">All clear</span>
+            <span className="tile-news">{alert.text}</span>
           )}
         </Tile>
       </div>

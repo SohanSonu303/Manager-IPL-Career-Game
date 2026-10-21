@@ -1,10 +1,11 @@
 import { players as basePlayers } from '../data'
 import type { Player } from '../data/types'
 import type { Awards, FixtureResult, SeasonStat, StandingRow } from './league'
+import type { NewsItem } from './news'
 import { START_CONFIDENCE, START_REPUTATION, type Finish, type Objective } from './board'
 import type { CalendarState } from './calendar'
 import type { Aggression } from './match/types'
-import { developRatings, driftForm, recoverFitness, type Condition } from './player'
+import { developRatings, driftForm, formTarget, recoverFitness, type Condition } from './player'
 import { createRng, deriveSeed, randInt } from './rng'
 
 export const START_YEAR = 2026
@@ -20,6 +21,8 @@ export interface Injury {
 /** A player as stored in a career: static data plus current condition. */
 export interface CareerPlayer extends Player, Condition {
   injury: Injury | null
+  /** 0–100. Falls when a good player is left out or the team loses; shows in form. */
+  morale: number
   /** Rating change from match grades this season (capped; reset at rollover). */
   seasonDev: { batting: number; bowling: number }
 }
@@ -72,12 +75,16 @@ export interface Career {
   history: SeasonReview[]
   market: {
     /** Contract talks this window, per player. */
-    talks: Record<string, { rounds: number; walkedAway: boolean }>
+    talks: Record<string, { rounds: number; walkedAway: boolean; ask?: number }>
     log: TransferLog[]
   }
   status: 'active' | 'sacked'
   /** The manager's chosen XI (optional; auto-pick is used when missing or invalid). */
   lineup?: Lineup
+  /** Club and league news, newest last (capped). */
+  news: NewsItem[]
+  /** Totals from finished seasons, per player. */
+  careerStats: Record<string, SeasonStat>
 }
 
 export interface Lineup {
@@ -108,18 +115,25 @@ export function newCareer(opts: {
       fitness: 100,
       form: randInt(rng, 40, 60),
       injury: null,
+      morale: randInt(rng, 60, 75),
       seasonDev: { batting: 0, bowling: 0 },
     })),
     season: { results: [], stats: {}, objective: opts.objective, review: null },
     history: [],
     market: { talks: {}, log: [] },
     status: 'active',
+    news: [],
+    careerStats: {},
   }
 }
 
 /** Daily upkeep: fitness recovers and form drifts towards neutral. */
 export function restDay(p: CareerPlayer): CareerPlayer {
-  return { ...p, fitness: recoverFitness(p.fitness, p.age), form: driftForm(p.form) }
+  return {
+    ...p,
+    fitness: recoverFitness(p.fitness, p.age),
+    form: driftForm(p.form, 1, formTarget(p.morale)),
+  }
 }
 
 /**
@@ -133,7 +147,8 @@ export function agePlayer(p: CareerPlayer, seed: number, endedYear: number): Car
     ratings: developRatings(p, rng),
     age: p.age + 1,
     fitness: 100,
-    form: 50,
+    // Half of a player's form carries into the new season.
+    form: 50 + (p.form - 50) * 0.5,
     // The off-season is months long; everyone starts the new season healed.
     injury: null,
     seasonDev: { batting: 0, bowling: 0 },

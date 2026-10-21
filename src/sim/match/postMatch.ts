@@ -4,7 +4,7 @@ import { createRng, deriveSeed, pickWeighted, randInt, type Rng } from '../rng'
 import type { BatterLine, BowlerLine, MatchState } from './types'
 
 /** Max rating change from match grades per skill per season. */
-export const SEASON_DEV_CAP = 3
+export const SEASON_DEV_CAP = 4
 
 export interface PlayerReport {
   id: string
@@ -136,16 +136,32 @@ export function applyPostMatch(
   const teamIds = new Set(Object.keys(state.sheets))
   const keepers = new Set(Object.values(state.sheets).map((s) => s.keeperId))
   const reports: PlayerReport[] = []
+  const winner = state.result?.winnerId ?? null
+  // Each squad's best eleven by rating: leaving one of them out hurts his morale.
+  const deserving = new Set(
+    [...teamIds].flatMap((t) =>
+      players
+        .filter((p) => p.teamId === t && !p.injury)
+        .sort((a, b) => overallRating(b) - overallRating(a))
+        .slice(0, 11)
+        .map((p) => p.id),
+    ),
+  )
+  const clampMorale = (v: number) => Math.max(0, Math.min(100, v))
 
   const updated = players.map((p) => {
     const g = graded.get(p.id)
     if (!g) {
-      // A squad member who sat out: an injury heals by one match.
-      if (p.teamId && teamIds.has(p.teamId) && p.injury) {
-        const left = p.injury.matchesOut - 1
-        return { ...p, injury: left > 0 ? { ...p.injury, matchesOut: left } : null }
+      if (!p.teamId || !teamIds.has(p.teamId)) return p
+      // A squad member who sat out: an injury heals by one match; a fit regular who
+      // was dropped is unhappy about it.
+      const left = p.injury ? p.injury.matchesOut - 1 : 0
+      const morale = p.injury ? p.morale : clampMorale(p.morale - (deserving.has(p.id) ? 5 : 1))
+      return {
+        ...p,
+        morale,
+        injury: p.injury && left > 0 ? { ...p.injury, matchesOut: left } : null,
       }
-      return p
     }
     const rng = createRng(deriveSeed(seed, 'post', p.id))
     const ratings = { ...p.ratings }
@@ -160,6 +176,22 @@ export function applyPostMatch(
       ratings[skill] = Math.max(1, Math.min(99, ratings[skill] + step))
       dev[skill] += step
       change[skill] = step
+    }
+
+    // Playing time: young players grow just from playing at this level.
+    const expChance = p.age <= 23 ? 0.08 : p.age <= 27 ? 0.05 : p.age <= 31 ? 0.02 : 0
+    if (rng() < expChance && overallRating({ role: p.role, ratings }) < p.potential) {
+      const skill: 'batting' | 'bowling' =
+        p.role === 'bowler'
+          ? 'bowling'
+          : p.role === 'allrounder' && rng() < 0.5
+            ? 'bowling'
+            : 'batting'
+      if (dev[skill] + 1 <= SEASON_DEV_CAP) {
+        ratings[skill] = Math.min(99, ratings[skill] + 1)
+        dev[skill] += 1
+        change[skill] += 1
+      }
     }
 
     const oversBowled = (g.bowling?.legalBalls ?? 0) / 6
@@ -180,8 +212,9 @@ export function applyPostMatch(
       injury = { kind, matchesOut: randInt(rng, min, max) }
     }
     const form = formAfterMatch(p.form, g.grade)
+    const morale = clampMorale(p.morale + 2 + (winner === p.teamId ? 1 : winner ? -1 : 0))
     reports.push({ ...g, ratingChange: change, fitnessAfter: fitness, formAfter: form, injury })
-    return { ...p, ratings, seasonDev: dev, fitness, form, injury }
+    return { ...p, ratings, seasonDev: dev, fitness, form, injury, morale }
   })
   return { players: updated, reports }
 }

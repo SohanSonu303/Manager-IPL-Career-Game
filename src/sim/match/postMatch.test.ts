@@ -71,8 +71,8 @@ describe('post-match step', () => {
     expect(r).toHaveLength(22)
     for (const p of r) {
       expect(p.fitnessAfter).toBeLessThan(100)
-      expect(Math.abs(p.ratingChange.batting)).toBeLessThanOrEqual(1)
-      expect(Math.abs(p.ratingChange.bowling)).toBeLessThanOrEqual(1)
+      expect(Math.abs(p.ratingChange.batting)).toBeLessThanOrEqual(2)
+      expect(Math.abs(p.ratingChange.bowling)).toBeLessThanOrEqual(2)
       expect(p.grade).toBeGreaterThanOrEqual(0)
       expect(p.grade).toBeLessThanOrEqual(100)
     }

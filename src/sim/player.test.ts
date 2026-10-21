@@ -103,10 +103,10 @@ describe('fitness and form', () => {
     expect(driftForm(80, 30)).toBeGreaterThan(50)
   })
 
-  it('effective rating: form ±5, fatigue penalty below 70 fitness', () => {
+  it('effective rating: form about ±6, fatigue penalty below 70 fitness', () => {
     expect(effectiveRating(70, { fitness: 100, form: 50 })).toBe(70)
-    expect(effectiveRating(70, { fitness: 100, form: 100 })).toBe(75)
-    expect(effectiveRating(70, { fitness: 100, form: 0 })).toBe(65)
+    expect(effectiveRating(70, { fitness: 100, form: 100 })).toBe(76.25)
+    expect(effectiveRating(70, { fitness: 100, form: 0 })).toBe(63.75)
     expect(effectiveRating(70, { fitness: 40, form: 50 })).toBe(64)
     expect(effectiveRating(99, { fitness: 100, form: 100 })).toBe(99)
   })

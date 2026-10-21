@@ -10,9 +10,9 @@
     },
     "ground": "Deccan Park",
     "crest": {
-      "shape": "hexagon",
+      "shape": "diamond",
       "glyph": "wing",
-      "band": false
+      "band": true
     }
   },
   {
@@ -26,7 +26,7 @@
     },
     "ground": "Marina Ground",
     "crest": {
-      "shape": "circle",
+      "shape": "pennant",
       "glyph": "star",
       "band": true
     }
@@ -42,7 +42,7 @@
     },
     "ground": "Harbour Stadium",
     "crest": {
-      "shape": "shield",
+      "shape": "diamond",
       "glyph": "wave",
       "band": true
     }
@@ -60,7 +60,7 @@
     "crest": {
       "shape": "pennant",
       "glyph": "bolt",
-      "band": false
+      "band": true
     }
   },
   {
@@ -74,9 +74,9 @@
     },
     "ground": "Hooghly Park",
     "crest": {
-      "shape": "diamond",
+      "shape": "shield",
       "glyph": "flame",
-      "band": false
+      "band": true
     }
   },
   {
@@ -90,7 +90,7 @@
     },
     "ground": "Yamuna Ground",
     "crest": {
-      "shape": "diamond",
+      "shape": "circle",
       "glyph": "star",
       "band": false
     }
@@ -108,7 +108,7 @@
     "crest": {
       "shape": "shield",
       "glyph": "peak",
-      "band": true
+      "band": false
     }
   },
   {
@@ -124,7 +124,7 @@
     "crest": {
       "shape": "pennant",
       "glyph": "sun",
-      "band": false
+      "band": true
     }
   },
   {
@@ -138,9 +138,9 @@
     },
     "ground": "Gomti Oval",
     "crest": {
-      "shape": "hexagon",
+      "shape": "pennant",
       "glyph": "leaf",
-      "band": true
+      "band": false
     }
   },
   {
@@ -154,7 +154,7 @@
     },
     "ground": "Sabarmati Arena",
     "crest": {
-      "shape": "shield",
+      "shape": "circle",
       "glyph": "bolt",
       "band": true
     }

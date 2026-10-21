@@ -9,11 +9,13 @@ import {
   recordFixture,
   setupFixture,
   startCareer as newGame,
+  talkToPlayer,
   TEAM_IDS,
   userFixtureToday,
 } from '@/sim/game'
 import type { Fixture } from '@/sim/league'
 import {
+  answerTradeOffer,
   evaluateTrade,
   executeTrade,
   makeOffer,
@@ -152,6 +154,21 @@ export function release(playerId: string): string | null {
   if (blocked) return blocked
   commit(releasePlayer(c, playerId))
   return null
+}
+
+/** Accept or decline an AI club's trade offer from the news feed. */
+export function respondToOffer(newsId: string, accept: boolean): string {
+  const c = current()
+  if (!c) return 'No career.'
+  const { career, message } = answerTradeOffer(c, newsId, accept)
+  commit(career)
+  return message
+}
+
+/** Have a word with an unhappy player. */
+export function talkTo(newsId: string) {
+  const c = current()
+  if (c) commit(talkToPlayer(c, newsId))
 }
 
 export function proposeTrade(give: string[], get: string[]): TradeAnswer {

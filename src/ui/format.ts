@@ -34,8 +34,34 @@ export const TRAIT_LABEL: Record<string, string> = {
   'big-hitter': 'Big Hitter',
   finisher: 'Finisher',
   'poor-vs-spin': 'Weak vs Spin',
-  'powerplay-specialist': 'Powerplay',
+  'spin-basher': 'Spin Basher',
+  'pace-hitter': 'Pace Hitter',
+  'powerplay-hitter': 'Powerplay Hitter',
+  'powerplay-specialist': 'New-ball Bowler',
   'death-bowler': 'Death Bowler',
+  'yorker-specialist': 'Yorker Specialist',
+  'swing-bowler': 'Swing',
+  'mystery-spinner': 'Mystery Spin',
+  'bouncer-specialist': 'Bouncer',
+  economical: 'Economical',
+}
+
+/** What each skill does in a match. */
+export const TRAIT_INFO: Record<string, string> = {
+  anchor: 'Rarely gets out; scores a bit slower.',
+  'big-hitter': 'Clears the rope far more often.',
+  finisher: 'More boundaries and fewer wickets at the death.',
+  'poor-vs-spin': 'Struggles against spin.',
+  'spin-basher': 'Attacks spinners: more boundaries, fewer wickets.',
+  'pace-hitter': 'Scores freely against pace.',
+  'powerplay-hitter': 'Goes hard in the first six overs.',
+  'powerplay-specialist': 'Takes wickets and keeps it tight with the new ball.',
+  'death-bowler': 'Harder to hit at the death.',
+  'yorker-specialist': 'Deadly with the Yorkers plan; tight at the death.',
+  'swing-bowler': 'More wickets in the powerplay.',
+  'mystery-spinner': 'Batters struggle to read him: more wickets and dots.',
+  'bouncer-specialist': 'Bouncers plan takes more wickets without leaking runs.',
+  economical: 'Concedes fewer boundaries.',
 }
 
 /** One line for the news ticker, most important first. */

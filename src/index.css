@@ -1242,3 +1242,223 @@ select.input {
   top: 10px;
   bottom: auto;
 }
+
+.tile-news {
+  font-size: 13px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.news li.action {
+  outline: 2px solid var(--warn);
+}
+
+/* --- Pick XI team sheet --------------------------------------------------------------- */
+
+.xi-intent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.seg {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.seg button {
+  min-height: 40px;
+  padding: 0 2px;
+  border-radius: 0;
+  background: transparent;
+  font-size: 14px;
+}
+
+.seg button.on {
+  background: var(--blue);
+  color: #fff;
+  font-weight: 600;
+}
+
+.xi-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.xi-head {
+  padding: 10px 12px 6px;
+}
+
+.xi-head .dim {
+  font-size: 13px;
+}
+
+.xi-tools {
+  display: flex;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--bg-deep);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.xi-tools button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.xi-row {
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 0;
+  background: transparent;
+  border-top: 1px solid var(--surface-2);
+  text-align: left;
+  font-weight: 400;
+}
+
+.xi-row.sel {
+  background: color-mix(in srgb, var(--blue) 35%, transparent);
+}
+
+.xi-row.bench {
+  opacity: 0.85;
+}
+
+.xi-num {
+  width: 24px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.xi-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.xi-main strong {
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.xi-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.role-tag {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 2px;
+  background: var(--bg-deep);
+  color: var(--accent);
+}
+
+/* --- Bowling controls ------------------------------------------------------------------- */
+
+.crease-panel.break {
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 14px;
+}
+
+.crease-panel.break strong {
+  font-family: var(--font-display);
+  font-size: 28px;
+}
+
+.crease-panel.break button {
+  width: 100%;
+}
+
+.bowl-ctl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid #2b375c;
+}
+
+.tactic {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.tactic .filters {
+  margin: 0;
+  padding: 0;
+}
+
+.tactic .filters button {
+  min-height: 34px;
+  background: #24304f;
+}
+
+.tactic .filters button.on,
+.seg.three button.on {
+  background: #2d63d6;
+}
+
+.seg.three {
+  grid-template-columns: repeat(3, 1fr);
+  background: #24304f;
+}
+
+.seg.three button {
+  min-height: 36px;
+}
+
+.choose-bowler {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bowler-pick {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: #24304f;
+  text-align: left;
+}
+
+.bowler-pick .who {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.bowler-pick .dim {
+  font-size: 12px;
+}

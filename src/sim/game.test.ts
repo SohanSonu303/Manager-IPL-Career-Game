@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { judgeSeason, objectiveForRank } from './board'
 import { daysToNextEvent, LEAGUE_ROUNDS, nextDay, SEASON, today } from './calendar'
-import type { Career } from './career'
+import { agePlayer, type Career } from './career'
+import { addNews } from './news'
 import {
   advanceDay,
+  talkToPlayer,
   continueBlocker,
   continueCareer,
   fixturesToday,
@@ -22,7 +24,8 @@ import {
   executeTrade,
   freeAgents,
   makeOffer,
-  MAX_ROUNDS,
+  agentOf,
+  answerTradeOffer,
   offerBlocker,
   releasePlayer,
   requiredSalary,
@@ -248,7 +251,7 @@ describe('market', () => {
     )
   })
 
-  it('negotiates: lowball rejected, near offer countered, meeting the counter signs', () => {
+  it('negotiates: lowball rejected, close offer met halfway, his counter signs', () => {
     const need = requiredSalary(c, best, 2, TEAM_IDS)
     const room = capRoom(c.players, me)
     expect(need).toBeLessThanOrEqual(room) // otherwise this test needs a cheaper target
@@ -259,14 +262,14 @@ describe('market', () => {
       TEAM_IDS,
     )
     expect(low.answer.kind).toBe('reject')
-    const near = makeOffer(
-      low.career,
-      best.id,
-      { salary: Math.floor(need * 0.9), years: 2 },
-      TEAM_IDS,
-    )
+    const offered = Math.floor(need * 0.82)
+    const near = makeOffer(low.career, best.id, { salary: offered, years: 2 }, TEAM_IDS)
+    if (near.answer.kind === 'accept') return // a very keen player may take it
     expect(near.answer.kind).toBe('counter')
     if (near.answer.kind !== 'counter') return
+    // Halfway between his ask and the offer, never above the ask.
+    expect(near.answer.salary).toBeLessThanOrEqual(need + 5)
+    expect(near.answer.salary).toBeGreaterThan(offered)
     const deal = makeOffer(
       near.career,
       best.id,
@@ -276,14 +279,31 @@ describe('market', () => {
     expect(deal.answer.kind).toBe('accept')
     const signed = deal.career.players.find((p) => p.id === best.id)
     expect(signed?.teamId).toBe(me)
-    expect(signed?.contract?.salary).toBe(near.answer.salary)
     expect(capRoom(deal.career.players, me)).toBe(room - near.answer.salary)
-    expect(deal.career.market.log.at(-1)?.kind).toBe('signed')
+    expect(deal.career.news.at(-1)?.kind).toBe('transfer')
   })
 
-  it(`walks away after ${MAX_ROUNDS} failed rounds`, () => {
+  it('agents differ: some keen (take less than their demand), some tough', () => {
+    const fas = freeAgents(c.players)
+    const labels = new Set(fas.map((p) => agentOf(c, p).label))
+    expect(labels.size).toBeGreaterThanOrEqual(2)
+    const keen = fas.find(
+      (p) =>
+        agentOf(c, p).greed < -0.08 && requiredSalary(c, p, 2, TEAM_IDS) <= capRoom(c.players, me),
+    )
+    if (keen) {
+      const need = requiredSalary(c, keen, 2, TEAM_IDS)
+      expect(
+        makeOffer(c, keen.id, { salary: Math.ceil((need * 0.95) / 5) * 5, years: 2 }, TEAM_IDS)
+          .answer.kind,
+      ).toBe('accept')
+    }
+  })
+
+  it('walks away when his patience runs out', () => {
     let x = c
-    for (let i = 0; i < MAX_ROUNDS; i++)
+    const patience = agentOf(c, best).patience
+    for (let i = 0; i < patience; i++)
       x = makeOffer(x, best.id, { salary: 20, years: 1 }, TEAM_IDS).career
     expect(x.market.talks[best.id]?.walkedAway).toBe(true)
     expect(offerBlocker(x, best.id, { salary: 20, years: 1 })).toMatch(/ended talks/)
@@ -396,5 +416,67 @@ describe('day helpers', () => {
     let c = start()
     while (c.calendar.year === 2026) c = advanceDay(c)
     expect(c.calendar.year).toBe(2027)
+  })
+})
+
+describe('living league: AI trades, offers, morale, news', () => {
+  const two = playUntilYear(start(5, 'del'), 2028)
+
+  it('AI clubs trade with each other and the news reports it', () => {
+    const aiTrades = two.news.filter(
+      (n) => n.kind === 'trade' && !n.teamIds.includes(two.manager.teamId),
+    )
+    expect(aiTrades.length).toBeGreaterThan(0)
+    for (const id of TEAM_IDS)
+      expect(squadOf(two.players, id).filter((p) => p.overseas).length).toBeLessThanOrEqual(8)
+  })
+
+  it('news covers the manager\u2019s results and the league', () => {
+    expect(two.news.some((n) => n.kind === 'result' && n.teamIds.includes('del'))).toBe(true)
+    expect(two.news.length).toBeGreaterThan(20)
+  })
+
+  it('accepting a trade offer swaps the players', () => {
+    let c = start(9, 'che')
+    for (let y = 2027; y <= 2030 && !c.news.some((n) => n.offer?.status === 'pending'); y++)
+      c = playUntilYear(c, y)
+    const offer = c.news.find((n) => n.offer?.status === 'pending')
+    if (!offer?.offer) return
+    const { career: after, message } = answerTradeOffer(c, offer.id, true)
+    expect(message).toBe('Trade done!')
+    expect(after.players.find((p) => p.id === offer.offer?.give[0])?.teamId).toBe(
+      offer.offer.fromTeamId,
+    )
+    expect(after.players.find((p) => p.id === offer.offer?.get[0])?.teamId).toBe('che')
+  })
+
+  it('a word with an unhappy player lifts his morale once', () => {
+    const c = start()
+    const p = c.players.find((x) => x.teamId === c.manager.teamId)!
+    const withItem = addNews(
+      { ...c, players: c.players.map((x) => (x.id === p.id ? { ...x, morale: 20 } : x)) },
+      {
+        kind: 'morale',
+        teamIds: [c.manager.teamId],
+        playerId: p.id,
+        text: 'unhappy',
+        talk: { playerId: p.id, done: false },
+      },
+    )
+    const id = withItem.news.at(-1)!.id
+    const talked = talkToPlayer(withItem, id)
+    expect(talked.players.find((x) => x.id === p.id)?.morale).toBe(35)
+    expect(talkToPlayer(talked, id)).toBe(talked)
+  })
+
+  it('career stats add up across seasons', () => {
+    const kohli = two.players.find((p) => p.name === 'Virat Kohli')
+    const stat = kohli && two.careerStats[kohli.id]
+    if (stat) expect(stat.matches).toBeGreaterThan(14)
+  })
+
+  it('form carries half into the new season', () => {
+    const p = { ...start().players[0]!, form: 80 }
+    expect(agePlayer(p, 1, 2026).form).toBe(65)
   })
 })

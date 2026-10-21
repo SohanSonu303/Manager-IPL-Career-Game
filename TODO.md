@@ -189,6 +189,20 @@ Reference direction (from the uploaded screenshots): scoreboard card on top, the
 - [ ] Changelog and known-issues page
 - [ ] Short demo script: new career, pick XI, sim a match, sign a player, play a season
 
+## Feedback round 1 (done)
+- [x] Negotiation: agent personalities (keen / fair / tough, hidden reservation, varied patience); counters meet you halfway
+- [x] Player sheet: season and career numbers (runs, avg, SR, HS, wickets, economy), morale, skills explained
+- [x] Hard innings stop: sim buttons never cross into the next innings; innings-break card
+- [x] Pick XI redesigned as a compact team sheet (tap to select, tap to swap, action strip)
+- [x] Bowling controls when you field: choose the bowler each over, field (attacking/balanced/defensive), bowler intent (contain/balanced/attack), plan (stock/yorkers/bouncers/wide line/variations); all affect the sim; field view follows the setting
+- [x] More skills (batting: spin basher, pace hitter, powerplay hitter; bowling: yorker specialist, swing, mystery spin, bouncer, economical) with sim effects; hand-set for ~80 well-known players
+- [x] Form carries half into the next season and is worth about ±6; playing time grows young players (season cap 4)
+- [x] Smarter AI: rests worn-out players, sets bowling tactics by phase and situation, trades with other AI clubs, sends you trade offers
+- [x] News centre (My club / League): results, milestones, injuries, transfers, trades, offers to accept, unhappy players to talk to, social-media drama, rumours
+- [x] Morale: drops when a regular is left out or underpaid; affects form and renewals
+- [x] Calibration re-tuned with AI tactics in play (all within about 2–4%)
+- [ ] Mid-season AI trades (currently only in the windows; mid-season has rumours)
+
 ## Open decisions
 - [x] League format: 14 matches each (IPL style). Revisit if needed
 - [ ] Game name; final franchise names (current ones are a first pass)

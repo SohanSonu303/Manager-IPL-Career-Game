@@ -6,14 +6,25 @@ export type Role = (typeof ROLES)[number]
 export const BOWLING_TYPES = ['pace', 'spin'] as const
 export type BowlingType = (typeof BOWLING_TYPES)[number]
 
-export const TRAITS = [
+export const BATTING_TRAITS = [
   'anchor',
   'big-hitter',
   'finisher',
   'poor-vs-spin',
+  'spin-basher',
+  'pace-hitter',
+  'powerplay-hitter',
+] as const
+export const BOWLING_TRAITS = [
   'powerplay-specialist',
   'death-bowler',
+  'yorker-specialist',
+  'swing-bowler',
+  'mystery-spinner',
+  'bouncer-specialist',
+  'economical',
 ] as const
+export const TRAITS = [...BATTING_TRAITS, ...BOWLING_TRAITS] as const
 export type Trait = (typeof TRAITS)[number]
 
 export const NATIONALITIES = ['IND', 'AUS', 'ENG', 'RSA', 'NZ', 'WI', 'AFG', 'SL', 'BAN'] as const

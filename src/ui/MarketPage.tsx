@@ -3,6 +3,7 @@ import { teamById, teams } from '@/data'
 import type { Career, CareerPlayer } from '@/sim/career'
 import { TEAM_IDS } from '@/sim/game'
 import {
+  agentOf,
   capRoom,
   freeAgents,
   isWindowOpen,
@@ -23,6 +24,9 @@ import { FilterChips, FILTERS, type Filter } from './SquadPage'
 import { useNextAction } from './useNextAction'
 
 type Tab = 'free' | 'squad' | 'trade' | 'log'
+
+const AGENT_TEXT = { Keen: 'keen to sign', Fair: 'fair', Tough: 'hard bargainer' } as const
+const AGENT_TONE = { Keen: 'good', Fair: 'plain', Tough: 'warn' } as const
 
 /** Free agents, renewals and releases, trades, and the transfer log. */
 export function MarketPage() {
@@ -174,6 +178,7 @@ function Negotiation({
   start: number
   onSigned: (message: string) => void
 }) {
+  const career = useGame((st) => st.career)
   const [salary, setSalary] = useState(start)
   const [years, setYears] = useState(preferredYears(player.age))
   const [answer, setAnswer] = useState<OfferAnswer | null>(null)
@@ -189,7 +194,14 @@ function Negotiation({
   }
   return (
     <div className="card" style={{ marginTop: 10 }}>
-      <strong>{renewal ? 'Renew contract' : 'Make an offer'}</strong>
+      <div className="row-between">
+        <strong>{renewal ? 'Renew contract' : 'Make an offer'}</strong>
+        {career && (
+          <Chip tone={AGENT_TONE[agentOf(career, player).label]}>
+            Agent: {AGENT_TEXT[agentOf(career, player).label]}
+          </Chip>
+        )}
+      </div>
       <label className="field">
         Salary per season (lakh) — wants {crore(start)}
         <input

@@ -10,6 +10,9 @@ import {
 import { nextDay, SEASON, today, type PlayoffStage } from './calendar'
 import { agePlayer, newCareer, restDay, type Career, type CareerPlayer } from './career'
 import {
+  type Fixture,
+  type SeasonStat,
+  type StandingRow,
   addMatchStats,
   computeStandings,
   finalists,
@@ -18,14 +21,15 @@ import {
   seasonAwards,
   toResult,
   walkover,
-  type Fixture,
-  type StandingRow,
 } from './league'
 import {
   aiSignings,
+  aiTradeOffers,
+  aiTrades,
   askingSalary,
   expireContracts,
   freeAgents,
+  isWindowOpen,
   retirementChance,
   squadOf,
   strengthRanking,
@@ -35,6 +39,9 @@ import { applyPostMatch } from './match/postMatch'
 import { autoTeamSheet, isAvailable, validateSheet, type Selectable } from './match/selection'
 import { setupMatch } from './match/setup'
 import type { MatchState, TeamSheet } from './match/types'
+import { matchNews } from './matchNews'
+import { addNews, updateNews } from './news'
+import { overallRating } from './player'
 import { createRng, deriveSeed } from './rng'
 
 /*
@@ -166,7 +173,7 @@ export function managerSheet(career: Career): TeamSheet {
 /** Store a finished match: post-match step for both squads, result, season stats. */
 export function recordFixture(career: Career, f: Fixture, state: MatchState): Career {
   const { players } = applyPostMatch(career.players, state, deriveSeed(career.seed, 'post', f.id))
-  return {
+  const after: Career = {
     ...career,
     players,
     season: {
@@ -175,6 +182,42 @@ export function recordFixture(career: Career, f: Fixture, state: MatchState): Ca
       stats: addMatchStats(career.season.stats, state),
     },
   }
+  return addNews(
+    after,
+    ...matchNews(career, after, f, state, createRng(deriveSeed(career.seed, 'news', f.id))),
+  )
+}
+
+/** A word with an unhappy player: lifts his morale (once per complaint). */
+export function talkToPlayer(career: Career, newsId: string): Career {
+  const item = career.news.find((n) => n.id === newsId)
+  if (!item?.talk || item.talk.done) return career
+  const id = item.talk.playerId
+  const c = {
+    ...career,
+    players: career.players.map((p) =>
+      p.id === id ? { ...p, morale: Math.min(100, p.morale + 15) } : p,
+    ),
+  }
+  return updateNews(c, newsId, (n) => ({ ...n, talk: { playerId: id, done: true } }))
+}
+
+/** Pending trade offers lapse when the window shuts. */
+function expireOffers(career: Career): Career {
+  if (!career.news.some((n) => n.offer?.status === 'pending')) return career
+  return {
+    ...career,
+    news: career.news.map((n) =>
+      n.offer?.status === 'pending' ? { ...n, offer: { ...n.offer, status: 'expired' } } : n,
+    ),
+  }
+}
+
+/** The AI clubs' business in a transfer window: trades among themselves, offers to you. */
+function windowBusiness(career: Career, tag: string): Career {
+  let c = aiTrades(career, TEAM_IDS, createRng(deriveSeed(career.seed, 'ai-trade', tag)))
+  c = aiTradeOffers(c, TEAM_IDS, createRng(deriveSeed(career.seed, 'ai-offer', tag)))
+  return c
 }
 
 /** Play a fixture without watching it (AI picks and bats for both sides). */
@@ -238,13 +281,18 @@ export function advanceDay(career: Career): Career {
  */
 export function continueCareer(career: Career): Career {
   if (continueBlocker(career)) return career
+  const wasOpen = isWindowOpen(career)
   let c = playToday(career)
   do {
     const year = c.calendar.year
     c = advanceDay(c)
     if (c.calendar.year !== year) return c
   } while (!SEASON[c.calendar.day]?.event)
-  if (today(c.calendar).event?.type === 'seasonEnd' && !c.season.review) c = finishSeason(c)
+  if (wasOpen && !isWindowOpen(c)) c = expireOffers(c)
+  if (today(c.calendar).event?.type === 'seasonEnd' && !c.season.review) {
+    c = finishSeason(c)
+    c = windowBusiness(c, `${c.calendar.year}-end`)
+  }
   return c
 }
 
@@ -309,10 +357,40 @@ export function rollover(career: Career, endedYear: number): Career {
     }
     return true
   })
-  let c: Career = { ...career, players: staying }
+  // Morale settles over the off-season; underpaid players want a new deal.
+  const settled = staying.map((p) => {
+    const underpaid = p.contract && askingSalary(p) > p.contract.salary * 1.6
+    return { ...p, morale: 65 + (p.morale - 65) * 0.5 - (underpaid ? 10 : 0) }
+  })
+  const me = career.manager.teamId
+  let c: Career = expireOffers({
+    ...career,
+    players: settled,
+    careerStats: mergeStats(career.careerStats, career.season.stats),
+  })
+  c = addNews(
+    c,
+    ...retired
+      .filter((p) => p.teamId === me || overallRating(p) >= 75)
+      .map((p) => ({
+        kind: 'contract' as const,
+        teamIds: [p.teamId ?? me],
+        playerId: p.id,
+        text: `${p.name} retires from T20 cricket.`,
+      })),
+    ...settled
+      .filter((p) => p.teamId === me && p.contract && askingSalary(p) > p.contract.salary * 1.6)
+      .map((p) => ({
+        kind: 'morale' as const,
+        teamIds: [me],
+        playerId: p.id,
+        text: `${p.name} feels underpaid and wants a new deal.`,
+      })),
+  )
   c = expireContracts(c, createRng(deriveSeed(career.seed, 'expire', endedYear)))
   c = aiSignings(c, TEAM_IDS, createRng(deriveSeed(career.seed, 'ai-sign', endedYear)))
   for (const id of TEAM_IDS) c = ensureEleven(c, id)
+  c = windowBusiness(c, `${endedYear + 1}-pre`)
   const review = career.season.review
   return {
     ...c,
@@ -322,6 +400,31 @@ export function rollover(career: Career, endedYear: number): Career {
     season: { results: [], stats: {}, objective: objectiveFor(c), review: null },
     market: { ...c.market, talks: {} },
   }
+}
+
+/** Add a finished season's numbers to career totals. */
+export function mergeStats(total: Record<string, SeasonStat>, season: Record<string, SeasonStat>) {
+  const out = { ...total }
+  for (const [id, s] of Object.entries(season)) {
+    const t = out[id]
+    out[id] = t
+      ? {
+          ...s,
+          matches: t.matches + s.matches,
+          runs: t.runs + s.runs,
+          balls: t.balls + s.balls,
+          outs: t.outs + s.outs,
+          fours: t.fours + s.fours,
+          sixes: t.sixes + s.sixes,
+          highScore: Math.max(t.highScore, s.highScore),
+          wickets: t.wickets + s.wickets,
+          ballsBowled: t.ballsBowled + s.ballsBowled,
+          runsConceded: t.runsConceded + s.runsConceded,
+          gradeSum: t.gradeSum + s.gradeSum,
+        }
+      : s
+  }
+  return out
 }
 
 /** Day label helper for the UI. */

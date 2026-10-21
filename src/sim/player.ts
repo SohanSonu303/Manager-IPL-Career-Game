@@ -130,16 +130,20 @@ export function formAfterMatch(form: number, grade: number): number {
 }
 
 /** Idle days pull form slowly back towards neutral. */
-export function driftForm(form: number, days = 1): number {
-  return 50 + (form - 50) * 0.98 ** days
+export function driftForm(form: number, days = 1, target = 50): number {
+  return target + (form - target) * 0.985 ** days
 }
+
+/** Where form settles when a player isn't playing: happy players stay sharper. */
+export const formTarget = (morale: number) => 50 + (morale - 50) * 0.15
 
 /**
  * A skill as it plays today: ability adjusted by form (±5) and a penalty when tired
  * (below 70 fitness). Used by selection and, later, by the ball-by-ball sim.
  */
 export function effectiveRating(skill: number, c: Condition): number {
-  const formAdj = (c.form - 50) / 10
+  // In-form players play well above their rating (up to about ±6).
+  const formAdj = (c.form - 50) / 8
   const fatigue = c.fitness < 70 ? (70 - c.fitness) * 0.2 : 0
   return clamp(skill + formAdj - fatigue)
 }

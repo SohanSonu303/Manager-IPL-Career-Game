@@ -27,6 +27,7 @@ import {
   shuffle,
 } from '../src/sim/rng.ts'
 import { realPlayers } from './source/real-players.ts'
+import { knownTraits } from './source/known-traits.ts'
 import { sourceTeams } from './source/teams.ts'
 
 const SEED = 20261
@@ -82,7 +83,12 @@ function makeRatings(d: Draft): Player['ratings'] {
   return { batting: clamp(batting), bowling: clamp(bowling), fielding: clamp(fielding) }
 }
 
+/**
+ * Skills: hand-set for well-known players (scripts/source/known-traits.ts), otherwise
+ * generated from role and ratings. Up to two per player.
+ */
 function makeTraits(d: Draft, r: Player['ratings']): Trait[] {
+  // Always roll, so the random sequence doesn't depend on the hand-set list.
   const traits: Trait[] = []
   const bats = d.role !== 'bowler'
   if (bats && r.batting >= 62) {
@@ -90,7 +96,10 @@ function makeTraits(d: Draft, r: Player['ratings']): Trait[] {
       ['big-hitter', 3],
       ['anchor', 2],
       ['finisher', 2],
-      [null, 4],
+      ['powerplay-hitter', 2],
+      ['spin-basher', 1.5],
+      ['pace-hitter', 1.5],
+      [null, 5],
     ] as const)
     if (style) traits.push(style)
   }
@@ -99,13 +108,24 @@ function makeTraits(d: Draft, r: Player['ratings']): Trait[] {
     const style = pickWeighted(rng, [
       ['death-bowler', 2],
       ['powerplay-specialist', 2],
-      [null, 3],
+      ['yorker-specialist', 1],
+      ['swing-bowler', 1.5],
+      ['bouncer-specialist', 1],
+      ['economical', 1],
+      [null, 4],
     ] as const)
     if (style) traits.push(style)
   }
-  return traits
+  if (d.bowlingType === 'spin' && r.bowling >= 60 && traits.length < 2) {
+    const style = pickWeighted(rng, [
+      ['mystery-spinner', 1],
+      ['economical', 2],
+      [null, 4],
+    ] as const)
+    if (style) traits.push(style)
+  }
+  return knownTraits[d.name] ?? traits
 }
-
 
 // --- Build the pool ---------------------------------------------------------
 

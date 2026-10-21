@@ -38,9 +38,26 @@ export interface TeamSheet {
   intent: Record<string, Aggression>
   /** Optional planned bowler per over (20 entries); null or missing = AI choice. */
   bowlingPlan?: (string | null)[]
+  /** Bowling tactics in force (set live by the manager, or per over by the AI). */
+  field: FieldSetting
+  bowlIntent: BowlIntent
+  bowlPlan: BowlPlan
   /** True if the AI sets this side's intent and bowling. */
   ai: boolean
 }
+
+/** Field placement: more catchers in the ring, or more boundary riders. */
+export const FIELD_SETTINGS = ['attacking', 'balanced', 'defensive'] as const
+export type FieldSetting = (typeof FIELD_SETTINGS)[number]
+
+/** How hard the bowler tries to take wickets versus keeping it tight. */
+export const BOWL_INTENTS = ['contain', 'balanced', 'attack'] as const
+export type BowlIntent = (typeof BOWL_INTENTS)[number]
+export const bowlIntentValue = (b: BowlIntent): number => BOWL_INTENTS.indexOf(b) - 1
+
+/** Line and length plan for the over. */
+export const BOWL_PLANS = ['stock', 'yorkers', 'bouncers', 'wide', 'variations'] as const
+export type BowlPlan = (typeof BOWL_PLANS)[number]
 
 export interface Pitch {
   /** -1..1: helps pace bowlers. */
