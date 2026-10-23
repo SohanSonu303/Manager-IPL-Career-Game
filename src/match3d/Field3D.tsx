@@ -55,7 +55,8 @@ function useCanvasTexture(
 }
 
 function Camera({ radius }: { radius: number }) {
-  const width = useThree((s) => s.size.width)
+  // Fit the whole stadium in the smaller side, so a short, wide view shows all of it.
+  const side = useThree((s) => Math.min(s.size.width, s.size.height))
   const extent = radius + STANDS_GAP + STANDS_DEPTH - 2
   return (
     <OrthographicCamera
@@ -64,7 +65,7 @@ function Camera({ radius }: { radius: number }) {
       up={[0, 0, -1]}
       near={1}
       far={400}
-      zoom={width / (2 * extent)}
+      zoom={side / (2 * extent)}
       onUpdate={(c) => c.lookAt(0, 0, 0)}
     />
   )

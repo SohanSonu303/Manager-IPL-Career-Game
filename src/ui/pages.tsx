@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { explainLot } from '@/sim/auction'
 import { SAVE_VERSION } from '@/state/save'
 import { downloadSave } from '@/state/storage'
 import { importSave, resetCareer, simToSeasonEnd, useGame } from '@/state/store'
@@ -21,6 +22,17 @@ export function Debug() {
             Seed {career.seed} · {career.calendar.year} day {career.calendar.day}
           </p>
           <button onClick={simToSeasonEnd}>Quick-sim to the end of this season</button>
+          {career.mega?.lot && (
+            <>
+              <h2 className="section">Auction AI: the player on the block</h2>
+              <p className="dim">Why each club is in or out (developer view).</p>
+              {explainLot(career).map((d) => (
+                <pre key={d.teamId} className="error-detail" style={{ color: 'var(--text)' }}>
+                  {d.text}
+                </pre>
+              ))}
+            </>
+          )}
         </>
       )}
       <MatchDebug />

@@ -33,7 +33,22 @@ export function PlayerRow({
   const team = p.teamId ? teamById.get(p.teamId) : undefined
   const Tag = as
   return (
-    <Tag className={`prow ${picked ? 'picked' : ''}`} onClick={onClick}>
+    <Tag
+      className={`prow ${picked ? 'picked' : ''}`}
+      onClick={onClick}
+      {...(as === 'div' && onClick
+        ? {
+            role: 'button',
+            tabIndex: 0,
+            onKeyDown: (e: React.KeyboardEvent) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onClick()
+              }
+            },
+          }
+        : {})}
+    >
       <Avatar
         seed={p.id}
         nationality={p.nationality}

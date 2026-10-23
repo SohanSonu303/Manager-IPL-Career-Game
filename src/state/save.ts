@@ -1,12 +1,13 @@
 import { START_CONFIDENCE, START_REPUTATION } from '@/sim/board'
 import type { Career } from '@/sim/career'
 import { objectiveFor } from '@/sim/game'
+import { rerollFreeAgents } from '@/sim/market'
 
 /**
  * Save file format. Bump SAVE_VERSION whenever the `Career` shape changes, and add a
  * migration from the previous version to MIGRATIONS.
  */
-export const SAVE_VERSION = 5
+export const SAVE_VERSION = 7
 
 export interface SaveFile {
   version: number
@@ -54,6 +55,31 @@ export const MIGRATIONS: Record<number, Migration> = {
   4: (s) => {
     const career = s.career as Record<string, unknown>
     return { ...s, version: 5, career: { achievements: {}, ...career } }
+  },
+  // v6: the mega auction and a limited free-agent market.
+  5: (s) => {
+    const career = s.career as unknown as Career
+    const upgraded = rerollFreeAgents(
+      { ...career, mega: null, market: { ...career.market, freeAgentIds: [] } },
+      'migrate',
+    )
+    return { ...s, version: 6, career: upgraded }
+  },
+  // v7: an auction in progress keeps a shortlist with max prices (it was a list of starred ids).
+  6: (s) => {
+    const career = s.career as Record<string, unknown>
+    const mega = career.mega as Record<string, unknown> | null | undefined
+    if (!mega) return { ...s, version: 7 }
+    const { targets: _targets, ...rest } = mega
+    void _targets
+    return {
+      ...s,
+      version: 7,
+      career: {
+        ...career,
+        mega: { shortlist: {}, stopForShortlist: false, autoBid: true, ...rest },
+      },
+    }
   },
 }
 

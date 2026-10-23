@@ -1,10 +1,27 @@
 import { create } from 'zustand'
 import { careerAchievements, unlock } from '@/sim/achievements'
+import {
+  autoAuction,
+  confirmRetention,
+  nextLot,
+  retentionBlocker,
+  defaultMax,
+  setAutoBid,
+  setShortlist,
+  setStopForShortlist,
+  simAuction,
+  type SimResult,
+  hammer,
+  placeBid,
+  rivalRaise,
+  userPass,
+} from '@/sim/auction'
 import { today } from '@/sim/calendar'
 import type { Career, Lineup } from '@/sim/career'
 import {
   continueCareer,
   ensureEleven,
+  finishMega,
   playToday,
   quickSim,
   recordFixture,
@@ -182,6 +199,78 @@ export function proposeTrade(give: string[], get: string[]): TradeAnswer {
   const answer = evaluateTrade(c, give, get)
   if (answer.ok) commit(executeTrade(c, give, get))
   return answer
+}
+
+// --- Mega auction -----------------------------------------------------------------
+
+/** Run a pure auction step on the saved career and save the result. */
+function auctionStep(step: (c: Career) => Career) {
+  const c = current()
+  if (c?.mega) commit(step(c))
+}
+
+/** Lock in the manager's retentions (the AI clubs keep theirs) and open the auction. */
+export function retainPlayers(ids: string[]): string | null {
+  const c = current()
+  if (!c) return 'No career.'
+  const blocked = retentionBlocker(c, ids)
+  if (blocked) return blocked
+  commit(nextLot(confirmRetention(c, ids)))
+  return null
+}
+
+export const auctionNextLot = () => auctionStep(nextLot)
+/** The manager raises; the rivals answer on the auction clock. */
+export const auctionBid = () => auctionStep(placeBid)
+export const auctionPass = () => auctionStep(userPass)
+export const auctionHammer = () => auctionStep(hammer)
+
+/** One rival's turn on the clock. True if someone raised. */
+export function auctionRivalRaise(): boolean {
+  const c = current()
+  if (!c?.mega?.lot) return false
+  const r = rivalRaise(c)
+  if (r.raised) commit(r.career)
+  return r.raised
+}
+/** Shortlist a player with the most he may cost (null: take him off). */
+export const auctionShortlist = (playerId: string, max: number | null) =>
+  auctionStep((c) => setShortlist(c, playerId, max))
+/** Star or unstar a player; a new star starts at a little over his market value. */
+export function auctionToggleStar(playerId: string) {
+  auctionStep((c) => {
+    const p = c.players.find((x) => x.id === playerId)
+    if (!p) return c
+    return setShortlist(
+      c,
+      playerId,
+      c.mega?.shortlist[playerId] === undefined ? defaultMax(p) : null,
+    )
+  })
+}
+export const auctionAutoBid = (on: boolean) => auctionStep((c) => setAutoBid(c, on))
+export const auctionStopForShortlist = (on: boolean) =>
+  auctionStep((c) => setStopForShortlist(c, on))
+
+export type SimReport = Omit<SimResult, 'career'>
+
+/** Sim on: just this lot (no argument), up to a set, or to the end. */
+export function auctionSim(toSet?: number | 'end'): SimReport | null {
+  const c = current()
+  if (!c?.mega) return null
+  const { career, ...report } = simAuction(c, toSet)
+  commit(career)
+  return report
+}
+
+/** Hands-off: sensible retentions, the captain bids, to the end. */
+export function auctionAuto() {
+  auctionStep(autoAuction)
+}
+
+/** Close the auction: squads are topped up and the new season can start. */
+export function auctionFinish() {
+  auctionStep(finishMega)
 }
 
 // --- Debug friendlies and saves ------------------------------------------------------

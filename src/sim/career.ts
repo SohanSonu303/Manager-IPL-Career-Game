@@ -4,6 +4,7 @@ import type { Awards, FixtureResult, SeasonStat, StandingRow } from './league'
 import type { NewsItem } from './news'
 import { START_CONFIDENCE, START_REPUTATION, type Finish, type Objective } from './board'
 import type { CalendarState } from './calendar'
+import type { MegaState } from './auction'
 import type { Aggression } from './match/types'
 import { developRatings, driftForm, formTarget, recoverFitness, type Condition } from './player'
 import { createRng, deriveSeed, randInt } from './rng'
@@ -77,7 +78,11 @@ export interface Career {
     /** Contract talks this window, per player. */
     talks: Record<string, { rounds: number; walkedAway: boolean; ask?: number }>
     log: TransferLog[]
+    /** The free agents on offer this season (at most 14; rerolled every season). */
+    freeAgentIds: string[]
   }
+  /** The mega auction in progress (retention, then the auction), or null. */
+  mega: MegaState | null
   status: 'active' | 'sacked'
   /** The manager's chosen XI (optional; auto-pick is used when missing or invalid). */
   lineup?: Lineup
@@ -122,7 +127,8 @@ export function newCareer(opts: {
     })),
     season: { results: [], stats: {}, objective: opts.objective, review: null },
     history: [],
-    market: { talks: {}, log: [] },
+    market: { talks: {}, log: [], freeAgentIds: [] },
+    mega: null,
     status: 'active',
     news: [],
     careerStats: {},

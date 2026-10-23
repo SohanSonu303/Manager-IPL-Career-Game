@@ -3,7 +3,7 @@ import type { Career, CareerPlayer } from './career'
 import { autoPickXI } from './match/selection'
 import { overallRating } from './player'
 import { addNews, updateNews } from './news'
-import { createRng, deriveSeed, randInt, shuffle, type Rng } from './rng'
+import { createRng, deriveSeed, pickWeighted, randInt, shuffle, type Rng } from './rng'
 import { teams } from '../data'
 
 const teamLabel = (id: string) => teams.find((t) => t.id === id)?.short ?? id
@@ -22,7 +22,50 @@ export const SQUAD_OVERSEAS_MAX = 8
 
 export const squadOf = (players: CareerPlayer[], teamId: string) =>
   players.filter((p) => p.teamId === teamId)
+/** Everyone without a club. Only some of them are on the market (see `marketAgents`). */
 export const freeAgents = (players: CareerPlayer[]) => players.filter((p) => p.teamId === null)
+
+/** Free agents on offer in one season; the rest of the unsigned are playing elsewhere. */
+export const FREE_AGENT_MAX = 14
+
+/** The free agents the manager can sign right now. */
+export function marketAgents(career: Career): CareerPlayer[] {
+  const ids = new Set(career.market.freeAgentIds)
+  return career.players.filter((p) => p.teamId === null && ids.has(p.id))
+}
+
+/**
+ * Draw the season's free agents from everyone unsigned: 10 to 14 names, at least one
+ * keeper and a few bowlers if there are any, better players more likely, and last
+ * season's unsold names less likely so the list looks different each year.
+ */
+export function rerollFreeAgents(career: Career, tag: string | number): Career {
+  const rng = createRng(deriveSeed(career.seed, 'fa-reroll', tag))
+  const before = new Set(career.market.freeAgentIds)
+  const pool = freeAgents(career.players)
+  const want = Math.min(pool.length, randInt(rng, 10, FREE_AGENT_MAX))
+  const chosen: CareerPlayer[] = []
+  const draw = (from: CareerPlayer[]) => {
+    const left = from.filter((p) => !chosen.includes(p))
+    if (!left.length) return
+    chosen.push(
+      pickWeighted(
+        rng,
+        left.map((p) => [
+          p,
+          Math.max(1, overallRating(p) - 35) ** 1.5 * (before.has(p.id) ? 0.35 : 1),
+        ]),
+      ),
+    )
+  }
+  draw(pool.filter((p) => p.role === 'wicketkeeper'))
+  for (let i = 0; i < 3; i++) draw(pool.filter((p) => p.role === 'bowler'))
+  while (chosen.length < want) draw(pool)
+  return {
+    ...career,
+    market: { ...career.market, freeAgentIds: chosen.slice(0, want).map((p) => p.id) },
+  }
+}
 export const payroll = (players: CareerPlayer[], teamId: string) =>
   squadOf(players, teamId).reduce((s, p) => s + (p.contract?.salary ?? 0), 0)
 export const capRoom = (players: CareerPlayer[], teamId: string) =>
@@ -99,11 +142,15 @@ export function offerBlocker(career: Career, playerId: string, offer: Offer): st
   const teamId = career.manager.teamId
   const p = career.players.find((x) => x.id === playerId)
   if (!p) return 'Player not found.'
-  if (!isWindowOpen(career))
-    return 'The market is closed. Sign players in the preseason or after the season.'
+  if (career.mega) return 'The mega auction is under way. Finish it first.'
   const renewal = p.teamId === teamId
   if (p.teamId !== null && !renewal)
     return `${p.name} is under contract with another club. Try a trade.`
+  // Free agents can be signed all year; renewals wait for the preseason or the season's end.
+  if (renewal && !isWindowOpen(career))
+    return 'Contracts can be renewed in the preseason or after the season.'
+  if (!renewal && !career.market.freeAgentIds.includes(p.id))
+    return `${p.name} is not on the market this season.`
   if (renewal && (p.contract?.years ?? 0) > 1)
     return `${p.name} still has ${p.contract?.years} seasons left.`
   if (career.market.talks[playerId]?.walkedAway) return `${p.name} has ended talks for now.`
@@ -279,8 +326,7 @@ export function releaseBlocker(career: Career, playerId: string): string | null 
   const teamId = career.manager.teamId
   const p = career.players.find((x) => x.id === playerId)
   if (!p || p.teamId !== teamId) return 'Not your player.'
-  if (!isWindowOpen(career))
-    return 'You can only release players in the preseason or after the season.'
+  if (career.mega) return 'The mega auction is under way. Finish it first.'
   if (squadOf(career.players, teamId).length <= SQUAD_MIN)
     return `Your squad needs at least ${SQUAD_MIN} players.`
   return null
@@ -299,6 +345,18 @@ export function releasePlayer(career: Career, playerId: string): Career {
   })
 }
 
+/** Put a player on the market; if that makes more than 14, the weakest other one leaves. */
+function withAgent(ids: string[], players: CareerPlayer[], playerId: string): string[] {
+  const next = [...ids.filter((id) => id !== playerId), playerId]
+  if (next.length <= FREE_AGENT_MAX) return next
+  const rating = (id: string) => {
+    const p = players.find((x) => x.id === id)
+    return p ? overallRating(p) : 0
+  }
+  const weakest = next.filter((id) => id !== playerId).sort((a, b) => rating(a) - rating(b))[0]
+  return next.filter((id) => id !== weakest)
+}
+
 function released(career: Career, playerId: string): Career {
   return {
     ...career,
@@ -307,6 +365,8 @@ function released(career: Career, playerId: string): Career {
     ),
     market: {
       ...career.market,
+      // A player you let go is on offer to everyone until the next reroll.
+      freeAgentIds: withAgent(career.market.freeAgentIds, career.players, playerId),
       log: [
         ...career.market.log,
         {
@@ -323,8 +383,13 @@ function released(career: Career, playerId: string): Career {
 
 // --- Market window -----------------------------------------------------------
 
-/** Signings, releases and trades happen in the preseason and after the season. */
+/**
+ * The off-season window (preseason and the season's end): trades, and renewals of
+ * expiring contracts. Free agents can be signed and players released at any time.
+ * Shut while a mega auction is under way.
+ */
 export function isWindowOpen(career: Career): boolean {
+  if (career.mega) return false
   const phase = today(career.calendar).phase
   return phase === 'preseason' || phase === 'offseason'
 }
@@ -357,7 +422,12 @@ function squadProblem(players: CareerPlayer[], teamId: string, sizeBefore: numbe
 export function evaluateTrade(career: Career, give: string[], get: string[]): TradeAnswer {
   const me = career.manager.teamId
   if (!isWindowOpen(career))
-    return { ok: false, reason: 'Trades happen in the preseason or after the season.' }
+    return {
+      ok: false,
+      reason: career.mega
+        ? 'The mega auction is under way.'
+        : 'Trades happen in the preseason or after the season.',
+    }
   if (!give.length || !get.length) return { ok: false, reason: 'Pick players on both sides.' }
   const byId = new Map(career.players.map((p) => [p.id, p]))
   const out = give.map((id) => byId.get(id))
@@ -427,7 +497,7 @@ export function doTrade(
 }
 
 /** Ideal squad shape the AI aims for when it trades. */
-const IDEAL: Record<CareerPlayer['role'], number> = {
+export const IDEAL: Record<CareerPlayer['role'], number> = {
   wicketkeeper: 2,
   batter: 5,
   allrounder: 4,

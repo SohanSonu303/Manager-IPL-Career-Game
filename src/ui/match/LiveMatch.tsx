@@ -45,7 +45,7 @@ import { Avatar } from '../identity/Avatar'
 import { ringStatus } from '../identity/avatarSpec'
 import { Crest } from '../identity/Crest'
 import { Icon } from '../kit/Icon'
-import { Chip, Screen, Sheet, StatBar, type Action } from '../kit/kit'
+import { Screen, Sheet, StatBar, type Action } from '../kit/kit'
 import { commentary } from './commentary'
 import { INTENT_LABEL, Scorecard, WinWorm } from './MatchView'
 import { readViewMode, type ViewMode } from './viewMode'
@@ -152,17 +152,109 @@ export function LiveMatch({
     bowlColor: bowlTeam?.colors.primary ?? '#ffffff',
     reducedMotion: prefersReducedMotion(),
   }
-  const waitingOnMe = !!review || tossToCall
+  const dock = state.result ? null : tossToCall ? (
+    <div className="dock play-dock decision" role="group" aria-label="Toss">
+      <span className="dock-caption">You won the toss</span>
+      <div className="dock-row">
+        <button
+          className="pd-btn text main"
+          onClick={() => {
+            decideToss(state, 'bat')
+            refresh()
+          }}
+        >
+          <b>Bat first</b>
+        </button>
+        <button
+          className="pd-btn text"
+          onClick={() => {
+            decideToss(state, 'field')
+            refresh()
+          }}
+        >
+          <b>Bowl first</b>
+        </button>
+      </div>
+    </div>
+  ) : review ? (
+    <div className="dock play-dock decision" role="group" aria-label="Review decision">
+      <span className="dock-caption">
+        DRS · {inn.reviews?.[me] ?? 0} review{(inn.reviews?.[me] ?? 0) === 1 ? '' : 's'} left
+      </span>
+      <div className="dock-row">
+        <button
+          className="pd-btn text main"
+          onClick={() => {
+            resolveReview(state, true)
+            refresh()
+          }}
+        >
+          <b>Review</b>
+        </button>
+        <button
+          className="pd-btn text"
+          onClick={() => {
+            resolveReview(state, false)
+            refresh()
+          }}
+        >
+          <b>{review.call === 'out' ? 'Walk off' : 'Accept'}</b>
+        </button>
+      </div>
+    </div>
+  ) : atInningsBreak(state) ? (
+    <div className="dock play-dock decision" role="group" aria-label="Innings break">
+      <div className="dock-row">
+        <button
+          className="pd-btn text main"
+          onClick={() => {
+            startNextInnings(state)
+            refresh()
+          }}
+        >
+          <b>{state.innings.length >= 2 ? 'Start super over' : 'Start 2nd innings'}</b>
+        </button>
+      </div>
+    </div>
+  ) : (
+    <div className="dock play-dock stack" role="group" aria-label="Sim controls">
+      <div className="dock-row">
+        <button className="pd-btn" onClick={() => step(simBall)}>
+          <b>1</b>
+          <small>BALL</small>
+        </button>
+        <button className="pd-btn main" onClick={() => step(simOver)}>
+          <b>1</b>
+          <small>OVER</small>
+        </button>
+        <button className="pd-btn" onClick={() => step((s, r) => simOvers(s, r, 5))}>
+          <b>5</b>
+          <small>OVERS</small>
+        </button>
+        <button className="pd-btn" onClick={() => step(simInnings)}>
+          <b>
+            <Icon name="play" size={22} />
+          </b>
+          <small>INNINGS</small>
+        </button>
+      </div>
+      <button
+        className="dock-tool quiet"
+        onClick={() => {
+          if (confirm('Play the rest of the match without stopping?')) step(simMatch)
+        }}
+      >
+        Play the rest of the match
+      </button>
+    </div>
+  )
 
   return (
     <Screen
-      className="match-screen"
+      className={`match-screen ${inn.bowlingTeamId === me && !state.result ? 'bowling-view' : ''}`}
       back={back}
-      primary={
-        state.result
-          ? finish
-          : { label: 'Sim Match', onClick: () => step(simMatch), disabled: tossToCall }
-      }
+      dock={dock}
+      primary={state.result ? finish : null}
     >
       <div className="scorebug">
         <span className="side">
@@ -219,7 +311,7 @@ export function LiveMatch({
         ))}
       </div>
 
-      <div className="field-wrap">
+      <div className={`field-wrap ${inn.bowlingTeamId === me ? 'compact' : ''}`}>
         {use3d ? (
           <Suspense fallback={<Field2D {...fieldProps} />}>
             <Field3D
@@ -258,26 +350,6 @@ export function LiveMatch({
             {capitalize(describePitch(state.pitch))}. {dewText(dew)} in the second innings
             {dew > 0.6 ? ': the ball will be wet for whoever bowls second' : ''}.
           </span>
-          <div className="button-row">
-            <button
-              className="primary"
-              onClick={() => {
-                decideToss(state, 'bat')
-                refresh()
-              }}
-            >
-              Bat first
-            </button>
-            <button
-              className="primary"
-              onClick={() => {
-                decideToss(state, 'field')
-                refresh()
-              }}
-            >
-              Bowl first
-            </button>
-          </div>
         </div>
       )}
 
@@ -296,25 +368,6 @@ export function LiveMatch({
               ? 'Review it? If the decision stands you lose a review.'
               : 'Send it upstairs? If the decision stands you lose a review.'}
           </span>
-          <div className="button-row">
-            <button
-              className="primary"
-              onClick={() => {
-                resolveReview(state, true)
-                refresh()
-              }}
-            >
-              Review
-            </button>
-            <button
-              onClick={() => {
-                resolveReview(state, false)
-                refresh()
-              }}
-            >
-              {review.call === 'out' ? 'Walk off' : 'Accept'}
-            </button>
-          </div>
         </div>
       )}
 
@@ -331,48 +384,42 @@ export function LiveMatch({
             {inn.maxOvers === 1 ? ' the super over' : ''}.
           </span>
           {canImpact && <ImpactHint state={state} me={me} onOpen={() => setImpactOpen(true)} />}
-          <button
-            className="primary"
-            onClick={() => {
-              startNextInnings(state)
-              refresh()
-            }}
-          >
-            {state.innings.length >= 2 ? 'Start super over' : 'Start 2nd innings'}
-          </button>
         </div>
       )}
 
       {!state.result && !atInningsBreak(state) && !tossToCall && (
         <>
-          <div className="crease-panel">
-            <span className="label">
-              BATTING · {teamShort(inn.battingTeamId)} reviews{' '}
-              {inn.reviews?.[inn.battingTeamId] ?? 0}
-            </span>
-            {[inn.strikerId, inn.nonStrikerId].map((id) => (
-              <BatRow
-                key={id}
-                p={people.get(id)}
-                name={state.players[id]?.name ?? ''}
-                line={inn.batting[id]}
-                onStrike={id === inn.strikerId}
-                human={inn.battingTeamId === me}
-                intent={
-                  state.sheets[inn.battingTeamId]?.intent[id] ??
-                  state.sheets[inn.battingTeamId]?.aggression ??
-                  'balanced'
-                }
-                onIntent={(d) => {
-                  setLiveIntent(state, me, id, d)
-                  refresh()
-                }}
-              />
-            ))}
-            <span className="label">BOWLING</span>
-            <BowlRow state={state} people={people} />
-            {inn.bowlingTeamId === me && !review && (
-              <BowlingControls state={state} me={me} people={people} onChange={refresh} />
+          <div className={`crease-panel ${inn.bowlingTeamId === me ? 'bowling' : ''}`}>
+            {inn.bowlingTeamId === me ? (
+              <BowlingPanel state={state} me={me} people={people} onChange={refresh} />
+            ) : (
+              <>
+                <span className="label">
+                  BATTING · {teamShort(inn.battingTeamId)} reviews{' '}
+                  {inn.reviews?.[inn.battingTeamId] ?? 0}
+                </span>
+                {[inn.strikerId, inn.nonStrikerId].map((id) => (
+                  <BatRow
+                    key={id}
+                    p={people.get(id)}
+                    name={state.players[id]?.name ?? ''}
+                    line={inn.batting[id]}
+                    onStrike={id === inn.strikerId}
+                    human={inn.battingTeamId === me}
+                    intent={
+                      state.sheets[inn.battingTeamId]?.intent[id] ??
+                      state.sheets[inn.battingTeamId]?.aggression ??
+                      'balanced'
+                    }
+                    onIntent={(d) => {
+                      setLiveIntent(state, me, id, d)
+                      refresh()
+                    }}
+                  />
+                ))}
+                <span className="label">BOWLING</span>
+                <BowlRow state={state} people={people} />
+              </>
             )}
             {(canImpact || canCallTimeout(state, me)) && (
               <div className="button-row">
@@ -390,14 +437,8 @@ export function LiveMatch({
               </div>
             )}
           </div>
-          {!waitingOnMe && (
-            <div className="sim-row">
-              <button onClick={() => step(simBall)}>Ball</button>
-              <button onClick={() => step(simOver)}>Over</button>
-              <button onClick={() => step((s, r) => simOvers(s, r, 5))}>5 Ov</button>
-              <button onClick={() => step(simInnings)}>Innings</button>
-              <button onClick={() => step(simMatch)}>Match</button>
-            </div>
+          {inn.bowlingTeamId === me && inn.bowlerId === null && (
+            <BowlerPicker state={state} people={people} onChange={refresh} />
           )}
         </>
       )}
@@ -754,8 +795,50 @@ const PLAN_LABEL = {
   variations: 'Variations',
 } as const
 
-/** The manager's bowling: who bowls the next over, the field, the bowler's approach. */
-function BowlingControls({
+/** A small avatar with a one-line score, for the side column. */
+function Mini({
+  p,
+  name,
+  sub,
+  on = false,
+  tag,
+}: {
+  p: Person | undefined
+  name: string
+  sub: string
+  on?: boolean
+  tag?: string
+}) {
+  const team = p?.teamId ? teamById.get(p.teamId) : undefined
+  return (
+    <div className={`mini ${on ? 'on' : ''}`}>
+      {p && (
+        <Avatar
+          seed={p.id}
+          nationality={p.nationality}
+          age={p.age}
+          kit={team?.colors ?? { primary: '#555', secondary: '#ccc' }}
+          size={32}
+          ring={ringStatus(p.fitness)}
+        />
+      )}
+      <span className="mini-text">
+        <span className="mini-name">{name.split(' ').slice(-1)[0]}</span>
+        <span className="mini-sub">
+          {sub}
+          {tag && <em className="tag warn"> {tag}</em>}
+        </span>
+      </span>
+    </div>
+  )
+}
+
+/**
+ * The manager's bowling, laid out so it fits on screen: the batters and the bowler as
+ * small badges on the left; on the right, who bowls the next over, the field, the
+ * bowler's approach and the plan.
+ */
+function BowlingPanel({
   state,
   me,
   people,
@@ -770,99 +853,152 @@ function BowlingControls({
   const sheet = state.sheets[me]
   if (!sheet) return null
   const choosing = inn.bowlerId === null
+  const bowlerId = inn.bowlerId ?? inn.events.at(-1)?.bowlerId
+  const bowled = bowlerId ? inn.bowling[bowlerId] : undefined
+  const batter = (id: string) => ({
+    line: inn.batting[id],
+    name: state.players[id]?.name ?? '',
+  })
+  const set = (patch: Parameters<typeof setLiveTactics>[2]) => {
+    setLiveTactics(state, me, patch)
+    onChange()
+  }
   return (
-    <div className="bowl-ctl">
-      {choosing && (
-        <div className="choose-bowler">
-          <span className="label">CHOOSE BOWLER · OVER {Math.floor(inn.legalBalls / 6) + 1}</span>
-          {eligibleBowlers(state)
-            .map((id) => ({ id, p: people.get(id), b: inn.bowling[id], m: state.players[id] }))
-            .filter((x) => x.m && (x.m.role === 'bowler' || x.m.role === 'allrounder' || x.b))
-            .sort((x, y) => (y.m?.bowling ?? 0) - (x.m?.bowling ?? 0))
-            .map(({ id, p, b, m }) => (
+    <div className="bowl-panel">
+      <div className="bp-side">
+        <span className="label">BAT</span>
+        {[inn.strikerId, inn.nonStrikerId].map((id) => {
+          const { line, name } = batter(id)
+          return (
+            <Mini
+              key={id}
+              p={people.get(id)}
+              name={name}
+              sub={`${line?.runs ?? 0} (${line?.balls ?? 0})${id === inn.strikerId ? ' *' : ''}`}
+              on={id === inn.strikerId}
+            />
+          )
+        })}
+        <span className="label">BOWL</span>
+        {bowlerId ? (
+          <Mini
+            p={people.get(bowlerId)}
+            name={state.players[bowlerId]?.name ?? ''}
+            sub={
+              bowled
+                ? `${oversText(bowled.legalBalls)}-${bowled.runs}-${bowled.wickets}`
+                : 'new over'
+            }
+            tag={!choosing && (inn.overBoundaries ?? 0) >= 2 ? 'Rattled' : undefined}
+          />
+        ) : (
+          <div className="mini empty">—</div>
+        )}
+      </div>
+
+      <div className="bp-main">
+        <span className="bp-title">
+          Over {Math.floor(inn.legalBalls / 6) + 1}
+          {(inn.spell ?? 0) >= 3 ? ` · spell over ${inn.spell}` : ''}
+          {choosing ? ' · pick a bowler below' : ''}
+        </span>
+        <div className="bp-group">
+          <span className="bp-label">Field</span>
+          <div className="bp-seg">
+            {FIELD_SETTINGS.map((f) => (
+              <button
+                key={f}
+                className={sheet.field === f ? 'on' : ''}
+                onClick={() => set({ field: f })}
+              >
+                {FIELD_LABEL[f]}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="bp-group">
+          <span className="bp-label">Bowler</span>
+          <div className="bp-seg">
+            {BOWL_INTENTS.map((b) => (
+              <button
+                key={b}
+                className={sheet.bowlIntent === b ? 'on' : ''}
+                onClick={() => set({ bowlIntent: b })}
+              >
+                {BOWL_INTENT_LABEL[b]}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="bp-group">
+          <span className="bp-label">Plan</span>
+          <div className="bp-plans">
+            {BOWL_PLANS.map((pl) => (
+              <button
+                key={pl}
+                className={sheet.bowlPlan === pl ? 'on' : ''}
+                onClick={() => set({ bowlPlan: pl })}
+              >
+                {PLAN_LABEL[pl]}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/** Who bowls the next over: its own block under the panel, so the tactics stay compact. */
+function BowlerPicker({
+  state,
+  people,
+  onChange,
+}: {
+  state: MatchState
+  people: Map<string, Person>
+  onChange: () => void
+}) {
+  const inn = currentInnings(state)
+  return (
+    <div className="bp-pick">
+      <span className="bp-title">
+        Pick the bowler for over {Math.floor(inn.legalBalls / 6) + 1}
+      </span>
+      <div className="bp-list">
+        {eligibleBowlers(state)
+          .map((id) => ({ id, b: inn.bowling[id], m: state.players[id] }))
+          .filter((x) => x.m && (x.m.role === 'bowler' || x.m.role === 'allrounder' || x.b))
+          .sort((x, y) => (y.m?.bowling ?? 0) - (x.m?.bowling ?? 0))
+          .map(({ id, b, m }) => {
+            const tiring = spellLength(inn, id) >= 2
+            const traits = people
+              .get(id)
+              ?.traits.filter((t) => !(BATTING_TRAITS as readonly string[]).includes(t))
+            return (
               <button
                 key={id}
-                className="bowler-pick"
+                className={`bp-card ${tiring ? 'tired' : ''}`}
                 onClick={() => {
                   setLiveBowler(state, id)
                   onChange()
                 }}
               >
-                <span className="who">
-                  <strong>
-                    {m?.name}
-                    {spellLength(inn, id) >= 2 && (
-                      <em className="tag warn">
-                        {' '}
-                        Tiring · over {spellLength(inn, id) + 1} of spell
-                      </em>
-                    )}
-                  </strong>
-                  <span className="dim">
-                    {m?.bowlingType === 'spin' ? 'Spin' : 'Pace'} ·{' '}
-                    {b ? `${oversText(b.legalBalls)}-${b.runs}-${b.wickets}` : '0-0-0'}
-                    {p?.traits
-                      .filter((t) => !(BATTING_TRAITS as readonly string[]).includes(t))
-                      .map((t) => ` · ${TRAIT_LABEL[t]}`)}
-                  </span>
-                </span>
-                <Chip tone="blue">{Math.round(m?.bowling ?? 0)}</Chip>
+                <strong>
+                  {m?.name}
+                  {tiring && <em className="tag warn"> Tiring</em>}
+                </strong>
+                <small>
+                  {m?.bowlingType === 'spin' ? 'Spin' : 'Pace'} ·{' '}
+                  {b ? `${oversText(b.legalBalls)}-${b.runs}-${b.wickets}` : 'yet to bowl'}
+                  {traits?.map((t) => ` · ${TRAIT_LABEL[t]}`)}
+                </small>
+                <span className="bp-rate">{Math.round(m?.bowling ?? 0)}</span>
               </button>
-            ))}
-          <span className="dim">Or press a sim button and the captain picks.</span>
-        </div>
-      )}
-      <div className="tactic">
-        <span className="dim">Field</span>
-        <div className="seg three">
-          {FIELD_SETTINGS.map((f) => (
-            <button
-              key={f}
-              className={sheet.field === f ? 'on' : ''}
-              onClick={() => {
-                setLiveTactics(state, me, { field: f })
-                onChange()
-              }}
-            >
-              {FIELD_LABEL[f]}
-            </button>
-          ))}
-        </div>
+            )
+          })}
       </div>
-      <div className="tactic">
-        <span className="dim">Bowler</span>
-        <div className="seg three">
-          {BOWL_INTENTS.map((b) => (
-            <button
-              key={b}
-              className={sheet.bowlIntent === b ? 'on' : ''}
-              onClick={() => {
-                setLiveTactics(state, me, { bowlIntent: b })
-                onChange()
-              }}
-            >
-              {BOWL_INTENT_LABEL[b]}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="tactic">
-        <span className="dim">Plan</span>
-        <div className="filters">
-          {BOWL_PLANS.map((pl) => (
-            <button
-              key={pl}
-              className={sheet.bowlPlan === pl ? 'on' : ''}
-              onClick={() => {
-                setLiveTactics(state, me, { bowlPlan: pl })
-                onChange()
-              }}
-            >
-              {PLAN_LABEL[pl]}
-            </button>
-          ))}
-        </div>
-      </div>
+      <span className="bp-hint">Or press a sim button and the captain picks.</span>
     </div>
   )
 }

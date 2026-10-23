@@ -7,6 +7,7 @@ import {
   type Finish,
   type Objective,
 } from './board'
+import { fillSquad, isMegaYear, startMega } from './auction'
 import { nextDay, SEASON, today, type PlayoffStage } from './calendar'
 import { agePlayer, newCareer, restDay, type Career, type CareerPlayer } from './career'
 import {
@@ -30,6 +31,7 @@ import {
   expireContracts,
   freeAgents,
   isWindowOpen,
+  rerollFreeAgents,
   retirementChance,
   squadOf,
   strengthRanking,
@@ -58,7 +60,10 @@ export function objectiveFor(career: Career): Objective {
 }
 
 export function startCareer(opts: { seed: number; managerName: string; teamId: string }): Career {
-  const draft = newCareer({ ...opts, objective: { targetPosition: 6, text: '' } })
+  const draft = rerollFreeAgents(
+    newCareer({ ...opts, objective: { targetPosition: 6, text: '' } }),
+    'start',
+  )
   return { ...draft, season: { ...draft.season, objective: objectiveFor(draft) } }
 }
 
@@ -267,6 +272,7 @@ export function playToday(career: Career): Career {
 
 export function continueBlocker(career: Career): string | null {
   if (career.status === 'sacked') return 'You have been sacked.'
+  if (career.mega) return 'Finish the mega auction first.'
   if (userFixtureToday(career)) return 'Play or sim your match first.'
   return null
 }
@@ -390,10 +396,16 @@ export function rollover(career: Career, endedYear: number): Career {
         text: `${p.name} feels underpaid and wants a new deal.`,
       })),
   )
-  c = expireContracts(c, createRng(deriveSeed(career.seed, 'expire', endedYear)))
-  c = aiSignings(c, TEAM_IDS, createRng(deriveSeed(career.seed, 'ai-sign', endedYear)))
-  for (const id of TEAM_IDS) c = ensureEleven(c, id)
-  c = windowBusiness(c, `${endedYear + 1}-pre`)
+  if (isMegaYear(endedYear)) {
+    // Squads stay as they are until the retentions are in; the auction does the rest.
+    c = startMega(c, endedYear)
+  } else {
+    c = expireContracts(c, createRng(deriveSeed(career.seed, 'expire', endedYear)))
+    c = aiSignings(c, TEAM_IDS, createRng(deriveSeed(career.seed, 'ai-sign', endedYear)))
+    for (const id of TEAM_IDS) c = ensureEleven(c, id)
+    c = rerollFreeAgents(c, endedYear + 1)
+    c = windowBusiness(c, `${endedYear + 1}-pre`)
+  }
   const review = career.season.review
   return {
     ...c,
@@ -403,6 +415,34 @@ export function rollover(career: Career, endedYear: number): Career {
     season: { results: [], stats: {}, objective: objectiveFor(c), review: null },
     market: { ...c.market, talks: {} },
   }
+}
+
+/**
+ * The auction is over: clubs short of players fill up from the unsigned, free agents are
+ * redrawn, the AI clubs open their usual preseason business and the board sets the
+ * season's target for the squad that came out of the auction.
+ */
+export function finishMega(career: Career): Career {
+  const m = career.mega
+  if (!m || m.stage !== 'done') return career
+  const me = career.manager.teamId
+  let c = fillSquad(career, me)
+  c = aiSignings(c, TEAM_IDS, createRng(deriveSeed(career.seed, 'ai-sign', 'mega', m.year)))
+  for (const id of TEAM_IDS) c = ensureEleven(c, id)
+  const top = [...m.sold].sort((a, b) => b.price - a.price)[0]
+  const topPlayer = top && c.players.find((p) => p.id === top.playerId)
+  c = addNews(c, {
+    kind: 'transfer',
+    teamIds: top ? [top.teamId] : [me],
+    playerId: top?.playerId,
+    text: top
+      ? `The mega auction is over. ${topPlayer?.name} was the big buy: ${(top.price / 100).toFixed(1)} cr to ${teams.find((t) => t.id === top.teamId)?.short}.`
+      : 'The mega auction is over.',
+  })
+  c = { ...c, mega: null, lineup: undefined, market: { ...c.market, talks: {} } }
+  c = rerollFreeAgents(c, `${m.year + 1}-mega`)
+  c = windowBusiness(c, `${m.year + 1}-pre`)
+  return { ...c, season: { ...c.season, objective: objectiveFor(c) } }
 }
 
 /** Add a finished season's numbers to career totals. */

@@ -119,19 +119,30 @@ export function Screen({
   primary,
   back = true,
   className = '',
+  dock,
+  top,
+  bar = true,
 }: {
   children: ReactNode
   primary?: Action | null
   back?: boolean | Action
   className?: string
+  /** Controls pinned above the action bar, always in view (the content scrolls behind). */
+  dock?: ReactNode
+  /** A fixed header above the scrolling content. */
+  top?: ReactNode
+  /** False hides the slanted action bar (the screen brings its own controls). */
+  bar?: boolean
 }) {
   const navigate = useNavigate()
   const left: Action | null =
     back === false ? null : back === true ? { label: 'Back', onClick: () => navigate(-1) } : back
   return (
     <>
+      {top}
       <div className={`screen ${className}`}>{children}</div>
-      <div className="action-bar">
+      {dock}
+      <div className="action-bar" hidden={!bar}>
         {left ? (
           <button className="action-left" onClick={left.onClick} disabled={left.disabled}>
             {left.label}

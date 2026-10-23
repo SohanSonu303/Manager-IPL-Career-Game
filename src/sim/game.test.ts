@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import { judgeSeason, objectiveForRank } from './board'
 import { daysToNextEvent, LEAGUE_ROUNDS, nextDay, SEASON, today } from './calendar'
+import { autoAuction } from './auction'
 import { agePlayer, type Career } from './career'
 import { addNews } from './news'
 import {
   advanceDay,
+  finishMega,
   talkToPlayer,
   continueBlocker,
   continueCareer,
@@ -22,8 +24,10 @@ import {
   capRoom,
   evaluateTrade,
   executeTrade,
+  FREE_AGENT_MAX,
   freeAgents,
   makeOffer,
+  marketAgents,
   agentOf,
   answerTradeOffer,
   offerBlocker,
@@ -39,6 +43,9 @@ import { overallRating } from './player'
 
 const start = (seed = 42, teamId = 'hyd') => startCareer({ seed, managerName: 'Test', teamId })
 
+/** Run a pending mega auction on autopilot (sensible retentions, the captain bids). */
+const settleMega = (c: Career): Career => (c.mega ? finishMega(autoAuction(c)) : c)
+
 /** Play on (quick-simming the manager's matches) until the given year starts. */
 function playUntilYear(c: Career, year: number): Career {
   let guard = 0
@@ -46,7 +53,7 @@ function playUntilYear(c: Career, year: number): Career {
     const mine = userFixtureToday(c)
     c = mine ? quickSim(c, mine) : continueCareer(c)
   }
-  return c
+  return settleMega(c)
 }
 
 /** Play to the season-end day of the current year (review done, before rollover). */
@@ -244,7 +251,7 @@ describe('market', () => {
   const c = withRoom(start())
   const me = c.manager.teamId
   // The best domestic free agent: an overseas signing would be blocked (8 overseas already).
-  const best = freeAgents(c.players)
+  const best = marketAgents(c)
     .filter((p) => !p.overseas)
     .sort((a, b) => overallRating(b) - overallRating(a))[0]!
 
@@ -254,9 +261,43 @@ describe('market', () => {
     expect(askingSalary(best)).toBeGreaterThanOrEqual(20)
   })
 
-  it('is closed during the season', () => {
+  it('free agents can be signed in the season; renewals and trades wait for the window', () => {
     const inSeason = continueCareer(c)
-    expect(offerBlocker(inSeason, best.id, { salary: 100, years: 2 })).toMatch(/closed/)
+    expect(offerBlocker(inSeason, best.id, { salary: 100, years: 2 })).toBeNull()
+    const own = squadOf(inSeason.players, me).find((p) => (p.contract?.years ?? 0) <= 1)!
+    expect(offerBlocker(inSeason, own.id, { salary: 100, years: 2 })).toMatch(/renewed/)
+    const star = squadOf(inSeason.players, me)[0]!
+    const other = squadOf(inSeason.players, 'mum')[0]!
+    expect(evaluateTrade(inSeason, [star.id], [other.id])).toMatchObject({ ok: false })
+  })
+
+  it('has at most 14 free agents on offer, all unsigned; others are not for sale', () => {
+    const agents = marketAgents(c)
+    expect(agents.length).toBeGreaterThan(0)
+    expect(agents.length).toBeLessThanOrEqual(FREE_AGENT_MAX)
+    expect(agents.every((p) => p.teamId === null)).toBe(true)
+    const hidden = freeAgents(c.players).find((p) => !agents.includes(p))!
+    expect(hidden).toBeDefined()
+    expect(offerBlocker(c, hidden.id, { salary: 100, years: 2 })).toMatch(/not on the market/)
+  })
+
+  it('rerolls the free agents every season, still at most 14', () => {
+    const next = playUntilYear(start(), 2027)
+    const now = marketAgents(next)
+    expect(now.length).toBeGreaterThan(0)
+    expect(now.length).toBeLessThanOrEqual(FREE_AGENT_MAX)
+    expect(now.map((p) => p.id).sort()).not.toEqual(
+      marketAgents(start())
+        .map((p) => p.id)
+        .sort(),
+    )
+  })
+
+  it('a released player goes on the market', () => {
+    const worst = squadOf(c.players, me).sort((a, b) => overallRating(a) - overallRating(b))[0]!
+    const out = releasePlayer(c, worst.id)
+    expect(marketAgents(out).map((p) => p.id)).toContain(worst.id)
+    expect(marketAgents(out).length).toBeLessThanOrEqual(FREE_AGENT_MAX)
   })
 
   it('blocks offers over the cap', () => {
@@ -299,12 +340,14 @@ describe('market', () => {
   })
 
   it('agents differ: some keen (take less than their demand), some tough', () => {
-    const fas = freeAgents(c.players)
+    const fas = marketAgents(c)
     const labels = new Set(fas.map((p) => agentOf(c, p).label))
     expect(labels.size).toBeGreaterThanOrEqual(2)
     const keen = fas.find(
       (p) =>
-        agentOf(c, p).greed < -0.08 && requiredSalary(c, p, 2, TEAM_IDS) <= capRoom(c.players, me),
+        !p.overseas &&
+        agentOf(c, p).greed < -0.08 &&
+        requiredSalary(c, p, 2, TEAM_IDS) <= capRoom(c.players, me),
     )
     if (keen) {
       const need = requiredSalary(c, keen, 2, TEAM_IDS)

@@ -30,8 +30,49 @@ describe('save format', () => {
     const { achievements: _drop, ...old } = career()
     void _drop
     const parsed = migrate({ version: 4, savedAt: '', career: old })
-    expect(parsed.ok && parsed.save.version).toBe(5)
+    expect(parsed.ok && parsed.save.version).toBe(SAVE_VERSION)
     expect(parsed.ok && parsed.save.career.achievements).toEqual({})
+  })
+
+  it('upgrades a v5 save: no auction under way, at most 14 free agents on offer', () => {
+    const { mega: _m, ...rest } = career()
+    void _m
+    const old = { ...rest, market: { talks: {}, log: [] } }
+    const parsed = migrate({ version: 5, savedAt: '', career: old })
+    expect(parsed.ok && parsed.save.version).toBe(SAVE_VERSION)
+    if (!parsed.ok) return
+    expect(parsed.save.career.mega).toBeNull()
+    const ids = parsed.save.career.market.freeAgentIds
+    expect(ids.length).toBeGreaterThan(0)
+    expect(ids.length).toBeLessThanOrEqual(14)
+  })
+
+  it('upgrades a v6 auction in progress: starred ids become a shortlist', () => {
+    const c = career()
+    const mega = {
+      year: 2028,
+      stage: 'auction',
+      retained: {},
+      purses: {},
+      sets: [],
+      setIndex: 0,
+      lotIndex: 0,
+      lot: null,
+      sold: [],
+      unsold: [],
+      targets: ['p1'],
+      autoBid: false,
+      accelerated: false,
+      last: null,
+    }
+    const parsed = migrate({ version: 6, savedAt: '', career: { ...c, mega } })
+    expect(parsed.ok && parsed.save.version).toBe(SAVE_VERSION)
+    if (!parsed.ok) return
+    const m = parsed.save.career.mega as unknown as Record<string, unknown>
+    expect(m.shortlist).toEqual({})
+    expect(m.stopForShortlist).toBe(false)
+    expect(m.autoBid).toBe(false)
+    expect('targets' in m).toBe(false)
   })
 
   it('round-trips through JSON', () => {

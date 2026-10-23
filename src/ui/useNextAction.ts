@@ -11,6 +11,7 @@ export function useNextAction(): Action | null {
   const career = useGame((s) => s.career)
   const navigate = useNavigate()
   if (!career || career.status !== 'active') return null
+  if (career.mega) return { label: 'Mega Auction', onClick: () => navigate('/auction') }
   if (userFixtureToday(career)) return { label: 'Play Match', onClick: () => navigate('/prematch') }
   return {
     label: career.season.review ? 'Next Season' : 'Continue',

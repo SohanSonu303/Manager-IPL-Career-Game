@@ -1,12 +1,16 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { teamById, teams } from '@/data'
+import { nextMegaSeason } from '@/sim/auction'
 import type { Career, CareerPlayer } from '@/sim/career'
 import { TEAM_IDS } from '@/sim/game'
 import {
   agentOf,
   capRoom,
+  FREE_AGENT_MAX,
   freeAgents,
   isWindowOpen,
+  marketAgents,
   preferredYears,
   requiredSalary,
   SQUAD_MAX,
@@ -29,28 +33,48 @@ type Tab = 'free' | 'squad' | 'all' | 'trade' | 'log'
 const AGENT_TEXT = { Keen: 'keen to sign', Fair: 'fair', Tough: 'hard bargainer' } as const
 const AGENT_TONE = { Keen: 'good', Fair: 'plain', Tough: 'warn' } as const
 
-/** Free agents, renewals and releases, trades, and the transfer log. */
+/** Free agents (any time), renewals and trades (the off-season), releases, the transfer log. */
 export function MarketPage() {
   const career = useGame((s) => s.career)
   const next = useNextAction()
+  const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>('free')
   if (!career) return null
   const me = career.manager.teamId
   const squad = squadOf(career.players, me)
   const open = isWindowOpen(career)
+  const agents = marketAgents(career)
   return (
     <Screen primary={next}>
       <h1>Market</h1>
-      <div className="row-between">
-        <Chip tone={open ? 'good' : 'warn'}>{open ? 'Window open' : 'Window closed'}</Chip>
-        <span className="dim">
-          {squad.length}/{SQUAD_MAX} · {squad.filter((p) => p.overseas).length}/{SQUAD_OVERSEAS_MAX}{' '}
-          overseas · <span className="money">{crore(capRoom(career.players, me))}</span>
-        </span>
-      </div>
-      {!open && (
-        <p className="dim">Sign, release and trade in the preseason or once the season ends.</p>
+      {career.mega ? (
+        <button className="mega-banner" onClick={() => navigate('/auction')}>
+          <span className="grow2">
+            <strong>Mega auction under way</strong>
+            <small>Signings, renewals and trades wait until it is over</small>
+          </span>
+          <span className="mega-go">Open</span>
+        </button>
+      ) : (
+        <div className="market-status">
+          <div>
+            <Chip tone="good">Free agents</Chip>
+            <small>Sign any time</small>
+          </div>
+          <div>
+            <Chip tone={open ? 'good' : 'warn'}>Trade window {open ? 'open' : 'closed'}</Chip>
+            <small>{open ? 'Trades and renewals' : 'Off-season only'}</small>
+          </div>
+          <div>
+            <Chip>Mega auction</Chip>
+            <small>After the {nextMegaSeason(career.calendar.year)} season</small>
+          </div>
+        </div>
       )}
+      <p className="dim">
+        {squad.length}/{SQUAD_MAX} · {squad.filter((p) => p.overseas).length}/{SQUAD_OVERSEAS_MAX}{' '}
+        overseas · <span className="money">{crore(capRoom(career.players, me))}</span> room
+      </p>
       <div className="tabs" role="tablist">
         {(['free', 'squad', 'all', 'trade', 'log'] as const).map((t) => (
           <button
@@ -69,7 +93,16 @@ export function MarketPage() {
         ))}
       </div>
       {tab === 'free' && (
-        <Players career={career} players={freeAgents(career.players)} mode="sign" />
+        <>
+          <p className="dim">
+            {agents.length} free agent{agents.length === 1 ? '' : 's'} this season (never more than{' '}
+            {FREE_AGENT_MAX}). The list is redrawn every season;{' '}
+            {freeAgents(career.players).length - agents.length} other unsigned player
+            {freeAgents(career.players).length - agents.length === 1 ? ' is' : 's are'} playing
+            elsewhere.
+          </p>
+          <Players career={career} players={agents} mode="sign" />
+        </>
       )}
       {tab === 'squad' && <Players career={career} players={squad} mode="mine" />}
       {tab === 'all' && (
@@ -79,7 +112,7 @@ export function MarketPage() {
           mode="browse"
         />
       )}
-      {tab === 'trade' && <Trade career={career} />}
+      {tab === 'trade' && <Trade career={career} open={open} />}
       {tab === 'log' && <Log career={career} />}
     </Screen>
   )
@@ -144,8 +177,20 @@ function Players({
           actions={
             mode === 'browse' ? (
               <p className="dim">
-                To get him, use the Trade tab (trades run in the preseason and after the season).
+                To get him, use the Trade tab (trades run in the off-season: the preseason and after
+                the season).
               </p>
+            ) : mode !== 'sign' && (open.contract?.years ?? 0) <= 1 && !isWindowOpen(career) ? (
+              <>
+                <p className="dim">
+                  {career.mega
+                    ? 'Renewals wait until the mega auction is over.'
+                    : 'Contracts can be renewed in the off-season: the preseason or after the season.'}
+                </p>
+                {!career.mega && (
+                  <ReleaseButton p={open} onDone={setMessage} close={() => setOpenId(null)} />
+                )}
+              </>
             ) : mode === 'sign' || (open.contract?.years ?? 0) <= 1 ? (
               <>
                 <Negotiation
@@ -269,7 +314,7 @@ function Negotiation({
   )
 }
 
-function Trade({ career }: { career: Career }) {
+function Trade({ career, open }: { career: Career; open: boolean }) {
   const me = career.manager.teamId
   const mine = squadOf(career.players, me).sort((a, b) => tradeValue(b) - tradeValue(a))
   const others = teams.filter((t) => t.id !== me)
@@ -281,6 +326,13 @@ function Trade({ career }: { career: Career }) {
   const label = (p: CareerPlayer) => `${p.name} (${overallRating(p)}, ${p.age})`
   return (
     <div className="card">
+      {!open && (
+        <p className="warn">
+          {career.mega
+            ? 'Trades wait until the mega auction is over.'
+            : 'The trade window is closed. Trades run in the off-season: the preseason and after the season.'}
+        </p>
+      )}
       <label className="field">
         You give
         <select value={give} onChange={(e) => setGive(e.target.value)}>
@@ -320,7 +372,7 @@ function Trade({ career }: { career: Career }) {
       </label>
       <button
         className="primary"
-        disabled={!give || !get}
+        disabled={!open || !give || !get}
         onClick={() => {
           const r = proposeTrade([give], [get])
           setMessage(r.ok ? { ok: true, text: 'Trade agreed!' } : { ok: false, text: r.reason })

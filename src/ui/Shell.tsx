@@ -4,6 +4,7 @@ import { capRoom } from '@/sim/market'
 import { dismissNotice, useGame } from '@/state/store'
 import { crore, newsLine } from './format'
 import { Avatar } from './identity/Avatar'
+import { ErrorBoundary } from './kit/ErrorBoundary'
 import { Icon } from './kit/Icon'
 
 /** Top bar (manager, purse, reputation), news ticker, then the current screen. */
@@ -11,8 +12,9 @@ export function Shell() {
   const notice = useGame((s) => s.notice)
   const career = useGame((s) => s.career)
   const navigate = useNavigate()
-  // The match screen is full-screen, like a broadcast.
-  const fullScreen = useLocation().pathname === '/match'
+  const path = useLocation().pathname
+  // The match and the auction room are full-screen, like a broadcast.
+  const fullScreen = path === '/match' || path === '/auction'
   const team = career ? teamById.get(career.manager.teamId) : undefined
   return (
     <div className="shell">
@@ -51,7 +53,9 @@ export function Shell() {
         </div>
       )}
       <main>
-        <Outlet />
+        <ErrorBoundary key={path}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
     </div>
   )

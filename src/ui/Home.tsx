@@ -1,6 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { teamById, teams } from '@/data'
+import { isMegaYear, MEGA_EVERY, RETAIN_MAX } from '@/sim/auction'
 import { objectiveForRank } from '@/sim/board'
 import { describeEvent, today } from '@/sim/calendar'
 import type { Career, SeasonReview } from '@/sim/career'
@@ -205,6 +206,25 @@ function ClubHub({ career }: { career: Career }) {
         <FlatButton onClick={() => setSheet('club')}>Club</FlatButton>
       </div>
 
+      {career.mega && (
+        <button className="mega-banner" onClick={() => navigate('/auction')}>
+          <span className="daily-icon" aria-hidden>
+            <Icon name="market" size={22} />
+          </span>
+          <span className="grow2">
+            <strong>Mega auction</strong>
+            <small>
+              {career.mega.stage === 'retention'
+                ? `Keep up to ${RETAIN_MAX} players, then rebuild at the auction`
+                : career.mega.stage === 'auction'
+                  ? 'The auction is on: your squad is being built'
+                  : 'Finished: start the season'}
+            </small>
+          </span>
+          <span className="mega-go">Open</span>
+        </button>
+      )}
+
       <div className="hub">
         <div className="hub-ring" />
         <div className="hub-ring inner" />
@@ -364,9 +384,11 @@ function ClubHub({ career }: { career: Career }) {
                 </strong>
                 {career.season.review ? (
                   <button onClick={() => setSheet('review')}>Season review</button>
+                ) : career.mega ? (
+                  <span className="warn">Mega auction under way</span>
                 ) : isWindowOpen(career) ? (
                   <span className="warn">
-                    Transfer window open
+                    Trade window open
                     {expiring.length
                       ? ` · ${expiring.length} contract${expiring.length > 1 ? 's' : ''} ending`
                       : ''}
@@ -690,9 +712,16 @@ function ReviewSheet({ review, onClose }: { review: SeasonReview; onClose: () =>
           />
         )}
       </ul>
-      <p className="dim">
-        Renew expiring contracts in the Market before you start the next season.
-      </p>
+      {isMegaYear(review.year) ? (
+        <p className="warn">
+          Mega auction next: you keep up to {RETAIN_MAX} players and rebuild the rest of your squad
+          at the auction. Every {MEGA_EVERY} years.
+        </p>
+      ) : (
+        <p className="dim">
+          Renew expiring contracts and make trades in the Market before you start the next season.
+        </p>
+      )}
     </Sheet>
   )
 }

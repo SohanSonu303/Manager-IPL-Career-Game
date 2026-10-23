@@ -251,7 +251,20 @@ Slice 4, deliveries and shots (done):
 - [x] Shot types (drive, cut, pull, hook, sweep, flick, glance, loft, slog, scoop, edge) with matching directions and commentary
 - [x] Wagon wheel per innings or per batter in every scorecard; pitch-map dot (green on target, red missed) and this over's shot trails in the 2D and 3D views
 - [x] Recalibrated (all within about 2–4%; see `src/sim/calibration/README.md` for known gaps)
-- [ ] Slice 5: mega auction every 3 seasons, manager reputation and job offers, press conferences
+Slice 5, mega auction and market (partly done):
+- [x] Mega auction after every 3rd season (`src/sim/auction.ts`, `/auction`):
+  - retain up to 5 (at most 2 overseas) at fixed slabs of 18/14/11/9/7 cr; AI clubs retain 4–5; the rest of the squad goes into the pool;
+  - sets: marquee, then rounds of batters, all-rounders, keepers, fast bowlers, spinners, then an accelerated round for the unsold;
+  - a live auction room: each player comes up on his own, CPU clubs bid against you and each other on a clock, "going once, going twice, sold"; one big BID button, Skip player, Pause, Sim ahead; a line says what to do now; star players to build a shortlist with a max price each;
+  - "Sim ahead…" (quick jumps to the next set, batters, all-rounders, keepers, fast, spin, any set, or the rest of the auction; each row names where it lands);
+  - while simming, your club bids for the shortlist up to each max (proxy bidding, pays only what it takes), and optionally buys players the squad needs; optional stop when a shortlisted player comes up; a result card says what you signed, missed and the biggest sale;
+  - purse is the cap minus retentions; clubs keep enough back to reach 18 players.
+  - CPU clubs bid with a squad-aware brain (`src/sim/auctionAI.ts`): tactical roles from real attributes (keeper, top order, finisher, all-rounder, pace, spin, death, new ball), a role plan shaped by the home pitch plus squad depth, value over replacement (pay for how much better than what is still to come), rival demand, a budget reserve for the rest of the squad, six characters (aggressive, conservative, balanced, star, talent, specialist), patience before joining; `npm run auction` measures many auctions, `-- 3 log` and the Debug page explain every decision
+  - [ ] CPU nominations in the accelerated round (the round is automatic: all unsold players come back); Right to Match
+- [x] Free agents: at most 14 on offer, redrawn every season, signable all year; renewals and trades in the off-season only (preseason and after the season); save v6
+- [x] Match screen: sim buttons (ball, over, 5 overs, innings) and the toss, DRS and innings-break choices are pinned above the action bar
+- [ ] Slice 5, rest: manager reputation and job offers, press conferences
+- [ ] Player pool still shrinks (no youth intake): by the third mega auction (2034) squads run thin
 - [ ] Later: batting hand and matchups, rain and DLS, scenario mode
 
 ## Open decisions

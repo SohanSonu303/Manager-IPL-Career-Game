@@ -6,6 +6,10 @@ import { standings } from '@/sim/game'
 /** 1310 lakh -> "₹13.1 cr". */
 export const crore = (lakh: number) => `₹${(lakh / 100).toFixed(lakh % 100 === 0 ? 0 : 1)} cr`
 
+/** A bid in lakh: "₹45 L" under a crore, "₹12.25 cr" above. */
+export const bidPrice = (lakh: number) =>
+  lakh < 100 ? `₹${lakh} L` : `₹${(lakh / 100).toFixed(2).replace(/0$/, '')} cr`
+
 export function ordinal(n: number): string {
   if (n % 100 >= 11 && n % 100 <= 13) return `${n}th`
   return `${n}${({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ?? 'th'}`
