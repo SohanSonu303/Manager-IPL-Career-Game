@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { explainLot } from '@/sim/auction'
+import { checkForUpdate } from '@/state/pwaUpdate'
 import { SAVE_VERSION } from '@/state/save'
 import { downloadSave } from '@/state/storage'
 import { importSave, resetCareer, simToSeasonEnd, useGame } from '@/state/store'
@@ -46,6 +47,8 @@ export function Settings() {
   const [message, setMessage] = useState<string | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
   const [view, setView] = useState<ViewMode>(readViewMode)
+  const [checking, setChecking] = useState(false)
+  const [updateNote, setUpdateNote] = useState<string | null>(null)
   const chooseView = (v: ViewMode) => {
     setView(v)
     try {
@@ -64,9 +67,26 @@ export function Settings() {
   return (
     <Screen>
       <h1>Settings</h1>
-      <p className="version-tag">
-        <strong>Version {__APP_VERSION__}</strong>
-      </p>
+      <div className="version-row">
+        <p className="version-tag">
+          <strong>Version {__APP_VERSION__}</strong>
+        </p>
+        <button
+          className="version-check"
+          disabled={checking}
+          onClick={async () => {
+            setChecking(true)
+            const found = await checkForUpdate()
+            setChecking(false)
+            setUpdateNote(
+              found ? 'A new version is here: reloading…' : "You're on the latest version.",
+            )
+          }}
+        >
+          {checking ? 'Checking…' : 'Check for updates'}
+        </button>
+      </div>
+      {updateNote && <p className="dim">{updateNote}</p>}
       <p>
         <Link to="/debug">Sim debug</Link> · <Link to="/gallery">Identity gallery</Link>
       </p>

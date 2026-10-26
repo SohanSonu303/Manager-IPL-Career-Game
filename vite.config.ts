@@ -16,9 +16,17 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // A new build takes over at once; src/state/pwaUpdate.ts registers the worker,
+      // checks for new builds and reloads the page when it's safe.
       registerType: 'autoUpdate',
+      injectRegister: false,
       // Fonts are bundled, so cache them too for offline play.
-      workbox: { globPatterns: ['**/*.{js,css,html,woff2,png,svg}'] },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,woff2,png,svg}'],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+      },
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Cricket Manager',

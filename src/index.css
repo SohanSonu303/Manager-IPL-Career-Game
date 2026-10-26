@@ -2114,6 +2114,24 @@ select.input {
   border-color: var(--line);
 }
 
+.version-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.version-row .version-tag {
+  margin: 0;
+}
+
+.version-check {
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
 .version-tag {
   display: inline-block;
   margin: 0 0 8px;
