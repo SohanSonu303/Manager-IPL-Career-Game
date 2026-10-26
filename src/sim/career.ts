@@ -37,6 +37,21 @@ export interface TransferLog {
   salary: number
 }
 
+/** Contract talks with one player (this window/season). */
+export interface Talks {
+  /** Offers he has turned down or countered. */
+  rounds: number
+  walkedAway: boolean
+  /** The day talks broke down; they reopen a fortnight later. */
+  walkedDay?: number
+  /** His latest counter, per contract length. */
+  asks?: Record<number, number>
+  /** He has made his final offer: meet it or he walks. */
+  final?: boolean
+  /** The manager has decided not to renew him: he leaves when his contract ends. */
+  letGo?: boolean
+}
+
 export interface SeasonReview {
   year: number
   championId: string
@@ -75,11 +90,13 @@ export interface Career {
   }
   history: SeasonReview[]
   market: {
-    /** Contract talks this window, per player. */
-    talks: Record<string, { rounds: number; walkedAway: boolean; ask?: number }>
+    /** Contract talks this season, per player. */
+    talks: Record<string, Talks>
     log: TransferLog[]
     /** The free agents on offer this season (at most 14; rerolled every season). */
     freeAgentIds: string[]
+    /** The manager's players on the transfer list: AI clubs make offers for them. */
+    listed: string[]
   }
   /** The mega auction in progress (retention, then the auction), or null. */
   mega: MegaState | null
@@ -127,7 +144,7 @@ export function newCareer(opts: {
     })),
     season: { results: [], stats: {}, objective: opts.objective, review: null },
     history: [],
-    market: { talks: {}, log: [], freeAgentIds: [] },
+    market: { talks: {}, log: [], freeAgentIds: [], listed: [] },
     mega: null,
     status: 'active',
     news: [],

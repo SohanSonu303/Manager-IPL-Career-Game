@@ -33,12 +33,16 @@ import {
 } from '@/sim/game'
 import type { Fixture } from '@/sim/league'
 import {
+  aiTradeOffers,
   answerTradeOffer,
   evaluateTrade,
   executeTrade,
+  isWindowOpen,
   makeOffer,
   releaseBlocker,
   releasePlayer,
+  setLetGo,
+  setListed,
   type Offer,
   type OfferAnswer,
   type TradeAnswer,
@@ -46,7 +50,7 @@ import {
 import type { Match } from '@/sim/match/engine'
 import { applyPostMatch, type PlayerReport } from '@/sim/match/postMatch'
 import type { MatchState } from '@/sim/match/types'
-import { deriveSeed } from '@/sim/rng'
+import { createRng, deriveSeed } from '@/sim/rng'
 import { parseSave } from './save'
 import { clearSave, readSave, writeSave } from './storage'
 
@@ -176,6 +180,30 @@ export function release(playerId: string): string | null {
   if (blocked) return blocked
   commit(releasePlayer(c, playerId))
   return null
+}
+
+/** Decide not to renew a final-year player (or change your mind). */
+export function letGo(playerId: string, on: boolean) {
+  const c = current()
+  if (c) commit(setLetGo(c, playerId, on))
+}
+
+/**
+ * Put a player on the transfer list (or take him off). In the window, clubs answer
+ * straight away; otherwise they make their offers when it opens. Returns the offers made.
+ */
+export function listPlayer(playerId: string, on: boolean): number {
+  const c = current()
+  if (!c) return 0
+  let next = setListed(c, playerId, on)
+  if (on && isWindowOpen(next)) {
+    const rng = createRng(deriveSeed(c.seed, 'listed', playerId, c.calendar.year, c.calendar.day))
+    next = aiTradeOffers(next, TEAM_IDS, rng, 2, playerId)
+  }
+  commit(next)
+  const offers = (x: Career) =>
+    x.news.filter((n) => n.offer?.status === 'pending' && n.offer.give.includes(playerId)).length
+  return offers(next) - offers(c)
 }
 
 /** Accept or decline an AI club's trade offer from the news feed. */

@@ -1,6 +1,7 @@
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { AchievementsPage } from '@/ui/AchievementsPage'
 import { AuctionPage } from '@/ui/AuctionPage'
+import { ContractsPage } from '@/ui/ContractsPage'
 import { DailyPage } from '@/ui/DailyPage'
 import { Gallery } from '@/ui/Gallery'
 import { Home } from '@/ui/Home'
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="squad" element={<SquadPage />} />
           <Route path="lineup" element={<LineupPage />} />
           <Route path="market" element={<MarketPage />} />
+          <Route path="contracts" element={<ContractsPage />} />
           <Route path="auction" element={<AuctionPage />} />
           <Route path="table" element={<TablePage />} />
           <Route path="fixtures" element={<FixturesPage />} />

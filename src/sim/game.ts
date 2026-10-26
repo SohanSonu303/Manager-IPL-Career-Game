@@ -32,7 +32,7 @@ import {
   freeAgents,
   isWindowOpen,
   rerollFreeAgents,
-  retirementChance,
+  retires,
   squadOf,
   strengthRanking,
 } from './market'
@@ -359,8 +359,7 @@ export function rollover(career: Career, endedYear: number): Career {
   const aged = career.players.map((p) => agePlayer(p, career.seed, endedYear))
   const retired: CareerPlayer[] = []
   const staying = aged.filter((p) => {
-    const rng = createRng(deriveSeed(career.seed, 'retire', endedYear, p.id))
-    if (rng() < retirementChance(p)) {
+    if (retires(career.seed, endedYear, p)) {
       retired.push(p)
       return false
     }
@@ -413,7 +412,13 @@ export function rollover(career: Career, endedYear: number): Career {
       ? [...c.history, { ...review, retired: retired.map((p) => p.name) }]
       : c.history,
     season: { results: [], stats: {}, objective: objectiveFor(c), review: null },
-    market: { ...c.market, talks: {} },
+    market: {
+      ...c.market,
+      talks: {},
+      listed: (c.market.listed ?? []).filter(
+        (id) => c.players.find((p) => p.id === id)?.teamId === me,
+      ),
+    },
   }
 }
 
@@ -439,7 +444,7 @@ export function finishMega(career: Career): Career {
       ? `The mega auction is over. ${topPlayer?.name} was the big buy: ${(top.price / 100).toFixed(1)} cr to ${teams.find((t) => t.id === top.teamId)?.short}.`
       : 'The mega auction is over.',
   })
-  c = { ...c, mega: null, lineup: undefined, market: { ...c.market, talks: {} } }
+  c = { ...c, mega: null, lineup: undefined, market: { ...c.market, talks: {}, listed: [] } }
   c = rerollFreeAgents(c, `${m.year + 1}-mega`)
   c = windowBusiness(c, `${m.year + 1}-pre`)
   return { ...c, season: { ...c.season, objective: objectiveFor(c) } }

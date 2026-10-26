@@ -7,7 +7,7 @@ import { rerollFreeAgents } from '@/sim/market'
  * Save file format. Bump SAVE_VERSION whenever the `Career` shape changes, and add a
  * migration from the previous version to MIGRATIONS.
  */
-export const SAVE_VERSION = 7
+export const SAVE_VERSION = 8
 
 export interface SaveFile {
   version: number
@@ -80,6 +80,17 @@ export const MIGRATIONS: Record<number, Migration> = {
         mega: { shortlist: {}, stopForShortlist: false, autoBid: true, ...rest },
       },
     }
+  },
+  // v8: a transfer list; contract talks keep counters per contract length.
+  7: (s) => {
+    const career = s.career as Record<string, unknown>
+    const market = career.market as Record<string, unknown>
+    const talks = Object.fromEntries(
+      Object.entries((market.talks ?? {}) as Record<string, Record<string, unknown>>).map(
+        ([id, t]) => [id, { rounds: Number(t.rounds) || 0, walkedAway: !!t.walkedAway }],
+      ),
+    )
+    return { ...s, version: 8, career: { ...career, market: { listed: [], ...market, talks } } }
   },
 }
 

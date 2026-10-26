@@ -261,11 +261,13 @@ describe('market', () => {
     expect(askingSalary(best)).toBeGreaterThanOrEqual(20)
   })
 
-  it('free agents can be signed in the season; renewals and trades wait for the window', () => {
+  it('free agents and final-year renewals any time; longer deals and trades wait', () => {
     const inSeason = continueCareer(c)
     expect(offerBlocker(inSeason, best.id, { salary: 100, years: 2 })).toBeNull()
     const own = squadOf(inSeason.players, me).find((p) => (p.contract?.years ?? 0) <= 1)!
-    expect(offerBlocker(inSeason, own.id, { salary: 100, years: 2 })).toMatch(/renewed/)
+    expect(offerBlocker(inSeason, own.id, { salary: 20, years: 2 })).toBeNull()
+    const longer = squadOf(inSeason.players, me).find((p) => (p.contract?.years ?? 0) > 1)!
+    expect(offerBlocker(inSeason, longer.id, { salary: 20, years: 2 })).toMatch(/final year/)
     const star = squadOf(inSeason.players, me)[0]!
     const other = squadOf(inSeason.players, 'mum')[0]!
     expect(evaluateTrade(inSeason, [star.id], [other.id])).toMatchObject({ ok: false })

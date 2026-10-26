@@ -47,6 +47,21 @@ describe('save format', () => {
     expect(ids.length).toBeLessThanOrEqual(14)
   })
 
+  it('upgrades a v7 save: an empty transfer list, talks without the old single ask', () => {
+    const c = career()
+    const { listed: _l, ...market } = c.market
+    void _l
+    const old = {
+      ...c,
+      market: { ...market, talks: { x: { rounds: 2, walkedAway: true, ask: 500 } } },
+    }
+    const parsed = migrate({ version: 7, savedAt: '', career: old })
+    expect(parsed.ok && parsed.save.version).toBe(SAVE_VERSION)
+    if (!parsed.ok) return
+    expect(parsed.save.career.market.listed).toEqual([])
+    expect(parsed.save.career.market.talks.x).toEqual({ rounds: 2, walkedAway: true })
+  })
+
   it('upgrades a v6 auction in progress: starred ids become a shortlist', () => {
     const c = career()
     const mega = {

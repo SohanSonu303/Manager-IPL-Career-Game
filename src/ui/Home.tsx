@@ -5,6 +5,7 @@ import { isMegaYear, MEGA_EVERY, RETAIN_MAX } from '@/sim/auction'
 import { objectiveForRank } from '@/sim/board'
 import { describeEvent, today } from '@/sim/calendar'
 import type { Career, SeasonReview } from '@/sim/career'
+import { contractOutlook } from '@/sim/contracts'
 import { isMyClub, needsAction } from '@/sim/news'
 import {
   managerSheet,
@@ -171,7 +172,7 @@ function ClubHub({ career }: { career: Career }) {
   const position = table.findIndex((r) => r.teamId === me) + 1
   const myRow = table.find((r) => r.teamId === me)
   const injured = squad.filter((p) => p.injury)
-  const expiring = squad.filter((p) => (p.contract?.years ?? 0) <= 1)
+  const contracts = contractOutlook(career, TEAM_IDS)
   const lineupStale =
     !!career.lineup &&
     managerSheet(career).battingOrder.join() !== career.lineup.battingOrder.join()
@@ -185,6 +186,13 @@ function ClubHub({ career }: { career: Career }) {
   const upcoming = fixtures.filter((f) => !resultOf.has(f.id) && f.id !== mine?.id).slice(0, 4)
   const playoffs = career.season.results.filter((r) => r.stage !== 'league')
   const oppOf = (f: Fixture) => (f.homeId === me ? f.awayId : f.homeId)
+  // From the last three rounds on, final-year players nobody has decided about are flagged.
+  const lateSeason = day.phase === 'playoffs' || played.length >= fixtures.length - 3
+  const contractsDue =
+    !career.mega &&
+    !contracts.megaYear &&
+    contracts.undecided.length > 0 &&
+    (lateSeason || isWindowOpen(career))
 
   const news: { text: string; icon: IconName | null; go: () => void } = career.season.review
     ? { text: 'Season review', icon: 'trophy', go: () => setSheet('review') }
@@ -240,7 +248,7 @@ function ClubHub({ career }: { career: Career }) {
           const rad = (h.angle * Math.PI) / 180
           const badge =
             (h.to === '/squad' && injured.length > 0) ||
-            (h.to === '/market' && expiring.length > 0 && isWindowOpen(career)) ||
+            (h.to === '/market' && contractsDue) ||
             (h.to === '/lineup' && lineupStale)
           return (
             <div
@@ -289,6 +297,32 @@ function ClubHub({ career }: { career: Career }) {
           )}
         </Tile>
       </div>
+
+      {contractsDue && (
+        <button
+          className="daily-link contracts-link"
+          onClick={() => navigate('/market?tab=contracts')}
+        >
+          <span className="daily-icon" aria-hidden>
+            <Icon name="alert" size={22} />
+          </span>
+          <span className="grow2">
+            <strong>
+              {contracts.undecided.length} contract{contracts.undecided.length > 1 ? 's' : ''}{' '}
+              ending
+            </strong>
+            <small>
+              {contracts.undecided
+                .slice(0, 3)
+                .map((p) => p.name.split(' ').slice(-1)[0])
+                .join(', ')}
+              {contracts.undecided.length > 3 ? ' and more' : ''}: renew them or they leave after
+              this season
+            </small>
+          </span>
+          <span className="mega-go">Review</span>
+        </button>
+      )}
 
       <DailyCard />
       <button className="daily-link badges-link" onClick={() => navigate('/achievements')}>
@@ -389,8 +423,8 @@ function ClubHub({ career }: { career: Career }) {
                 ) : isWindowOpen(career) ? (
                   <span className="warn">
                     Trade window open
-                    {expiring.length
-                      ? ` · ${expiring.length} contract${expiring.length > 1 ? 's' : ''} ending`
+                    {contracts.undecided.length
+                      ? ` · ${contracts.undecided.length} contract${contracts.undecided.length > 1 ? 's' : ''} ending`
                       : ''}
                   </span>
                 ) : (
@@ -671,6 +705,7 @@ function SeasonsTable({ seasons }: { seasons: SeasonReview[] }) {
 }
 
 function ReviewSheet({ review, onClose }: { review: SeasonReview; onClose: () => void }) {
+  const navigate = useNavigate()
   const players = useGame((s) => s.career?.players ?? [])
   const name = (id: string | undefined) => players.find((p) => p.id === id)?.name ?? '—'
   const a = review.awards
@@ -719,9 +754,12 @@ function ReviewSheet({ review, onClose }: { review: SeasonReview; onClose: () =>
         </p>
       ) : (
         <p className="dim">
-          Renew expiring contracts and make trades in the Market before you start the next season.
+          Check who is leaving, renew expiring contracts and make trades before the next season.
         </p>
       )}
+      <button className="primary" onClick={() => navigate('/contracts?confirm=1')}>
+        Before next season
+      </button>
     </Sheet>
   )
 }

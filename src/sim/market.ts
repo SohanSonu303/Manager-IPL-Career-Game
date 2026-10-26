@@ -1,5 +1,5 @@
 import { today } from './calendar'
-import type { Career, CareerPlayer } from './career'
+import { START_YEAR, type Career, type CareerPlayer, type Talks } from './career'
 import { autoPickXI } from './match/selection'
 import { overallRating } from './player'
 import { addNews, updateNews } from './news'
@@ -134,8 +134,36 @@ export interface Offer {
 
 export type OfferAnswer =
   | { kind: 'accept' }
-  | { kind: 'counter'; salary: number; years: number; message: string }
-  | { kind: 'reject'; message: string }
+  | {
+      kind: 'counter'
+      salary: number
+      years: number
+      message: string
+      /** Offers left before he makes his final offer. */
+      roundsLeft: number
+      /** Meet this or he walks away. */
+      final: boolean
+    }
+  | { kind: 'reject'; message: string; roundsLeft?: number; ended?: boolean }
+
+/** Days before a player who walked out of talks will listen again. */
+export const TALKS_COOLDOWN = 14
+
+/** Talks as they stand: a walk-out that has cooled off starts afresh. */
+export function talksWith(career: Career, playerId: string): Talks {
+  const t = career.market.talks[playerId]
+  if (!t) return { rounds: 0, walkedAway: false }
+  if (t.walkedAway && t.walkedDay !== undefined && talksReopenIn(career, t) <= 0)
+    return { rounds: 0, walkedAway: false, letGo: t.letGo }
+  return t
+}
+
+/** Days until a walked-out player listens again (Infinity: not this season). */
+export function talksReopenIn(career: Career, t: Talks): number {
+  if (!t.walkedAway) return 0
+  if (t.walkedDay === undefined) return Infinity
+  return t.walkedDay + TALKS_COOLDOWN - career.calendar.day
+}
 
 /** Why an offer cannot even be made, or null if it can. */
 export function offerBlocker(career: Career, playerId: string, offer: Offer): string | null {
@@ -146,14 +174,18 @@ export function offerBlocker(career: Career, playerId: string, offer: Offer): st
   const renewal = p.teamId === teamId
   if (p.teamId !== null && !renewal)
     return `${p.name} is under contract with another club. Try a trade.`
-  // Free agents can be signed all year; renewals wait for the preseason or the season's end.
-  if (renewal && !isWindowOpen(career))
-    return 'Contracts can be renewed in the preseason or after the season.'
+  // Free agents can be signed all year, and a player can be renewed any time in his final year.
   if (!renewal && !career.market.freeAgentIds.includes(p.id))
     return `${p.name} is not on the market this season.`
   if (renewal && (p.contract?.years ?? 0) > 1)
-    return `${p.name} still has ${p.contract?.years} seasons left.`
-  if (career.market.talks[playerId]?.walkedAway) return `${p.name} has ended talks for now.`
+    return `${p.name} still has ${p.contract?.years} seasons left. Renew him in his final year.`
+  const t = talksWith(career, playerId)
+  if (t.walkedAway) {
+    const days = talksReopenIn(career, t)
+    return days === Infinity
+      ? `${p.name} has ended talks for now.`
+      : `${p.name} has ended talks. He will listen again in ${days} day${days === 1 ? '' : 's'}.`
+  }
   if (offer.years < 1 || offer.years > 3) return 'Contracts run for 1 to 3 seasons.'
   if (offer.salary < 20) return 'The minimum salary is 20 lakh.'
   const squad = squadOf(career.players, teamId)
@@ -166,9 +198,26 @@ export function offerBlocker(career: Career, playerId: string, offer: Offer): st
   return null
 }
 
+/** Seasons a player has been at the manager's club (roughly: since his last move here). */
+export function seasonsAtClub(career: Career, p: CareerPlayer): number {
+  const me = career.manager.teamId
+  const joined = [...career.market.log]
+    .reverse()
+    .find(
+      (e) => e.playerId === p.id && e.teamId === me && (e.kind === 'signed' || e.kind === 'traded'),
+    )
+  return career.calendar.year - (joined?.year ?? START_YEAR)
+}
+
+/** A happy, long-serving player gives his own club a discount; an unhappy one wants out. */
+function loyalty(career: Career, p: CareerPlayer): number {
+  const mood = p.morale < 35 ? 0.85 : p.morale >= 70 ? 1.1 : 1.05
+  return mood + (seasonsAtClub(career, p) >= 3 ? 0.05 : 0)
+}
+
 /**
  * The salary that would make this player say yes to this club: asking price, scaled by
- * how appealing the club is, whether he would start, and the contract length.
+ * how appealing the club is, whether he would start, loyalty and the contract length.
  */
 export function requiredSalary(
   career: Career,
@@ -180,40 +229,80 @@ export function requiredSalary(
   const renewal = p.teamId === teamId
   const appeal = clubAppeal(career, teamId, teamIds)
   const starts = wouldStart(career.players, teamId, p)
-  const role = starts ? 1 : overallRating(p) >= 75 ? 0.85 : 0.95
-  // A happy player gives his own club a discount; an unhappy one wants out.
-  const loyalty = renewal ? (p.morale < 35 ? 0.85 : 1.05) : 1
-  return round5(askingSalary(p) / (appeal * role * loyalty * yearsFit(p.age, years)))
+  // Your own bench players know their place; a star from outside wants a starting spot.
+  const role = starts ? 1 : renewal || overallRating(p) < 75 ? 0.95 : 0.85
+  const loyal = renewal ? loyalty(career, p) : 1
+  return round5(askingSalary(p) / (appeal * role * loyal * yearsFit(p.age, years)))
+}
+
+/**
+ * The most a renewal can ask: a little over his market value, and no more than double
+ * what he earns now. A badly underpaid player gives his club a discount: up to a quarter
+ * off his market value.
+ */
+export function renewalCeiling(p: CareerPlayer): number {
+  const value = askingSalary(p)
+  return round5(Math.min(value * 1.1, Math.max(value * 0.75, (p.contract?.salary ?? 0) * 2)))
 }
 
 export interface Agent {
-  /** Hidden: how far below (−) or above (+) his stated demand he will really go. */
+  /** How far below (−) or above (+) a fair price he pitches. */
   greed: number
-  /** Rounds of talks before he walks away. */
+  /** Offers before he makes his final offer. */
   patience: number
   label: 'Keen' | 'Fair' | 'Tough'
 }
 
+/** How far over his real price each kind of agent opens. */
+const MARKUP: Record<Agent['label'], number> = { Keen: 0.04, Fair: 0.08, Tough: 0.12 }
+
 /**
- * Every player's agent has a personality (seeded per career): some are keen and will
- * take a little less than they ask, some play hardball and lose patience quickly.
+ * Every player's agent has a personality (seeded per career): some are keen and take
+ * a little less, some play hardball and open high.
  */
 export function agentOf(career: Career, p: CareerPlayer): Agent {
   const rng = createRng(deriveSeed(career.seed, 'agent', p.id))
   const greed = -0.12 + rng() * 0.2
-  const patience = randInt(rng, 2, 5)
+  const patience = randInt(rng, 3, 5)
   return { greed, patience, label: greed < -0.05 ? 'Keen' : greed > 0.03 ? 'Tough' : 'Fair' }
 }
 
-/** What he will actually accept (hidden from the manager). */
-function reservation(career: Career, p: CareerPlayer, years: number, teamIds: string[]): number {
-  return round5(requiredSalary(career, p, years, teamIds) * (1 + agentOf(career, p).greed))
+/** What he asks for (shown to the manager). Offer this and he signs. */
+export function askingPrice(
+  career: Career,
+  p: CareerPlayer,
+  years: number,
+  teamIds: string[],
+): number {
+  const agent = agentOf(career, p)
+  const v =
+    requiredSalary(career, p, years, teamIds) * (1 + agent.greed) * (1 + MARKUP[agent.label])
+  return round5(p.teamId === career.manager.teamId ? Math.min(v, renewalCeiling(p)) : v)
+}
+
+/** The least he will take (hidden): talks can bring him down to here. */
+function floorPrice(career: Career, p: CareerPlayer, years: number, teamIds: string[]): number {
+  return round5(askingPrice(career, p, years, teamIds) / (1 + MARKUP[agentOf(career, p).label]))
+}
+
+/** Below this share of his ask an offer is an insult: it costs patience and gets no counter. */
+export const LOWBALL = 0.6
+
+export type OfferZone = 'deal' | 'close' | 'low' | 'insult'
+
+/** How an offer looks next to his ask (what the manager's meter shows). */
+export function offerZone(salary: number, ask: number): OfferZone {
+  if (salary >= ask) return 'deal'
+  if (salary >= ask * 0.85) return 'close'
+  if (salary >= ask * LOWBALL) return 'low'
+  return 'insult'
 }
 
 /**
  * The player's answer to an offer. Deterministic: same situation, same answer.
- * Meet his (hidden) price and he signs; get close and he comes down halfway; lowball
- * him and he loses patience.
+ * Meet his ask and he signs; get close to his real price and he signs; otherwise he
+ * comes down halfway, and an insulting offer costs patience. When his patience runs out
+ * he makes a final offer, and walks away if that is not met.
  */
 export function answerOffer(
   career: Career,
@@ -223,33 +312,50 @@ export function answerOffer(
 ): OfferAnswer {
   const p = career.players.find((x) => x.id === playerId) as CareerPlayer
   const agent = agentOf(career, p)
-  const res = reservation(career, p, offer.years, teamIds)
-  const talks = career.market.talks[playerId]
-  const rounds = (talks?.rounds ?? 0) + 1
-  if (offer.salary >= res) return { kind: 'accept' }
-  if (rounds >= agent.patience) {
-    return { kind: 'reject', message: `${p.name}'s agent has heard enough and ends the talks.` }
+  const talks = talksWith(career, playerId)
+  if (offer.salary >= floorPrice(career, p, offer.years, teamIds)) return { kind: 'accept' }
+  const rounds = talks.rounds + 1
+  const roundsLeft = Math.max(0, agent.patience - rounds)
+  const lowball = offer.salary < askingPrice(career, p, offer.years, teamIds) * LOWBALL
+  if (talks.final || (lowball && roundsLeft === 0)) {
+    return {
+      kind: 'reject',
+      message: `${p.name}'s agent has heard enough and ends the talks.`,
+      roundsLeft: 0,
+      ended: true,
+    }
   }
-  if (offer.salary >= res * 0.75) {
-    // He comes down halfway towards your offer, but never below his real price.
-    const ask = talks?.ask ?? requiredSalary(career, p, offer.years, teamIds)
-    const years =
-      offer.years === preferredYears(p.age) || agent.label !== 'Tough'
-        ? offer.years
-        : preferredYears(p.age)
-    const salary = Math.max(
-      reservation(career, p, years, teamIds),
-      round5((ask + offer.salary) / 2),
-    )
-    const tone =
-      agent.label === 'Keen'
-        ? `${p.name} is keen to make this work.`
-        : agent.label === 'Tough'
-          ? `${p.name}'s agent is playing hardball.`
-          : `${p.name} wants a little more.`
-    return { kind: 'counter', salary, years, message: tone }
+  if (lowball) {
+    return {
+      kind: 'reject',
+      message: `${p.name} says the offer is far too low.`,
+      roundsLeft,
+    }
   }
-  return { kind: 'reject', message: `${p.name} says the offer is far too low.` }
+  // A tough agent steers towards the length his client wants.
+  const years =
+    agent.label === 'Tough' && offer.years !== preferredYears(p.age)
+      ? preferredYears(p.age)
+      : offer.years
+  // He comes down halfway towards your offer, but never below his real price.
+  const ask = talks.asks?.[years] ?? askingPrice(career, p, years, teamIds)
+  const salary = Math.max(floorPrice(career, p, years, teamIds), round5((ask + offer.salary) / 2))
+  const final = roundsLeft === 0
+  const tone =
+    agent.label === 'Keen'
+      ? `${p.name} is keen to make this work.`
+      : agent.label === 'Tough'
+        ? `${p.name}'s agent is playing hardball.`
+        : `${p.name} wants a little more.`
+  const length = years !== offer.years ? ` He wants ${years} seasons, not ${offer.years}.` : ''
+  return {
+    kind: 'counter',
+    salary,
+    years,
+    message: `${tone}${length}${final ? ' Final offer: meet it or he walks.' : ''}`,
+    roundsLeft,
+    final,
+  }
 }
 
 /** Record one round of talks; on acceptance, sign the player. */
@@ -262,16 +368,28 @@ export function makeOffer(
   const blocked = offerBlocker(career, playerId, offer)
   if (blocked) return { career, answer: { kind: 'reject', message: blocked } }
   const answer = answerOffer(career, playerId, offer, teamIds)
-  const prev = career.market.talks[playerId] ?? { rounds: 0, walkedAway: false }
+  const prev = talksWith(career, playerId)
   const p = career.players.find((x) => x.id === playerId) as CareerPlayer
-  const talks = {
-    ...career.market.talks,
-    [playerId]: {
-      rounds: prev.rounds + 1,
-      walkedAway: answer.kind === 'reject' && prev.rounds + 1 >= agentOf(career, p).patience,
-      ask: answer.kind === 'counter' ? answer.salary : prev.ask,
-    },
-  }
+  const { [playerId]: _done, ...others } = career.market.talks
+  void _done
+  const ended = answer.kind === 'reject' && !!answer.ended
+  const talks: Record<string, Talks> =
+    answer.kind === 'accept'
+      ? others
+      : {
+          ...others,
+          [playerId]: {
+            ...prev,
+            rounds: prev.rounds + 1,
+            walkedAway: ended,
+            ...(ended ? { walkedDay: career.calendar.day } : {}),
+            asks:
+              answer.kind === 'counter'
+                ? { ...prev.asks, [answer.years]: answer.salary }
+                : prev.asks,
+            final: answer.kind === 'counter' ? answer.final : prev.final,
+          },
+        }
   let next: Career = { ...career, market: { ...career.market, talks } }
   if (answer.kind === 'accept') {
     const me = career.manager.teamId
@@ -282,7 +400,7 @@ export function makeOffer(
       teamIds: [me],
       playerId,
       text: renewal
-        ? `${p.name} signs a new ${offer.years}-season deal with ${teamLabel(me)}.`
+        ? `${p.name} signs a ${offer.years}-season extension with ${teamLabel(me)}.`
         : `${teamLabel(me)} sign ${p.name} on a ${offer.years}-season deal.`,
     })
     // A new deal cheers a player up.
@@ -296,15 +414,18 @@ export function makeOffer(
   return { career: next, answer }
 }
 
+/**
+ * Sign a player. A renewal adds the new seasons to what is left of his deal (so renewing
+ * in his final year, at any point of it, keeps him for that many more seasons).
+ */
 export function signPlayer(career: Career, playerId: string, teamId: string, offer: Offer): Career {
   const p = career.players.find((x) => x.id === playerId)
   const renewal = p?.teamId === teamId
+  const years = (renewal ? (p?.contract?.years ?? 0) : 0) + offer.years
   return {
     ...career,
     players: career.players.map((x) =>
-      x.id === playerId
-        ? { ...x, teamId, contract: { salary: offer.salary, years: offer.years } }
-        : x,
+      x.id === playerId ? { ...x, teamId, contract: { salary: offer.salary, years } } : x,
     ),
     market: {
       ...career.market,
@@ -320,6 +441,24 @@ export function signPlayer(career: Career, playerId: string, teamId: string, off
       ],
     },
   }
+}
+
+/** Decide not to renew a player (he plays on until his contract ends), or change your mind. */
+export function setLetGo(career: Career, playerId: string, on: boolean): Career {
+  const t = talksWith(career, playerId)
+  return {
+    ...career,
+    market: {
+      ...career.market,
+      talks: { ...career.market.talks, [playerId]: { ...t, letGo: on } },
+    },
+  }
+}
+
+/** Put one of the manager's players on the transfer list (or take him off). */
+export function setListed(career: Career, playerId: string, on: boolean): Career {
+  const listed = (career.market.listed ?? []).filter((id) => id !== playerId)
+  return { ...career, market: { ...career.market, listed: on ? [...listed, playerId] : listed } }
 }
 
 export function releaseBlocker(career: Career, playerId: string): string | null {
@@ -503,17 +642,17 @@ export const IDEAL: Record<CareerPlayer['role'], number> = {
   allrounder: 4,
   bowler: 6,
 }
-const ROLES = Object.keys(IDEAL) as CareerPlayer['role'][]
+export const ROLES = Object.keys(IDEAL) as CareerPlayer['role'][]
 const countRole = (squad: CareerPlayer[], r: CareerPlayer['role']) =>
   squad.filter((p) => p.role === r).length
-const deficits = (squad: CareerPlayer[]) =>
+export const deficits = (squad: CareerPlayer[]) =>
   ROLES.filter((r) => countRole(squad, r) < IDEAL[r]).sort(
     (x, y) => countRole(squad, x) - IDEAL[x] - (countRole(squad, y) - IDEAL[y]),
   )
 const surpluses = (squad: CareerPlayer[]) => ROLES.filter((r) => countRole(squad, r) > IDEAL[r])
 
 /** Players a club would part with: not among its six most valuable; unhappy ones first. */
-function tradeable(squad: CareerPlayer[], role: CareerPlayer['role']): CareerPlayer[] {
+export function tradeable(squad: CareerPlayer[], role: CareerPlayer['role']): CareerPlayer[] {
   const core = new Set(
     [...squad]
       .sort((a, b) => tradeValue(b) - tradeValue(a))
@@ -583,17 +722,28 @@ export function aiTrades(career: Career, teamIds: string[], rng: Rng, max = 3): 
 }
 
 /**
- * AI clubs come to the manager with trade offers: they want one of his spare (or
- * unhappy) players and offer one of similar value, ideally where he is short.
+ * AI clubs come to the manager with trade offers: they want one of his listed, spare (or
+ * unhappy) players and offer one of similar value, ideally where he is short. With
+ * `only`, every offer is for that one (listed) player.
  */
-export function aiTradeOffers(career: Career, teamIds: string[], rng: Rng, max = 2): Career {
+export function aiTradeOffers(
+  career: Career,
+  teamIds: string[],
+  rng: Rng,
+  max = 2,
+  only?: string,
+): Career {
   const me = career.manager.teamId
   const mine = squadOf(career.players, me)
   const myNeeds = deficits(mine)
-  const spare = [
-    ...surpluses(mine).flatMap((r) => tradeable(mine, r)),
-    ...mine.filter((p) => p.morale < 30),
-  ]
+  const listed = new Set(career.market.listed ?? [])
+  const spare = only
+    ? mine.filter((p) => p.id === only && !p.injury)
+    : [
+        ...mine.filter((p) => listed.has(p.id) && !p.injury),
+        ...surpluses(mine).flatMap((r) => tradeable(mine, r)),
+        ...mine.filter((p) => p.morale < 30),
+      ]
   let c = career
   let made = 0
   for (const b of shuffle(
@@ -602,11 +752,15 @@ export function aiTradeOffers(career: Career, teamIds: string[], rng: Rng, max =
   )) {
     if (made >= max) break
     const sb = squadOf(c.players, b)
-    const want = spare.find((p) => deficits(sb).includes(p.role) || p.morale < 30)
+    const want = spare.find(
+      (p) => listed.has(p.id) || deficits(sb).includes(p.role) || p.morale < 30,
+    )
     if (!want) continue
     const offer = [
       ...myNeeds.flatMap((r) => tradeable(sb, r)),
       ...surpluses(sb).flatMap((r) => tradeable(sb, r)),
+      // A listed player is wanted for himself: the club offers whoever fits the value.
+      ...(listed.has(want.id) ? ROLES.flatMap((r) => tradeable(sb, r)) : []),
     ].find((p) => {
       const ratio = tradeValue(p) / tradeValue(want)
       return ratio > 0.85 && ratio < 1.2 && swapOk(c.players, me, [want.id], b, [p.id])
@@ -749,6 +903,27 @@ export function retirementChance(p: CareerPlayer): number {
   return 0
 }
 
+/** Does this (already aged) player retire at the end of `endedYear`? Seeded per player. */
+export function retires(seed: number, endedYear: number, aged: CareerPlayer): boolean {
+  const chance = retirementChance(aged)
+  return chance > 0 && createRng(deriveSeed(seed, 'retire', endedYear, aged.id))() < chance
+}
+
+/**
+ * Safety net at season end: of the manager's players with no years left, the best are
+ * kept (one season at asking price) so that he still has eleven.
+ */
+export function safetyNet(mine: CareerPlayer[]): Set<string> {
+  const staying = mine.filter((p) => (p.contract?.years ?? 0) > 0).length
+  return new Set(
+    mine
+      .filter((p) => (p.contract?.years ?? 0) <= 0)
+      .sort((a, b) => overallRating(b) - overallRating(a))
+      .slice(0, Math.max(0, 11 - staying))
+      .map((p) => p.id),
+  )
+}
+
 /**
  * Contracts at season end (after the year has been used): the manager's players with no
  * years left become free agents unless renewed; AI clubs keep most of their good ones.
@@ -756,17 +931,7 @@ export function retirementChance(p: CareerPlayer): number {
 export function expireContracts(career: Career, rng: Rng): Career {
   const me = career.manager.teamId
   let players = career.players
-  // Safety net: the manager keeps enough expiring players (best first, one season at
-  // asking price) to still have eleven.
-  const mine = squadOf(players, me)
-  const staying = mine.filter((p) => (p.contract?.years ?? 0) > 0).length
-  const rescue = new Set(
-    mine
-      .filter((p) => (p.contract?.years ?? 0) <= 0)
-      .sort((a, b) => overallRating(b) - overallRating(a))
-      .slice(0, Math.max(0, 11 - staying))
-      .map((p) => p.id),
-  )
+  const rescue = safetyNet(squadOf(players, me))
   for (const p of career.players) {
     if (!p.teamId || !p.contract || p.contract.years > 0) continue
     if (rescue.has(p.id)) {

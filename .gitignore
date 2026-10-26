@@ -33,3 +33,6 @@ dev-dist
 .env.*
 *.tsbuildinfo
 coverage
+
+# Promo video / screenshots (local only)
+promo/

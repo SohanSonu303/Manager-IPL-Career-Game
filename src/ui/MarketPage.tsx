@@ -1,49 +1,58 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { teamById, teams } from '@/data'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { teamById } from '@/data'
 import { nextMegaSeason } from '@/sim/auction'
 import type { Career, CareerPlayer } from '@/sim/career'
 import { TEAM_IDS } from '@/sim/game'
 import {
-  agentOf,
+  askingPrice,
   capRoom,
   FREE_AGENT_MAX,
   freeAgents,
   isWindowOpen,
   marketAgents,
+  offerBlocker,
   preferredYears,
-  requiredSalary,
   SQUAD_MAX,
   SQUAD_OVERSEAS_MAX,
   squadOf,
-  tradeValue,
-  type OfferAnswer,
 } from '@/sim/market'
-import { overallRating } from '@/sim/player'
-import { offerContract, proposeTrade, release, useGame } from '@/state/store'
-import { crore, teamShort } from './format'
+import { transferNeeds, type NeedCard, type Target } from '@/sim/transfers'
+import { offerContract, useGame } from '@/state/store'
+import { bidPrice, crore, teamShort } from './format'
 import { Chip, Screen } from './kit/kit'
-import { PlayerRow, PlayerSheet } from './PlayerRow'
+import { ContractsPanel } from './ContractsPage'
 import { FilterBar } from './FilterBar'
+import { Negotiation } from './Negotiation'
+import { PlayerRow, PlayerSheet } from './PlayerRow'
 import { applyFilters, DEFAULT_FILTERS, type PlayerFilters } from './playerFilters'
+import { TradeBuilder } from './TradeBuilder'
 import { useNextAction } from './useNextAction'
 
-type Tab = 'free' | 'squad' | 'all' | 'trade' | 'log'
+type Tab = 'needs' | 'contracts' | 'trade' | 'log'
+const TABS: Record<Tab, string> = {
+  needs: 'Needs',
+  contracts: 'Contracts',
+  trade: 'Trade',
+  log: 'Log',
+}
 
-const AGENT_TEXT = { Keen: 'keen to sign', Fair: 'fair', Tough: 'hard bargainer' } as const
-const AGENT_TONE = { Keen: 'good', Fair: 'plain', Tough: 'warn' } as const
-
-/** Free agents (any time), renewals and trades (the off-season), releases, the transfer log. */
+/**
+ * The transfer hub: what the squad needs (and who fits), contracts, trades, the log.
+ * `?tab=` picks the tab; `get`/`give` start a trade with those players.
+ */
 export function MarketPage() {
   const career = useGame((s) => s.career)
   const next = useNextAction()
   const navigate = useNavigate()
-  const [tab, setTab] = useState<Tab>('free')
+  const [params, setParams] = useSearchParams()
+  const tab = (params.get('tab') as Tab | null) ?? 'needs'
+  const setTab = (t: Tab, extra: Record<string, string> = {}) =>
+    setParams({ tab: t, ...extra }, { replace: true })
   if (!career) return null
   const me = career.manager.teamId
   const squad = squadOf(career.players, me)
   const open = isWindowOpen(career)
-  const agents = marketAgents(career)
   return (
     <Screen primary={next}>
       <h1>Market</h1>
@@ -62,8 +71,8 @@ export function MarketPage() {
             <small>Sign any time</small>
           </div>
           <div>
-            <Chip tone={open ? 'good' : 'warn'}>Trade window {open ? 'open' : 'closed'}</Chip>
-            <small>{open ? 'Trades and renewals' : 'Off-season only'}</small>
+            <Chip tone={open ? 'good' : 'warn'}>Trades {open ? 'open' : 'shut'}</Chip>
+            <small>Preseason and after the season</small>
           </div>
           <div>
             <Chip>Mega auction</Chip>
@@ -76,7 +85,7 @@ export function MarketPage() {
         overseas · <span className="money">{crore(capRoom(career.players, me))}</span> room
       </p>
       <div className="tabs" role="tablist">
-        {(['free', 'squad', 'all', 'trade', 'log'] as const).map((t) => (
+        {(Object.keys(TABS) as Tab[]).map((t) => (
           <button
             key={t}
             role="tab"
@@ -84,37 +93,200 @@ export function MarketPage() {
             className={tab === t ? 'active' : ''}
             onClick={() => setTab(t)}
           >
-            {
-              { free: 'Free agents', squad: 'My squad', all: 'League', trade: 'Trade', log: 'Log' }[
-                t
-              ]
-            }
+            {TABS[t]}
           </button>
         ))}
       </div>
-      {tab === 'free' && (
+      {tab === 'needs' && <Needs career={career} onTrade={(id) => setTab('trade', { get: id })} />}
+      {tab === 'contracts' && <ContractsPanel career={career} />}
+      {tab === 'trade' && (
+        <TradeBuilder
+          key={`${params.get('get')}-${params.get('give')}`}
+          career={career}
+          initialGet={params.get('get') ?? undefined}
+          initialGive={params.get('give') ?? undefined}
+        />
+      )}
+      {tab === 'log' && <Log career={career} />}
+    </Screen>
+  )
+}
+
+type View = 'suggested' | 'free' | 'league'
+
+/** Needs: the squad's gaps with the best options, or every free agent / league player. */
+function Needs({ career, onTrade }: { career: Career; onTrade: (playerId: string) => void }) {
+  const [view, setView] = useState<View>('suggested')
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
+  const me = career.manager.teamId
+  const agents = marketAgents(career)
+  const open = career.players.find((p) => p.id === openId)
+  const signed = (m: string) => {
+    setMessage(m)
+    setOpenId(null)
+  }
+  const signAtAsk = (t: Target) => {
+    if (!confirm(`Sign ${t.p.name} for ${bidPrice(t.price)} a season, ${t.years} seasons?`)) return
+    const a = offerContract(t.p.id, { salary: t.price, years: t.years })
+    setMessage(
+      a.kind === 'accept'
+        ? `${t.p.name} signs for ${bidPrice(t.price)} a season.`
+        : a.kind === 'reject'
+          ? a.message
+          : `${t.p.name} wants more: open his card to negotiate.`,
+    )
+  }
+  return (
+    <>
+      <div className="filters" role="radiogroup" aria-label="Show">
+        {(
+          [
+            ['suggested', 'For your needs'],
+            ['free', `Free agents (${agents.length})`],
+            ['league', 'Other clubs'],
+          ] as const
+        ).map(([v, label]) => (
+          <button
+            key={v}
+            role="radio"
+            aria-checked={view === v}
+            className={view === v ? 'on' : ''}
+            onClick={() => setView(v)}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {message && <p className="good">{message}</p>}
+      {view === 'suggested' && (
+        <NeedCards career={career} onOpen={setOpenId} onSign={signAtAsk} onTrade={onTrade} />
+      )}
+      {view === 'free' && (
         <>
           <p className="dim">
-            {agents.length} free agent{agents.length === 1 ? '' : 's'} this season (never more than{' '}
-            {FREE_AGENT_MAX}). The list is redrawn every season;{' '}
-            {freeAgents(career.players).length - agents.length} other unsigned player
-            {freeAgents(career.players).length - agents.length === 1 ? ' is' : 's are'} playing
+            Up to {FREE_AGENT_MAX} free agents each season (the list is redrawn every year);{' '}
+            {freeAgents(career.players).length - agents.length} other unsigned players are playing
             elsewhere.
           </p>
-          <Players career={career} players={agents} mode="sign" />
+          <Players career={career} players={agents} mode="sign" onOpen={setOpenId} />
         </>
       )}
-      {tab === 'squad' && <Players career={career} players={squad} mode="mine" />}
-      {tab === 'all' && (
+      {view === 'league' && (
         <Players
           career={career}
           players={career.players.filter((p) => p.teamId !== null && p.teamId !== me)}
           mode="browse"
+          onOpen={setOpenId}
         />
       )}
-      {tab === 'trade' && <Trade career={career} open={open} />}
-      {tab === 'log' && <Log career={career} />}
-    </Screen>
+      {open && (
+        <PlayerSheet
+          p={open}
+          onClose={() => setOpenId(null)}
+          actions={
+            open.teamId === null ? (
+              <Negotiation player={open} onSigned={signed} />
+            ) : open.teamId !== me ? (
+              <button
+                className="primary"
+                style={{ width: '100%' }}
+                onClick={() => onTrade(open.id)}
+              >
+                Trade for him
+              </button>
+            ) : null
+          }
+        />
+      )}
+    </>
+  )
+}
+
+function NeedCards({
+  career,
+  onOpen,
+  onSign,
+  onTrade,
+}: {
+  career: Career
+  onOpen: (id: string) => void
+  onSign: (t: Target) => void
+  onTrade: (id: string) => void
+}) {
+  const needs: NeedCard[] = transferNeeds(career, TEAM_IDS)
+  if (!needs.length)
+    return (
+      <div className="card">
+        <strong>Your squad covers every role</strong>
+        <span className="dim">Browse the free agents or other clubs for an upgrade.</span>
+      </div>
+    )
+  return (
+    <>
+      {needs.map((n) => (
+        <section key={n.role} className="card need-card">
+          <div className="row-between">
+            <strong>{n.title}</strong>
+            <small className="dim">{n.why}</small>
+          </div>
+          {n.options.length === 0 && (
+            <span className="dim">Nobody better on the market right now.</span>
+          )}
+          {(() => {
+            const t = n.options.find((o) => o.kind === 'free')
+            const why = t && offerBlocker(career, t.p.id, { salary: t.price, years: t.years })
+            return why ? <span className="warn">{why} Release or trade someone first.</span> : null
+          })()}
+          <ul className="plist">
+            {n.options.map((t) => {
+              const blocked =
+                t.kind === 'free' &&
+                offerBlocker(career, t.p.id, { salary: t.price, years: t.years })
+              return (
+                <li key={t.p.id}>
+                  <PlayerRow
+                    p={t.p}
+                    as="div"
+                    onClick={() => onOpen(t.p.id)}
+                    extra={
+                      t.kind === 'free' ? (
+                        <>
+                          <Chip tone="good">Free agent</Chip> asks{' '}
+                          <span className="money">{bidPrice(t.price)}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Chip>{teamShort(t.p.teamId ?? '')}</Chip> trade value {t.price}
+                        </>
+                      )
+                    }
+                    side={
+                      <button
+                        className={`need-go ${t.kind === 'free' ? 'primary' : ''}`}
+                        disabled={!!blocked}
+                        title={blocked || undefined}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (t.kind === 'free') onSign(t)
+                          else onTrade(t.p.id)
+                        }}
+                      >
+                        {t.kind === 'free' ? `Sign ${bidPrice(t.price)}` : 'Trade'}
+                      </button>
+                    }
+                  />
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      ))}
+      <p className="dim">
+        "Sign" pays what he asks, and he signs on the spot. Open a player to negotiate a lower
+        price.
+      </p>
+    </>
   )
 }
 
@@ -122,21 +294,20 @@ function Players({
   career,
   players,
   mode,
+  onOpen,
 }: {
   career: Career
   players: CareerPlayer[]
-  mode: 'sign' | 'mine' | 'browse'
+  mode: 'sign' | 'browse'
+  onOpen: (id: string) => void
 }) {
   const [filters, setFilters] = useState<PlayerFilters>(DEFAULT_FILTERS)
-  const [openId, setOpenId] = useState<string | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
-  /** What this player wants from the manager's club, for his preferred length. */
-  const demand = (p: CareerPlayer) => requiredSalary(career, p, preferredYears(p.age), TEAM_IDS)
-  // Free agents are priced by what they want from you; everyone else by their salary.
+  /** What this player asks of the manager's club, for his preferred length. */
+  const ask = (p: CareerPlayer) => askingPrice(career, p, preferredYears(p.age), TEAM_IDS)
+  // Free agents are priced by what they ask of you; everyone else by their salary.
   const sorted = applyFilters(players, filters, (p) =>
-    mode === 'sign' ? demand(p) : (p.contract?.salary ?? 0),
+    mode === 'sign' ? ask(p) : (p.contract?.salary ?? 0),
   )
-  const open = career.players.find((p) => p.id === openId)
   return (
     <>
       <FilterBar
@@ -146,22 +317,21 @@ function Players({
         total={players.length}
         priceLabel={mode === 'sign' ? 'Asking price' : 'Salary'}
       />
-      {message && <p className="good">{message}</p>}
       <ul className="plist">
         {sorted.length === 0 && <li className="dim">Nobody here right now.</li>}
         {sorted.map((p) => (
           <li key={p.id}>
             <PlayerRow
               p={p}
-              onClick={() => setOpenId(p.id)}
+              onClick={() => onOpen(p.id)}
               extra={
                 mode === 'sign' ? (
                   <>
-                    Wants <span className="money">{crore(demand(p))}</span>
+                    Asks <span className="money">{bidPrice(ask(p))}</span>
                   </>
                 ) : (
-                  <span className={(p.contract?.years ?? 0) <= 1 ? 'warn' : ''}>
-                    {mode === 'browse' && <strong>{teamShort(p.teamId ?? '')} · </strong>}
+                  <span>
+                    <strong>{teamShort(p.teamId ?? '')} · </strong>
                     {crore(p.contract?.salary ?? 0)} · {p.contract?.years} yr left
                   </span>
                 )
@@ -170,222 +340,7 @@ function Players({
           </li>
         ))}
       </ul>
-      {open && (
-        <PlayerSheet
-          p={open}
-          onClose={() => setOpenId(null)}
-          actions={
-            mode === 'browse' ? (
-              <p className="dim">
-                To get him, use the Trade tab (trades run in the off-season: the preseason and after
-                the season).
-              </p>
-            ) : mode !== 'sign' && (open.contract?.years ?? 0) <= 1 && !isWindowOpen(career) ? (
-              <>
-                <p className="dim">
-                  {career.mega
-                    ? 'Renewals wait until the mega auction is over.'
-                    : 'Contracts can be renewed in the off-season: the preseason or after the season.'}
-                </p>
-                {!career.mega && (
-                  <ReleaseButton p={open} onDone={setMessage} close={() => setOpenId(null)} />
-                )}
-              </>
-            ) : mode === 'sign' || (open.contract?.years ?? 0) <= 1 ? (
-              <>
-                <Negotiation
-                  player={open}
-                  start={demand(open)}
-                  onSigned={(m) => {
-                    setMessage(m)
-                    setOpenId(null)
-                  }}
-                />
-                {mode === 'mine' && (
-                  <ReleaseButton p={open} onDone={setMessage} close={() => setOpenId(null)} />
-                )}
-              </>
-            ) : (
-              <ReleaseButton p={open} onDone={setMessage} close={() => setOpenId(null)} />
-            )
-          }
-        />
-      )}
     </>
-  )
-}
-
-function ReleaseButton({
-  p,
-  onDone,
-  close,
-}: {
-  p: CareerPlayer
-  onDone: (m: string) => void
-  close: () => void
-}) {
-  return (
-    <button
-      className="danger"
-      style={{ width: '100%', marginTop: 10 }}
-      onClick={() => {
-        if (!confirm(`Release ${p.name}?`)) return
-        onDone(release(p.id) ?? `${p.name} released.`)
-        close()
-      }}
-    >
-      Release
-    </button>
-  )
-}
-
-function Negotiation({
-  player,
-  start,
-  onSigned,
-}: {
-  player: CareerPlayer
-  start: number
-  onSigned: (message: string) => void
-}) {
-  const career = useGame((st) => st.career)
-  const [salary, setSalary] = useState(start)
-  const [years, setYears] = useState(preferredYears(player.age))
-  const [answer, setAnswer] = useState<OfferAnswer | null>(null)
-  const renewal = !!player.teamId
-  const submit = (s: number, y: number) => {
-    const a = offerContract(player.id, { salary: s, years: y })
-    if (a.kind === 'accept') {
-      onSigned(
-        `${player.name} ${renewal ? 're-signs' : 'signs'} for ${crore(s)} a season, ${y} season${y > 1 ? 's' : ''}.`,
-      )
-    }
-    setAnswer(a)
-  }
-  return (
-    <div className="card" style={{ marginTop: 10 }}>
-      <div className="row-between">
-        <strong>{renewal ? 'Renew contract' : 'Make an offer'}</strong>
-        {career && (
-          <Chip tone={AGENT_TONE[agentOf(career, player).label]}>
-            Agent: {AGENT_TEXT[agentOf(career, player).label]}
-          </Chip>
-        )}
-      </div>
-      <label className="field">
-        Salary per season (lakh) — wants {crore(start)}
-        <input
-          type="number"
-          min={20}
-          step={5}
-          value={salary}
-          onChange={(e) => setSalary(Number(e.target.value))}
-        />
-      </label>
-      <div className="filters">
-        {[1, 2, 3].map((y) => (
-          <button key={y} className={years === y ? 'on' : ''} onClick={() => setYears(y)}>
-            {y} season{y > 1 ? 's' : ''}
-          </button>
-        ))}
-      </div>
-      <button className="primary" onClick={() => submit(salary, years)}>
-        Offer {crore(salary)} × {years}
-      </button>
-      {answer?.kind === 'reject' && <p className="warn">{answer.message}</p>}
-      {answer?.kind === 'counter' && (
-        <>
-          <p>
-            {answer.message} He asks {crore(answer.salary)} for {answer.years} season
-            {answer.years > 1 ? 's' : ''}.
-          </p>
-          <button
-            onClick={() => {
-              setSalary(answer.salary)
-              setYears(answer.years)
-              submit(answer.salary, answer.years)
-            }}
-          >
-            Accept his terms
-          </button>
-        </>
-      )}
-    </div>
-  )
-}
-
-function Trade({ career, open }: { career: Career; open: boolean }) {
-  const me = career.manager.teamId
-  const mine = squadOf(career.players, me).sort((a, b) => tradeValue(b) - tradeValue(a))
-  const others = teams.filter((t) => t.id !== me)
-  const [club, setClub] = useState(others[0]?.id ?? '')
-  const theirs = squadOf(career.players, club).sort((a, b) => tradeValue(b) - tradeValue(a))
-  const [give, setGive] = useState(mine[0]?.id ?? '')
-  const [get, setGet] = useState('')
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
-  const label = (p: CareerPlayer) => `${p.name} (${overallRating(p)}, ${p.age})`
-  return (
-    <div className="card">
-      {!open && (
-        <p className="warn">
-          {career.mega
-            ? 'Trades wait until the mega auction is over.'
-            : 'The trade window is closed. Trades run in the off-season: the preseason and after the season.'}
-        </p>
-      )}
-      <label className="field">
-        You give
-        <select value={give} onChange={(e) => setGive(e.target.value)}>
-          {mine.map((p) => (
-            <option key={p.id} value={p.id}>
-              {label(p)}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="field">
-        Club
-        <select
-          value={club}
-          onChange={(e) => {
-            setClub(e.target.value)
-            setGet('')
-          }}
-        >
-          {others.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="field">
-        You get
-        <select value={get} onChange={(e) => setGet(e.target.value)}>
-          <option value="">Choose a player</option>
-          {theirs.map((p) => (
-            <option key={p.id} value={p.id}>
-              {label(p)}
-            </option>
-          ))}
-        </select>
-      </label>
-      <button
-        className="primary"
-        disabled={!open || !give || !get}
-        onClick={() => {
-          const r = proposeTrade([give], [get])
-          setMessage(r.ok ? { ok: true, text: 'Trade agreed!' } : { ok: false, text: r.reason })
-          if (r.ok) {
-            setGive('')
-            setGet('')
-          }
-        }}
-      >
-        Propose trade
-      </button>
-      {message && <p className={message.ok ? 'good' : 'warn'}>{message.text}</p>}
-    </div>
   )
 }
 

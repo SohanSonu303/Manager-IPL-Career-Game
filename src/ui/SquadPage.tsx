@@ -3,7 +3,7 @@ import type { CareerPlayer } from '@/sim/career'
 import { squadOf } from '@/sim/market'
 import { useGame } from '@/state/store'
 import { FilterBar } from './FilterBar'
-import { Screen } from './kit/kit'
+import { Chip, Screen } from './kit/kit'
 import { applyFilters, DEFAULT_FILTERS, type PlayerFilters } from './playerFilters'
 import { PlayerRow, PlayerSheet } from './PlayerRow'
 import { useNextAction } from './useNextAction'
@@ -35,6 +35,7 @@ export function SquadPage() {
               extra={
                 <>
                   Form {Math.round(p.form)} · Fit {Math.round(p.fitness)}
+                  {(p.contract?.years ?? 0) <= 1 && <Chip tone="warn">Final year</Chip>}
                 </>
               }
             />
