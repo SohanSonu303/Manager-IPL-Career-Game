@@ -30,6 +30,7 @@ import {
   type MatchResult,
   type MatchState,
   type PendingReview,
+  type ReviewFeel,
   type Pitch,
   type ShotKind,
   type TeamSheet,
@@ -566,18 +567,42 @@ interface Draft {
 
 /** Chance the umpire's call is wrong, and how often a big appeal is turned down. */
 export const DRS = {
-  wrongLbw: 0.12,
-  wrongCaughtBehind: 0.08,
+  wrongLbw: 0.18,
+  wrongCaughtBehind: 0.12,
   /** Share of beaten dot balls with a big lbw appeal turned down. */
   appeal: 0.08,
   /** Share of those turned-down appeals that were actually out. */
   appealOut: 0.25,
+  /** Share of correct lbw calls that are marginal (umpire's call if reviewed). */
+  umpiresCall: 0.25,
 }
 
-/** Does a side review this call? The AI has a feel for it, not the truth. */
-export function aiReview(call: 'out' | 'notout', truthOut: boolean, r: number): boolean {
-  if (call === 'out') return r < (truthOut ? 0.12 : 0.75)
-  return r < (truthOut ? 0.6 : 0.08)
+/**
+ * How a call looks to the side that may review: a wrong decision looks wrong (the batter
+ * is adamant, the bowler unsure) three times in four; a right one looks wrong one time in
+ * five. Reviewing only the confident calls wins roughly 45% of reviews.
+ */
+export function reviewFeel(wrong: boolean, r: number): ReviewFeel {
+  if (wrong) return r < 0.75 ? 'confident' : 'unsure'
+  return r < 0.2 ? 'confident' : r < 0.55 ? 'unsure' : 'doubtful'
+}
+
+/** Does an AI side review this call? It goes on the same feel the manager sees. */
+export function aiReview(feel: ReviewFeel, r: number): boolean {
+  return r < { confident: 0.85, unsure: 0.2, doubtful: 0.03 }[feel]
+}
+
+/** Settle a call on review: out or not, overturned, umpire's call. */
+function drsCall(
+  rng: Rng,
+  call: 'out' | 'notout',
+  kind: 'lbw' | 'caught',
+  truthOut: boolean,
+): Pick<PendingReview, 'feel' | 'umpiresCall' | 'roll'> {
+  const wrong = (call === 'out') !== truthOut
+  const feel = reviewFeel(wrong, rng())
+  const marginal = rng() < DRS.umpiresCall
+  return { feel, umpiresCall: !wrong && kind === 'lbw' && marginal, roll: rng() }
 }
 
 /**
@@ -633,6 +658,15 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
       bat: boostFor(state, inn.battingTeamId, inn),
       bowl: boostFor(state, inn.bowlingTeamId, inn),
     },
+    runs: inn.batting[batterId]?.runs ?? 0,
+    stand: inn.stand ?? { runs: 0, balls: 0 },
+    wicketsDown: inn.wickets,
+    bowlerWickets: inn.bowling[bowlerId]?.wickets ?? 0,
+    expensive: !!inn.expensive?.[bowlerId],
+    requiredRate:
+      inn.target !== null && inn.maxOvers > 1
+        ? ((inn.target - inn.runs) * 6) / Math.max(1, inn.maxOvers * 6 - inn.legalBalls)
+        : undefined,
   }
 
   const draft: Draft = {
@@ -762,13 +796,15 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
   let pending: PendingReview | null = null
   if (w && (w.kind === 'lbw' || (w.kind === 'caught' && w.fielderId === keeperId))) {
     const wrong = w.kind === 'lbw' ? DRS.wrongLbw : DRS.wrongCaughtBehind
+    const truthOut = rng() >= wrong
     pending = {
       teamId: inn.battingTeamId,
       call: 'out',
       kind: w.kind,
       batterId,
       bowlerId,
-      truthOut: rng() >= wrong,
+      truthOut,
+      ...drsCall(rng, 'out', w.kind, truthOut),
       draft,
     }
   } else if (
@@ -780,13 +816,15 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
     !draft.shot &&
     rng() < DRS.appeal
   ) {
+    const truthOut = rng() < DRS.appealOut
     pending = {
       teamId: inn.bowlingTeamId,
       call: 'notout',
       kind: 'lbw',
       batterId,
       bowlerId,
-      truthOut: rng() < DRS.appealOut,
+      truthOut,
+      ...drsCall(rng, 'notout', 'lbw', truthOut),
       draft,
     }
     draft.key = 'appeal'
@@ -796,9 +834,8 @@ export function simBall(state: MatchState, rng: Rng): BallEvent {
       state.pendingReview = pending
       return provisionalEvent(inn, draft)
     }
-    const review = aiReview(pending.call, pending.truthOut, rng())
     state.pendingReview = pending
-    return resolveReview(state, review)
+    return resolveReview(state, aiReview(pending.feel, pending.roll))
   }
   return applyBall(state, inn, draft)
 }
@@ -814,7 +851,7 @@ function provisionalEvent(inn: InningsState, d: Draft): BallEvent {
 
 /**
  * Settle a ball waiting on a review: `review` true asks the third umpire. An overturned
- * call keeps the review; an upheld one loses it.
+ * call keeps the review, and so does one upheld on umpire's call; otherwise it is lost.
  */
 export function resolveReview(state: MatchState, review: boolean): BallEvent {
   const p = state.pendingReview
@@ -824,8 +861,9 @@ export function resolveReview(state: MatchState, review: boolean): BallEvent {
   const d = p.draft as Draft
   if (review) {
     const overturned = (p.call === 'out') !== p.truthOut
-    if (!overturned && inn.reviews) inn.reviews[p.teamId] = (inn.reviews[p.teamId] ?? 1) - 1
-    d.review = { teamId: p.teamId, call: p.call, overturned }
+    if (!overturned && !p.umpiresCall && inn.reviews)
+      inn.reviews[p.teamId] = (inn.reviews[p.teamId] ?? 1) - 1
+    d.review = { teamId: p.teamId, call: p.call, overturned, umpiresCall: p.umpiresCall }
     if (overturned && p.call === 'out') {
       d.wicket = null
       d.shot = null
@@ -898,10 +936,15 @@ function applyBall(state: MatchState, inn: InningsState, d: Draft): BallEvent {
       if (t.innings === inn.index && t.boostBalls > 0) t.boostBalls--
   }
   if (boundary) inn.overBoundaries = (inn.overBoundaries ?? 0) + 1
+  inn.overRuns = (inn.overRuns ?? 0) + total
+  const stand = (inn.stand ??= { runs: 0, balls: 0 })
+  stand.runs += total
+  if (legal) stand.balls++
   inn.freeHitNext =
     extra?.kind === 'noball' ? true : extra?.kind === 'wide' ? inn.freeHitNext : false
 
   if (wicket) {
+    inn.stand = { runs: 0, balls: 0 }
     inn.wickets++
     if (wicket.kind !== 'runOut') bowl.wickets++
     const outLine = inn.batting[wicket.playerOutId]
@@ -942,6 +985,8 @@ function applyBall(state: MatchState, inn: InningsState, d: Draft): BallEvent {
     inn.bowlerId = null
     inn.spell = undefined
     inn.overBoundaries = 0
+    inn.expensive = { ...inn.expensive, [bowlerId]: (inn.overRuns ?? 0) >= 15 }
+    inn.overRuns = 0
   }
   if (inn.legalBalls >= inn.maxOvers * 6) inn.complete = true
   if (inn.target !== null && inn.runs >= inn.target) inn.complete = true

@@ -9,13 +9,18 @@ export const MAX_OVERSEAS_IN_XI = 4
 export const MIN_BOWLING_OPTIONS = 5
 
 /** A squad member as selection sees it: data + condition + availability. */
-export type Selectable = Player & Condition & { injury?: { matchesOut: number } | null }
+export type Selectable = Player &
+  Condition & { injury?: { matchesOut: number } | null; morale?: number }
+
+/** A very unhappy player's mind isn't on the game. */
+const UNHAPPY_PENALTY = 2
 
 export const isAvailable = (p: Selectable) => !p.injury || p.injury.matchesOut <= 0
 const bowls = (p: Pick<Player, 'role'>) => p.role === 'bowler' || p.role === 'allrounder'
 
 /** Today's ratings: ability adjusted for form and fitness. */
 export function toMatchPlayer(p: Selectable): MatchPlayer {
+  const mood = p.morale !== undefined && p.morale < 30 ? UNHAPPY_PENALTY : 0
   return {
     id: p.id,
     name: p.name,
@@ -23,9 +28,9 @@ export function toMatchPlayer(p: Selectable): MatchPlayer {
     bowlingType: p.bowlingType,
     traits: p.traits,
     overseas: p.overseas,
-    batting: effectiveRating(p.ratings.batting, p),
-    bowling: effectiveRating(p.ratings.bowling, p),
-    fielding: effectiveRating(p.ratings.fielding, p),
+    batting: effectiveRating(p.ratings.batting, p) - mood,
+    bowling: effectiveRating(p.ratings.bowling, p) - mood,
+    fielding: effectiveRating(p.ratings.fielding, p) - mood,
   }
 }
 
@@ -152,6 +157,12 @@ export function impactSubs(squad: Selectable[], xi: string[], n = 5): string[] {
   return picked
 }
 
+/** The natural captain of an XI: the best player, with seniority counting for a lot. */
+export function pickCaptain(xi: Selectable[]): string {
+  const score = (p: Selectable) => overallRating(p) + Math.min(10, Math.max(0, p.age - 24))
+  return [...xi].sort((a, b) => score(b) - score(a))[0]?.id ?? ''
+}
+
 /** A complete team sheet chosen by the AI (also the default for a human side). */
 export function autoTeamSheet(teamId: string, squad: Selectable[], ai: boolean): TeamSheet {
   const xi = autoPickXI(squad)
@@ -159,6 +170,7 @@ export function autoTeamSheet(teamId: string, squad: Selectable[], ai: boolean):
     teamId,
     battingOrder: autoBattingOrder(xi),
     keeperId: pickKeeper(xi),
+    captainId: pickCaptain(xi),
     aggression: 'balanced',
     intent: {},
     field: 'balanced',

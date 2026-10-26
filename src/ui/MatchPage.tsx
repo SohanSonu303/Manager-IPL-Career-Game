@@ -1,7 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { teamById } from '@/data'
+import { PRIZES, WIN_BONUS } from '@/sim/finance'
 import { stageName } from '@/sim/game'
 import { finishMyMatch, useGame } from '@/state/store'
+import { crore } from './format'
 import { Screen } from './kit/kit'
 import { LiveMatch } from './match/LiveMatch'
 import { PostMatch } from './match/MatchView'
@@ -36,7 +38,17 @@ export function MatchPage() {
           navigate('/', { replace: true })
         },
       }}
-      after={<PostMatch state={match.state} reports={null} canApply={false} onApply={() => {}} />}
+      after={
+        <>
+          {match.state.result?.winnerId === career.manager.teamId && (
+            <p className="win-bonus">
+              +{crore(WIN_BONUS)} win bonus to club funds
+              {fixture.stage === 'final' ? `, and ${crore(PRIZES.champion)} prize money` : ''}
+            </p>
+          )}
+          <PostMatch state={match.state} reports={null} canApply={false} onApply={() => {}} />
+        </>
+      }
     />
   )
 }

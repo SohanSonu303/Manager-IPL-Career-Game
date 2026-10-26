@@ -2,11 +2,21 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { teams } from '@/data'
 import type { Career, CareerPlayer } from '@/sim/career'
-import { evaluateTrade, isWindowOpen, squadOf, tradeValue } from '@/sim/market'
+import { fundsOf } from '@/sim/finance'
+import {
+  isWindowOpen,
+  squadOf,
+  TRADE_ROUNDS,
+  tradeRounds,
+  tradeTally,
+  tradeValue,
+  type TradeDeal,
+  type TradeReply,
+} from '@/sim/market'
 import { overallRating } from '@/sim/player'
-import { suggestPackage, tradeBalance } from '@/sim/transfers'
+import { suggestPackage } from '@/sim/transfers'
 import { proposeTrade } from '@/state/store'
-import { roleLabel, teamShort } from './format'
+import { crore, roleLabel, teamShort } from './format'
 import { Chip, RatingRing } from './kit/kit'
 import { PlayerSheet } from './PlayerRow'
 
@@ -33,35 +43,60 @@ export function TradeBuilder({
   const [side, setSide] = useState<'theirs' | 'mine'>(
     initialGet || !initialGive ? 'theirs' : 'mine',
   )
+  const [cash, setCash] = useState(0)
+  const [reply, setReply] = useState<TradeReply | null>(null)
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const open = isWindowOpen(career)
   const byId = (id: string) => career.players.find((p) => p.id === id)
   const mine = squadOf(career.players, me).sort((a, b) => tradeValue(b) - tradeValue(a))
   const theirs = squadOf(career.players, club).sort((a, b) => tradeValue(b) - tradeValue(a))
-  const balance = tradeBalance(career, give, get)
-  const verdict = give.length && get.length ? evaluateTrade(career, give, get) : null
-  const pct = balance.target ? Math.min(100, (balance.give / balance.target) * 100) : 0
-  const toggle = (ids: string[], set: (v: string[]) => void, id: string) => {
+  const deal: TradeDeal = { club, give, get, cash }
+  const tally = tradeTally(career, deal)
+  const myFunds = fundsOf(career, me)
+  const theirFunds = fundsOf(career, club)
+  const roundsLeft = TRADE_ROUNDS - tradeRounds(career, club)
+  const pct = tally.progress * 100
+  const changed = () => {
     setMessage(null)
+    setReply(null)
+  }
+  const toggle = (ids: string[], set: (v: string[]) => void, id: string) => {
+    changed()
     set(ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id])
   }
   const pickClub = (id: string) => {
     setClub(id)
     setGet([])
-    setMessage(null)
+    setCash(0)
+    changed()
   }
-  const chips = (ids: string[], set: (v: string[]) => void) =>
-    ids.length ? (
-      ids.map((id) => (
-        <button key={id} className="trade-chip" onClick={() => toggle(ids, set, id)}>
-          {byId(id)?.name} <span aria-hidden>×</span>
-        </button>
-      ))
+  const chips = (ids: string[], set: (v: string[]) => void, pays: number) =>
+    ids.length || pays > 0 ? (
+      <>
+        {ids.map((id) => (
+          <button key={id} className="trade-chip" onClick={() => toggle(ids, set, id)}>
+            {byId(id)?.name} <span aria-hidden>×</span>
+          </button>
+        ))}
+        {pays > 0 && <span className="trade-chip cash">{crore(pays)} cash</span>}
+      </>
     ) : (
       <span className="dim">Nobody yet</span>
     )
   const shown = info ? byId(info) : undefined
+  const propose = (d: TradeDeal) => {
+    const r = proposeTrade(d)
+    setReply(r.kind === 'accept' ? null : r)
+    if (r.kind === 'accept') {
+      setMessage({ ok: true, text: 'Trade agreed!' })
+      setGive([])
+      setGet([])
+      setCash(0)
+    } else setMessage(null)
+  }
+  const payer = cash < 0 ? 'them' : 'me'
+  const cashMax = Math.max(0, Math.min(3000, payer === 'me' ? myFunds : theirFunds))
 
   return (
     <>
@@ -89,55 +124,135 @@ export function TradeBuilder({
       <div className="card trade-deal">
         <div className="trade-side">
           <small>You get from {teamShort(club)}</small>
-          <div className="trade-chips">{chips(get, setGet)}</div>
+          <div className="trade-chips">{chips(get, setGet, -cash)}</div>
         </div>
         <div className="trade-side">
           <small>You give</small>
-          <div className="trade-chips">{chips(give, setGive)}</div>
+          <div className="trade-chips">{chips(give, setGive, cash)}</div>
         </div>
-        <div className={`trade-balance ${verdict?.ok ? 'ok' : ''}`}>
-          <span className="meter">
+
+        <div className="trade-cash">
+          <div className="row-between">
+            <div className="seg two" role="radiogroup" aria-label="Who pays cash">
+              <button
+                role="radio"
+                aria-checked={payer === 'me'}
+                className={payer === 'me' ? 'on' : ''}
+                onClick={() => {
+                  changed()
+                  setCash(Math.abs(cash))
+                }}
+              >
+                You pay
+              </button>
+              <button
+                role="radio"
+                aria-checked={payer === 'them'}
+                className={payer === 'them' ? 'on' : ''}
+                onClick={() => {
+                  changed()
+                  setCash(-Math.abs(cash) || -5)
+                }}
+              >
+                They pay
+              </button>
+            </div>
+            <b className="money">{crore(Math.abs(cash))}</b>
+          </div>
+          <input
+            type="range"
+            className="nego-slider"
+            aria-label="Cash"
+            min={0}
+            max={cashMax}
+            step={5}
+            value={Math.min(cashMax, Math.abs(cash))}
+            onChange={(e) => {
+              changed()
+              const v = Number(e.target.value)
+              setCash(payer === 'me' ? v : -v)
+            }}
+          />
+          <small className="dim">
+            Club funds: you {crore(myFunds)} · {teamShort(club)} {crore(theirFunds)}
+          </small>
+        </div>
+
+        <div className={`trade-balance ${tally.progress >= 1 ? 'ok' : ''}`}>
+          <span className="meter" aria-label={`Deal ${Math.round(pct)}% of what they want`}>
             <span style={{ width: `${pct}%` }} />
           </span>
           <small className="dim">
-            {get.length
-              ? `Value: you offer ${Math.round(balance.give)} · they want ${Math.round(balance.target)}`
-              : 'Pick who you want, then what you give.'}
+            {get.length || give.length
+              ? tally.progress >= 1
+                ? 'Enough value: propose it.'
+                : `${Math.round(pct)}% of what ${teamShort(club)} want`
+              : 'Pick who you want, then what you give: players, cash or both.'}
           </small>
         </div>
-        {verdict && (
-          <span className={verdict.ok ? 'good' : 'warn'}>
-            {verdict.ok ? `${teamShort(club)} would accept this.` : verdict.reason}
-          </span>
+
+        {reply?.kind === 'counter' && (
+          <div className="nego-counter">
+            <span>
+              {reply.message}
+              {reply.final && ' Their final word.'}
+            </span>
+            <div className="button-row">
+              {reply.cash !== undefined && (
+                <button
+                  className="primary grow2"
+                  onClick={() => {
+                    const d = { ...deal, cash: reply.cash as number }
+                    setCash(d.cash)
+                    propose(d)
+                  }}
+                >
+                  {reply.cash > 0 ? `Pay ${crore(reply.cash)}` : `Take ${crore(-reply.cash)}`}
+                </button>
+              )}
+              {reply.player && (
+                <button
+                  className={reply.cash === undefined ? 'primary grow2' : ''}
+                  onClick={() => {
+                    const d = { ...deal, give: [...give, reply.player as string] }
+                    setGive(d.give)
+                    propose(d)
+                  }}
+                >
+                  Add {byId(reply.player)?.name}
+                </button>
+              )}
+              <button onClick={() => setReply(null)}>Walk away</button>
+            </div>
+          </div>
         )}
+        {reply?.kind === 'reject' && <p className="warn">{reply.message}</p>}
+
         <div className="button-row">
           <button
             disabled={!get.length || !open}
             onClick={() => {
               const pack = suggestPackage(career, get)
-              if (pack) {
-                setGive(pack)
-                setMessage(null)
-              } else setMessage({ ok: false, text: 'No package of your players gets this done.' })
+              changed()
+              if (pack) setGive(pack)
+              else setMessage({ ok: false, text: 'No package of your players gets this done.' })
             }}
           >
             Make it work
           </button>
           <button
             className="primary grow2"
-            disabled={!open || !verdict?.ok}
-            onClick={() => {
-              const r = proposeTrade(give, get)
-              setMessage(r.ok ? { ok: true, text: 'Trade agreed!' } : { ok: false, text: r.reason })
-              if (r.ok) {
-                setGive([])
-                setGet([])
-              }
-            }}
+            disabled={!open || (!get.length && !give.length) || roundsLeft <= 0}
+            onClick={() => propose(deal)}
           >
-            Propose trade
+            Propose
           </button>
         </div>
+        <small className="dim">
+          {roundsLeft > 0
+            ? `${teamShort(club)} will counter up to ${roundsLeft} more time${roundsLeft > 1 ? 's' : ''} this season.`
+            : `${teamShort(club)} have stopped talking until next season.`}
+        </small>
         {message && <p className={message.ok ? 'good' : 'warn'}>{message.text}</p>}
       </div>
 
@@ -177,8 +292,9 @@ export function TradeBuilder({
         })}
       </ul>
       <p className="dim">
-        Clubs want a little more value than they give up. Young, high-potential players are worth
-        more; players over 30 less. Offers for your listed players arrive in the{' '}
+        Clubs want a little more value than they give up, and count cash a little below players.
+        Young, high-potential players are worth more; players over 30 less. Offers for your listed
+        players arrive in the{' '}
         <button className="linkish" onClick={() => navigate('/news')}>
           News
         </button>

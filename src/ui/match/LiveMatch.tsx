@@ -38,6 +38,7 @@ import {
   FIELD_SETTINGS,
   phaseOf,
   type MatchState,
+  type PendingReview,
 } from '@/sim/match/types'
 import { describePitch } from '../PreMatchPage'
 import { TRAIT_LABEL, teamShort } from '../format'
@@ -276,6 +277,12 @@ export function LiveMatch({
           ) : chase ? (
             <div className="chase">
               {batTeam?.short} need {chase.need} from {chase.balls} · RRR {chase.rrr.toFixed(2)}
+              {chase.rrr > 9 && chase.balls > 0 && (
+                <em className="tag warn">
+                  {' '}
+                  · Pressure on{chase.rrr >= 11 ? ': risky shots get batters out' : ''}
+                </em>
+              )}
             </div>
           ) : (
             <div className="chase dim">
@@ -363,10 +370,9 @@ export function LiveMatch({
               ? `${state.players[review.batterId]?.name} is given out ${review.kind === 'lbw' ? 'lbw' : 'caught behind'}.`
               : `Big lbw appeal against ${state.players[review.batterId]?.name}: not out.`}
           </strong>
+          <span className={`review-feel ${review.feel}`}>{feelText(review)}</span>
           <span className="dim">
-            {review.call === 'out'
-              ? 'Review it? If the decision stands you lose a review.'
-              : 'Send it upstairs? If the decision stands you lose a review.'}
+            If the decision stands you lose the review (unless it's umpire's call).
           </span>
         </div>
       )}
@@ -716,6 +722,8 @@ function BatRow({
           {line?.runs ?? 0} ({line?.balls ?? 0})
           {(line?.balls ?? 0) < 6 ? (
             <em className="tag warn"> New</em>
+          ) : (line?.balls ?? 0) >= 20 && (line?.runs ?? 0) >= 25 ? (
+            <em className="tag good"> In the zone</em>
           ) : (line?.balls ?? 0) >= 20 ? (
             <em className="tag good"> Set</em>
           ) : null}
@@ -775,6 +783,10 @@ function BowlRow({ state, people }: { state: MatchState; people: Map<string, Per
             : 'Yet to bowl'}
           {spell >= 3 && <em className="tag warn"> Tiring · over {spell} of spell</em>}
           {rattled && <em className="tag bad"> Rattled</em>}
+          {!rattled && inn.expensive?.[id] && (
+            <em className="tag warn"> Shaken by his last over</em>
+          )}
+          {(b?.wickets ?? 0) > 0 && !rattled && <em className="tag good"> Confident</em>}
         </span>
       </span>
     </div>
@@ -1001,4 +1013,23 @@ function BowlerPicker({
       <span className="bp-hint">Or press a sim button and the captain picks.</span>
     </div>
   )
+}
+
+/** What the players' reactions tell the side deciding whether to review. */
+function feelText(r: PendingReview): string {
+  const out = r.call === 'out'
+  const what = r.kind === 'lbw' ? 'lbw' : 'edge'
+  if (r.feel === 'confident')
+    return out
+      ? r.kind === 'lbw'
+        ? 'The batter is adamant: he thinks it pitched outside or was going over.'
+        : "The batter is adamant he didn't hit it."
+      : 'The bowler is sure it was plumb, and the keeper agrees.'
+  if (r.feel === 'unsure')
+    return out
+      ? `A long chat in the middle: the ${what} looked close.`
+      : 'The bowler half-fancies it; the keeper shrugs.'
+  return out
+    ? 'The batter half-turns for the pavilion: it looked out.'
+    : 'Even the bowler looks unconvinced.'
 }

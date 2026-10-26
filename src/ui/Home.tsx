@@ -6,6 +6,7 @@ import { objectiveForRank } from '@/sim/board'
 import { describeEvent, today } from '@/sim/calendar'
 import type { Career, SeasonReview } from '@/sim/career'
 import { contractOutlook } from '@/sim/contracts'
+import { fundsOf, WIN_BONUS } from '@/sim/finance'
 import { isMyClub, needsAction } from '@/sim/news'
 import {
   managerSheet,
@@ -630,6 +631,34 @@ function FinanceSheet({ career, onClose }: { career: Career; onClose: () => void
           <strong className="money">{crore(capRoom(career.players, me))}</strong>
         </div>
         <Meter value={(payroll(career.players, me) / SALARY_CAP) * 100} color="var(--money)" />
+      </div>
+      <div className="card">
+        <div className="row-between">
+          <span>Club funds</span>
+          <strong className="money">{crore(fundsOf(career, me))}</strong>
+        </div>
+        <span className="dim">
+          {crore(WIN_BONUS)} for every win, prize money for the top four. Spend it as cash in
+          trades; wages still come under the cap.
+        </span>
+        {(career.ledger ?? []).length > 0 && (
+          <ul className="ledger">
+            {[...(career.ledger ?? [])]
+              .reverse()
+              .slice(0, 8)
+              .map((e, i) => (
+                <li key={i} className="row-between">
+                  <span className="dim">
+                    {e.year} · {e.text}
+                  </span>
+                  <span className={e.amount > 0 ? 'good' : 'warn'}>
+                    {e.amount > 0 ? '+' : '−'}
+                    {crore(Math.abs(e.amount))}
+                  </span>
+                </li>
+              ))}
+          </ul>
+        )}
       </div>
       <h2 className="section">Contracts</h2>
       <ul className="list">

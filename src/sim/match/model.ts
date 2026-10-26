@@ -18,9 +18,9 @@ import type {
 export const MODEL = {
   /** Legal-ball rates per phase for an average matchup at balanced intent. */
   base: {
-    powerplay: { wicket: 0.0378, dot: 0.37, four: 0.2, six: 0.064 },
-    middle: { wicket: 0.0505, dot: 0.258, four: 0.118, six: 0.063 },
-    death: { wicket: 0.069, dot: 0.2, four: 0.168, six: 0.124 },
+    powerplay: { wicket: 0.0355, dot: 0.372, four: 0.198, six: 0.063 },
+    middle: { wicket: 0.0478, dot: 0.262, four: 0.113, six: 0.06 },
+    death: { wicket: 0.0645, dot: 0.2, four: 0.16, six: 0.117 },
   } satisfies Record<Phase, { wicket: number; dot: number; four: number; six: number }>,
   /** Skill = (batting − bowling − center) / 10. Center = the average matchup. */
   skillCenter: -3,
@@ -53,9 +53,29 @@ export const MODEL = {
   /** Rattled bowler: rating points lost and extra wide risk per boundary past one this over. */
   rattledRating: 3,
   rattledWide: 0.2,
-  /** Dew: extra wides, and the wet ball skids on to the bat. */
+  /** Dew: extra wides, and the wet ball skids on to the bat (spinners lose grip). */
   dewWide: 0.06,
   dewBoundary: 0,
+  dewSpinBoundary: 0.14,
+  /** In the zone: a set batter (25+ off 20+ balls) hits more freely and safely. */
+  zoneBoundary: 1.07,
+  zoneWicket: 0.93,
+  /** A big innings (60+): tiredness and risk creep back in. */
+  longInningsWicket: 1.08,
+  /** A stand of 30+ settles the batting side; a new pair is fragile for a few balls. */
+  standWicket: 0.94,
+  newPairWicket: 1.1,
+  /** Rating points a bowler gains per wicket in the innings (up to two). */
+  confidence: 1.5,
+  /** Rating points lost after his previous over went for 15 or more. */
+  hangover: 2,
+  /** Chase pressure: extra wicket risk per run of required rate above 9 (capped). */
+  chaseWicket: 0.02,
+  chaseWicketMax: 0.16,
+  /** Sixes per metre of boundary shorter than 69 m (and fewer on big grounds). */
+  groundSix: 0.03,
+  /** Tail-enders (batting under 35) against a real bowler: extra risk per point. */
+  tailWicket: 0.015,
   /** Dropped catches: share of chances put down by a 60-rated fielder (keepers drop fewer). */
   drop: 0.15,
   /** Share of singles that become two through a misfield (60-rated fielder). */
@@ -108,6 +128,18 @@ export interface BallContext {
   dew?: number
   /** Rating points of refocus after a strategic timeout, per side. */
   boost?: { bat: number; bowl: number }
+  /** The batter's runs so far this innings. */
+  runs?: number
+  /** The current partnership: runs, and legal balls since the last wicket. */
+  stand?: { runs: number; balls: number }
+  /** Wickets down in the innings. */
+  wicketsDown?: number
+  /** The bowler's wickets this innings. */
+  bowlerWickets?: number
+  /** His previous over went for 15 or more. */
+  expensive?: boolean
+  /** When chasing: required run rate (per over). */
+  requiredRate?: number
 }
 
 /** Extra wide risk from the bowling plan, intent and a rattled bowler. */
@@ -135,8 +167,38 @@ export function settleFactor(balls: number): { wicket: number; boundary: number 
 }
 
 /** Rating points the bowler is down today from a long spell or a bad over. */
-export function bowlerPenalty({ spell = 1, hitThisOver = 0 }: BallContext): number {
-  return MODEL.fatigue * Math.max(0, spell - 2) + MODEL.rattledRating * Math.max(0, hitThisOver - 1)
+export function bowlerPenalty({
+  spell = 1,
+  hitThisOver = 0,
+  bowlerWickets = 0,
+  expensive = false,
+}: BallContext): number {
+  return (
+    MODEL.fatigue * Math.max(0, spell - 2) +
+    MODEL.rattledRating * Math.max(0, hitThisOver - 1) +
+    (expensive ? MODEL.hangover : 0) -
+    MODEL.confidence * Math.min(2, bowlerWickets)
+  )
+}
+
+/** Wicket and boundary multipliers from the state of the innings (form of the batter, the
+ * partnership, the chase). */
+export function situationFactor(ctx: BallContext): { wicket: number; boundary: number } {
+  const { runs = 0, ballsFaced = 0, stand, wicketsDown = 0, requiredRate, batter, bowler } = ctx
+  let wicket = 1
+  let boundary = 1
+  if (runs >= 25 && ballsFaced >= 20) {
+    boundary *= MODEL.zoneBoundary
+    wicket *= MODEL.zoneWicket
+  }
+  if (runs >= 60) wicket *= MODEL.longInningsWicket
+  if (stand && stand.runs >= 30) wicket *= MODEL.standWicket
+  else if (stand && wicketsDown > 0 && stand.balls < 6) wicket *= MODEL.newPairWicket
+  if (requiredRate !== undefined && requiredRate > 9)
+    wicket *= 1 + Math.min(MODEL.chaseWicketMax, MODEL.chaseWicket * (requiredRate - 9))
+  if (batter.batting < 35 && bowler.bowling >= 60)
+    wicket *= 1 + MODEL.tailWicket * (35 - batter.batting)
+  return { wicket, boundary }
 }
 
 /** Chance a catch goes down, by the fielder's rating. */
@@ -189,6 +251,9 @@ export function ballOdds(ctx: BallContext): Odds {
     b *= f.boundary
   }
   w *= 1 + MODEL.pressureWicket * pressure
+  const sit = situationFactor(ctx)
+  w *= sit.wicket
+  b *= sit.boundary
 
   // Batter traits.
   if (has(batter, 'big-hitter')) {
@@ -277,8 +342,10 @@ export function ballOdds(ctx: BallContext): Odds {
   sixShare *= e.six
   d *= e.dot
   b *= 1 + MODEL.dewBoundary * dew
+  if (bowler.bowlingType === 'spin') b *= 1 + MODEL.dewSpinBoundary * dew
 
-  // Pitch.
+  // Pitch and ground: short boundaries mean more sixes.
+  sixShare *= Math.exp(MODEL.groundSix * (69 - pitch.boundary))
   b *= 1 + 0.16 * pitch.flat
   w *= 1 - 0.05 * pitch.flat
   if (bowler.bowlingType === 'pace') w *= 1 + 0.12 * pitch.pace

@@ -4,7 +4,7 @@ import type { Fixture } from './league'
 import { gradeMatch } from './match/postMatch'
 import type { MatchState } from './match/types'
 import type { NewsItem } from './news'
-import { overallRating } from './player'
+import { overallRating, STREAK_MAX } from './player'
 import { pick, type Rng } from './rng'
 
 type Draft = Omit<NewsItem, 'id' | 'year' | 'day'>
@@ -124,6 +124,23 @@ export function matchNews(
       teamIds: [p.teamId],
       playerId: p.id,
       text: `${p.name} (${short(p.teamId)}) is injured — out for ${p.injury.matchesOut} match${p.injury.matchesOut > 1 ? 'es' : ''}.`,
+    })
+  }
+
+  // A streak that just peaked: your own players, and stars elsewhere.
+  for (const p of after.players) {
+    const s = p.streak ?? 0
+    const prev = was.get(p.id)?.streak ?? 0
+    if (!p.teamId || !teamsIn.includes(p.teamId) || Math.abs(s) < STREAK_MAX || s === prev) continue
+    if (p.teamId !== me && overallRating(p) < STAR) continue
+    out.push({
+      kind: 'milestone',
+      teamIds: [p.teamId],
+      playerId: p.id,
+      text:
+        s > 0
+          ? `${p.name} (${short(p.teamId)}) is on fire: three big games in a row.`
+          : `${p.name} (${short(p.teamId)}) is out of touch: three poor games in a row.`,
     })
   }
 

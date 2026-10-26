@@ -1,5 +1,5 @@
 import type { CareerPlayer, Injury, InjuryKind } from '../career'
-import { fitnessAfterMatch, formAfterMatch, overallRating } from '../player'
+import { fitnessAfterMatch, formAfterMatch, overallRating, streakAfterMatch } from '../player'
 import { createRng, deriveSeed, pickWeighted, randInt, type Rng } from '../rng'
 import type { BatterLine, BowlerLine, MatchState } from './types'
 
@@ -171,6 +171,8 @@ export function applyPostMatch(
       return {
         ...p,
         morale,
+        // A streak fades while he sits out.
+        streak: (p.streak ?? 0) - Math.sign(p.streak ?? 0),
         injury: p.injury && left > 0 ? { ...p.injury, matchesOut: left } : null,
       }
     }
@@ -223,9 +225,10 @@ export function applyPostMatch(
       injury = { kind, matchesOut: randInt(rng, min, max) }
     }
     const form = formAfterMatch(p.form, g.grade)
+    const streak = streakAfterMatch(p.streak ?? 0, g.grade)
     const morale = clampMorale(p.morale + 2 + (winner === p.teamId ? 1 : winner ? -1 : 0))
     reports.push({ ...g, ratingChange: change, fitnessAfter: fitness, formAfter: form, injury })
-    return { ...p, ratings, seasonDev: dev, fitness, form, injury, morale }
+    return { ...p, ratings, seasonDev: dev, fitness, form, streak, injury, morale }
   })
   return { players: updated, reports }
 }

@@ -155,7 +155,9 @@ export function commentary(e: BallEvent, state: MatchState): string {
     const who = e.review.call === 'out' ? bat : `${bowl}'s side`
     line = e.review.overturned
       ? `Not out on the field, ${who} review... it's hitting! ${line}`
-      : `${who} reviews... the umpire's call stands. ${line}`
+      : e.review.umpiresCall
+        ? `${who} reviews... umpire's call! The decision stands, but the review is kept. ${line}`
+        : `${who} reviews... no doubt about it, the decision stands. ${line}`
   }
   if (e.commentary.startsWith('noball.')) line = `No-ball from ${bowl}! ${line} Free hit next.`
   if (e.freeHit) line = `Free hit. ${line}`

@@ -1,13 +1,14 @@
 import { START_CONFIDENCE, START_REPUTATION } from '@/sim/board'
 import type { Career } from '@/sim/career'
-import { objectiveFor } from '@/sim/game'
+import { startingFunds } from '@/sim/finance'
+import { objectiveFor, TEAM_IDS } from '@/sim/game'
 import { rerollFreeAgents } from '@/sim/market'
 
 /**
  * Save file format. Bump SAVE_VERSION whenever the `Career` shape changes, and add a
  * migration from the previous version to MIGRATIONS.
  */
-export const SAVE_VERSION = 8
+export const SAVE_VERSION = 9
 
 export interface SaveFile {
   version: number
@@ -91,6 +92,17 @@ export const MIGRATIONS: Record<number, Migration> = {
       ),
     )
     return { ...s, version: 8, career: { ...career, market: { listed: [], ...market, talks } } }
+  },
+  // v9: club funds (win bonuses, prize money) and the manager's ledger.
+  // v9: club funds and their ledger. (Streaks, prospects, captains and trade talks are
+  // optional fields that start empty.)
+  8: (s) => {
+    const career = s.career as Record<string, unknown>
+    return {
+      ...s,
+      version: 9,
+      career: { funds: startingFunds(TEAM_IDS), ledger: [], ...career },
+    }
   },
 }
 

@@ -1,12 +1,17 @@
 import { isMegaYear } from './auction'
 import { agePlayer, type Career, type CareerPlayer } from './career'
+import { autoPickXI } from './match/selection'
+import { overallRating } from './player'
 import {
   agentOf,
   askingPrice,
+  makeOffer,
   preferredYears,
   retirementChance,
   retires,
   safetyNet,
+  setLetGo,
+  SQUAD_MIN,
   squadOf,
   talksWith,
   type Agent,
@@ -117,3 +122,106 @@ export function contractOutlook(career: Career, teamIds: string[]): ContractOutl
     keepersAfter: after.filter((p) => p.role === 'wicketkeeper').length,
   }
 }
+
+// --- The PA's renewals --------------------------------------------------------------
+
+export interface RenewalPlanRow {
+  p: CareerPlayer
+  keep: boolean
+  /** Why, in a few words. */
+  reason: string
+  years: number
+  /** His ask for that length. */
+  ask: number
+}
+
+/**
+ * What the PA would do with every undecided final-year player: keep the XI regulars,
+ * young players with room to grow, cover for thin roles and solid squad players; let
+ * the rest go, but never below the squad minimum.
+ */
+export function renewalPlan(career: Career, teamIds: string[]): RenewalPlanRow[] {
+  const o = contractOutlook(career, teamIds)
+  const open = o.expiring.filter((r) => r.status === 'open')
+  if (!open.length) return []
+  const me = career.manager.teamId
+  const squad = squadOf(career.players, me)
+  const xi = new Set(autoPickXI(squad).map((p) => p.id))
+  const openIds = new Set(open.map((r) => r.p.id))
+  // Everyone else who stays next season, to see which roles would run thin.
+  const staying = squad.filter((p) => !o.leaving.includes(p) && !openIds.has(p.id))
+  const median = [...squad.map((p) => overallRating(p))].sort((a, b) => a - b)[
+    Math.floor(squad.length / 2)
+  ] as number
+  const rows: RenewalPlanRow[] = open.map((r) => {
+    const { p } = r
+    const overall = overallRating(p)
+    const base = { p, years: r.years, ask: r.ask }
+    if (xi.has(p.id)) return { ...base, keep: true, reason: 'A regular in your XI' }
+    if (p.age <= 25 && p.potential - overall >= 6)
+      return { ...base, keep: true, reason: 'Young, with room to grow' }
+    const sameRole = staying.filter((q) => q.role === p.role).length
+    const minimum = { wicketkeeper: 2, bowler: 5, allrounder: 3, batter: 4 }[p.role]
+    if (sameRole < minimum)
+      return { ...base, keep: true, reason: `You'd be short of ${p.role}s without him` }
+    if (overall >= median && p.age <= 32)
+      return { ...base, keep: true, reason: 'A solid squad player' }
+    return {
+      ...base,
+      keep: false,
+      reason:
+        p.age >= 33 ? 'Getting on, and not in your XI' : 'Not in your plans, and easy to replace',
+    }
+  })
+  // Keep the squad at the minimum: the best of those let go stay on after all.
+  let size = o.squadAfter + rows.filter((r) => r.keep).length
+  for (const r of [...rows]
+    .filter((r) => !r.keep)
+    .sort((a, b) => overallRating(b.p) - overallRating(a.p))) {
+    if (size >= SQUAD_MIN) break
+    r.keep = true
+    r.reason = `Needed to keep the squad at ${SQUAD_MIN}`
+    size++
+  }
+  return rows.sort((a, b) => Number(b.keep) - Number(a.keep) || b.ask - a.ask)
+}
+
+/**
+ * Carry out the PA's plan: she opens at about 90% of each ask and takes a fair counter;
+ * those she doesn't keep are let go. Returns her report, one line per player.
+ */
+export function autoRenew(career: Career, teamIds: string[]): { career: Career; lines: string[] } {
+  let c = career
+  const lines: string[] = []
+  for (const r of renewalPlan(career, teamIds)) {
+    const { p } = r
+    if (!r.keep) {
+      c = setLetGo(c, p.id, true)
+      lines.push(`Letting ${p.name} go: ${r.reason.toLowerCase()}.`)
+      continue
+    }
+    const ask = askingPrice(c, p, r.years, teamIds)
+    const opening = Math.max(20, Math.round((ask * 0.9) / 5) * 5)
+    let out = makeOffer(c, p.id, { salary: opening, years: r.years }, teamIds)
+    let paid = opening
+    if (out.answer.kind === 'counter') {
+      paid = out.answer.salary
+      out = makeOffer(out.career, p.id, { salary: paid, years: r.years }, teamIds)
+    }
+    if (out.answer.kind === 'accept') {
+      c = out.career
+      const saved = ask - paid
+      lines.push(
+        `Renewed ${p.name}: ${money(paid)} × ${r.years} season${r.years > 1 ? 's' : ''}${
+          saved > 0 ? ` (he asked ${money(ask)})` : ''
+        }.`,
+      )
+    } else {
+      lines.push(`Couldn't renew ${p.name}: ${out.answer.message}`)
+    }
+  }
+  return { career: c, lines }
+}
+
+const money = (lakh: number) =>
+  lakh >= 100 ? `₹${+(lakh / 100).toFixed(2)} cr` : `₹${Math.round(lakh)} L`

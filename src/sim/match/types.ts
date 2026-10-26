@@ -33,6 +33,8 @@ export interface TeamSheet {
   /** 11 player ids in batting order. */
   battingOrder: string[]
   keeperId: string
+  /** The captain (shown on the sheet; lifts the XI's morale a little). */
+  captainId?: string
   /** Default intent for every batter; overridden per batter by `intent`. */
   aggression: Aggression
   intent: Record<string, Aggression>
@@ -138,7 +140,13 @@ export interface BallEvent {
   /** What the bowler meant to bowl and what he actually bowled (legal balls). */
   delivery?: { intended: BowlingDelivery; actual: BowlingDelivery } | null
   /** A DRS review on this ball: who asked, the umpire's call, and whether it was overturned. */
-  review?: { teamId: string; call: 'out' | 'notout'; overturned: boolean } | null
+  review?: {
+    teamId: string
+    call: 'out' | 'notout'
+    overturned: boolean
+    /** Upheld on umpire's call: the side keeps its review. */
+    umpiresCall?: boolean
+  } | null
   boundary: 4 | 6 | null
   /** A dropped catch or a misfield on this ball. */
   fumble?: { kind: 'drop' | 'misfield'; fielderId: string } | null
@@ -200,6 +208,12 @@ export interface InningsState {
   overBoundaries?: number
   /** DRS reviews left per side this innings. */
   reviews?: Record<string, number>
+  /** The current partnership: runs and legal balls since the last wicket. */
+  stand?: { runs: number; balls: number }
+  /** Runs conceded in the current over. */
+  overRuns?: number
+  /** Bowlers whose last over went for 15 or more. */
+  expensive?: Record<string, boolean>
 }
 
 export interface MatchResult {
@@ -230,6 +244,9 @@ export interface MatchState {
   timeouts?: Record<string, { innings: number; over: number; boostBalls: number }>
 }
 
+/** How a call looks to the side that may review it. */
+export type ReviewFeel = 'confident' | 'unsure' | 'doubtful'
+
 /** A ball bowled but not yet settled, waiting for a DRS call. */
 export interface PendingReview {
   /** The side that may review. */
@@ -241,6 +258,15 @@ export interface PendingReview {
   bowlerId: string
   /** The truth the ball-tracker would show. */
   truthOut: boolean
+  /**
+   * What the players' reactions say (all a reviewing side can go on). A wrong decision
+   * usually looks it; a right one only sometimes does.
+   */
+  feel: ReviewFeel
+  /** Marginal on the ball-tracker: if reviewed, the decision stands but the review is kept. */
+  umpiresCall: boolean
+  /** The AI's dice for its review decision (drawn either way, so watched and simmed agree). */
+  roll: number
   /** The ball as it stands if not reviewed (internal to the engine). */
   draft: unknown
 }

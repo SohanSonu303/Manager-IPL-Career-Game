@@ -23,9 +23,16 @@ const PATHS = {
   up: 'M6 15l6-6 6 6',
   down: 'M6 9l6 6 6-6',
   gloves: 'M7 21v-6l-3-4 2-1 3 3V4h2v7-8h2v8-6h2v6-4h2v10l-2 5z',
+  bat: 'M16 3l5 5-9.5 9.5-5-5zM9 15l-6 6',
+  ball: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM7.5 5.2c2 3.5 2 10.1 0 13.6M16.5 5.2c-2 3.5-2 10.1 0 13.6',
+  allround: 'M14 3l4 4-8 8-4-4zM8 13l-5 5M18 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
   trophy:
     'M7 4h10v4a5 5 0 0 1-10 0zM7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6',
   play: 'M7 4l13 8-13 8z',
+  search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM16 16l5 5',
+  contract: 'M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7',
+  trade: 'M4 8h14l-4-4M20 16H6l4 4',
+  log: 'M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01',
   filter: 'M3 5h18l-7 8v6l-4-2v-4z',
   menu: 'M4 7h16M4 12h16M4 17h16',
 } as const

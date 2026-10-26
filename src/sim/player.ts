@@ -104,6 +104,8 @@ export interface Condition {
   fitness: number
   /** 0–100, 50 = neutral. Moves towards recent match grades, drifts back to 50 when idle. */
   form: number
+  /** Hot or cold streak over the last few matches, −3 to +3 (missing = 0). */
+  streak?: number
 }
 
 export interface MatchLoad {
@@ -129,6 +131,17 @@ export function formAfterMatch(form: number, grade: number): number {
   return clamp(form + 0.35 * (clamp(grade, 0, 100) - form), 0, 100)
 }
 
+export const STREAK_MAX = 3
+/** Rating points per streak step. */
+export const STREAK_STEP = 1.5
+
+/** A big match heats the streak up, a poor one cools it, anything else lets it fade. */
+export function streakAfterMatch(streak: number, grade: number): number {
+  if (grade >= 72) return Math.min(STREAK_MAX, Math.max(0, streak) + 1)
+  if (grade <= 35) return Math.max(-STREAK_MAX, Math.min(0, streak) - 1)
+  return streak - Math.sign(streak)
+}
+
 /** Idle days pull form slowly back towards neutral. */
 export function driftForm(form: number, days = 1, target = 50): number {
   return target + (form - target) * 0.985 ** days
@@ -142,8 +155,8 @@ export const formTarget = (morale: number) => 50 + (morale - 50) * 0.15
  * (below 70 fitness). Used by selection and, later, by the ball-by-ball sim.
  */
 export function effectiveRating(skill: number, c: Condition): number {
-  // In-form players play well above their rating (up to about ±6).
-  const formAdj = (c.form - 50) / 8
+  // In-form players play well above their rating (up to ±10), more on a hot streak.
+  const formAdj = (c.form - 50) / 5 + (c.streak ?? 0) * STREAK_STEP
   const fatigue = c.fitness < 70 ? (70 - c.fitness) * 0.2 : 0
   return clamp(skill + formAdj - fatigue)
 }

@@ -32,7 +32,7 @@ import {
   answerTradeOffer,
   offerBlocker,
   releasePlayer,
-  requiredSalary,
+  askingPrice,
   SALARY_CAP,
   SQUAD_MIN,
   salaryFor,
@@ -308,25 +308,16 @@ describe('market', () => {
     )
   })
 
-  it('negotiates: lowball rejected, close offer met halfway, his counter signs', () => {
-    const need = requiredSalary(c, best, 2, TEAM_IDS)
+  it('negotiates: a low offer gets one counter, and his counter signs', () => {
+    const ask = askingPrice(c, best, 2, TEAM_IDS)
     const room = capRoom(c.players, me)
-    expect(need).toBeLessThanOrEqual(room) // otherwise this test needs a cheaper target
-    const low = makeOffer(
-      c,
-      best.id,
-      { salary: Math.max(20, Math.floor(need * 0.5)), years: 2 },
-      TEAM_IDS,
-    )
-    expect(low.answer.kind).toBe('reject')
-    const offered = Math.floor(need * 0.82)
-    // A fresh negotiation: the lowball above may have used up a short-tempered agent's patience.
+    expect(ask).toBeLessThanOrEqual(room) // otherwise this test needs a cheaper target
+    const offered = Math.floor((ask * 0.8) / 5) * 5
     const near = makeOffer(c, best.id, { salary: offered, years: 2 }, TEAM_IDS)
-    if (near.answer.kind === 'accept') return // a very keen player may take it
     expect(near.answer.kind).toBe('counter')
     if (near.answer.kind !== 'counter') return
     // Halfway between his ask and the offer, never above the ask.
-    expect(near.answer.salary).toBeLessThanOrEqual(need + 5)
+    expect(near.answer.salary).toBeLessThanOrEqual(ask)
     expect(near.answer.salary).toBeGreaterThan(offered)
     const deal = makeOffer(
       near.career,
@@ -341,30 +332,29 @@ describe('market', () => {
     expect(deal.career.news.at(-1)?.kind).toBe('transfer')
   })
 
-  it('agents differ: some keen (take less than their demand), some tough', () => {
+  it('agents differ: keen ones take a little less than they ask', () => {
     const fas = marketAgents(c)
     const labels = new Set(fas.map((p) => agentOf(c, p).label))
     expect(labels.size).toBeGreaterThanOrEqual(2)
     const keen = fas.find(
       (p) =>
         !p.overseas &&
-        agentOf(c, p).greed < -0.08 &&
-        requiredSalary(c, p, 2, TEAM_IDS) <= capRoom(c.players, me),
+        agentOf(c, p).label === 'Keen' &&
+        askingPrice(c, p, 2, TEAM_IDS) <= capRoom(c.players, me),
     )
     if (keen) {
-      const need = requiredSalary(c, keen, 2, TEAM_IDS)
+      const ask = askingPrice(c, keen, 2, TEAM_IDS)
       expect(
-        makeOffer(c, keen.id, { salary: Math.ceil((need * 0.95) / 5) * 5, years: 2 }, TEAM_IDS)
-          .answer.kind,
+        makeOffer(c, keen.id, { salary: Math.ceil((ask * 0.9) / 5) * 5, years: 2 }, TEAM_IDS).answer
+          .kind,
       ).toBe('accept')
     }
   })
 
-  it('walks away when his patience runs out', () => {
-    let x = c
-    const patience = agentOf(c, best).patience
-    for (let i = 0; i < patience; i++)
-      x = makeOffer(x, best.id, { salary: 20, years: 1 }, TEAM_IDS).career
+  it('walks away when his counter is not met', () => {
+    let x = makeOffer(c, best.id, { salary: 20, years: 1 }, TEAM_IDS).career
+    expect(x.market.talks[best.id]?.final).toBe(true)
+    x = makeOffer(x, best.id, { salary: 20, years: 1 }, TEAM_IDS).career
     expect(x.market.talks[best.id]?.walkedAway).toBe(true)
     expect(offerBlocker(x, best.id, { salary: 20, years: 1 })).toMatch(/ended talks/)
   })

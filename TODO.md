@@ -7,7 +7,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - **3D:** three.js for the match screen only, lazy-loaded. v1 uses a top-down orthographic camera only (no tilted broadcast camera).
 - **Storage:** `localStorage` for saves (versioned, with JSON export/import).
 - **Mobile-first:** design for 360–430 px wide; on desktop show a centered phone-width column. Installable as a PWA.
-- **Names and art:** real player names only; no fictional or generated names. Stats and ratings are generated. Team names are the real franchises with one word changed (e.g. Sunrisers Hyderabad -> Sunrisers Falcons). Crests and avatars are our own procedural SVG; no real logos. Photos deferred.
+- **Names and art:** real player names for the real pool; the yearly youth intake (`src/sim/youth.ts`) adds generated young prospects so the pool never runs dry. Stats and ratings are generated. Team names are the real franchises with one word changed (e.g. Sunrisers Hyderabad -> Sunrisers Falcons). Crests and avatars are our own procedural SVG; no real logos. Photos deferred.
 - **UI look:** own layout and visual identity. Palette direction from the approved mockups (charcoal, periwinkle blue, green for money, amber for warnings). Procedural face avatars in our own layered SVG style. Radial hub home in our own style (own icons, procedural crest; no mascot art). Font: Barlow Semi Condensed.
 - **Scope v1:** manager career mode. One league (10 teams), no promotion or relegation.
 - **Deferred:** AI photos, training, youth academy, sponsors, stadium building, weather, DRS, loans, coin economy, backend and accounts, tilted/broadcast camera, image-based player portraits.
@@ -100,7 +100,7 @@ Mobile-first career-mode cricket management sim, played in the browser. League i
 - [x] Free-agent market; AI clubs restock at the turn of the year (needs first, then one upgrade)
 - [x] Trades between clubs, 1-for-1 in the UI (engine allows more); AI wants 5% more value (loans deferred)
 - [x] Retirements (long T20 careers; fading players go sooner)
-- [ ] Season pool: new real players added through data updates (no generated names). The real squads plus 73 free agents last longer; still needs a decision (see Risks)
+- [x] Season pool: a youth intake of max(12, retirees + 4) generated prospects (17–21, potential 65–90) joins the unsigned pool each off-season
 - [x] Overseas player rules (max 8 in squad, 4 in the XI); squad size 18–25
 - [x] Safety nets: manager keeps 11 if contracts lapse, emergency signings, short sides, walkovers
 - [x] Market screen: free agents, my squad (renew/release), trade, transfer log
@@ -264,7 +264,7 @@ Slice 5, mega auction and market (partly done):
 - [x] Free agents: at most 14 on offer, redrawn every season, signable all year; renewals and trades in the off-season only (preseason and after the season); save v6
 - [x] Match screen: sim buttons (ball, over, 5 overs, innings) and the toss, DRS and innings-break choices are pinned above the action bar
 - [ ] Slice 5, rest: manager reputation and job offers, press conferences
-- [ ] Player pool still shrinks (no youth intake): by the third mega auction (2034) squads run thin
+- [x] Player pool no longer shrinks: youth intake each off-season (8-season test in `youth.test.ts`)
 - [ ] Later: batting hand and matchups, rain and DLS, scenario mode
 
 ## Open decisions
@@ -277,7 +277,7 @@ Slice 5, mega auction and market (partly done):
 - [ ] Nationality marker: own simple flag glyphs or a country-code chip
 - [ ] Aggression levels and their exact effect on the sim
 - [ ] Font choice (a condensed sans for the scorebug)
-- [ ] Where new players come from each season (see Risks: shrinking pool)
+- [x] Where new players come from each season: the youth intake
 - [ ] Release costs (currently free) and mid-season injury replacements
 
 ## Risks
@@ -287,5 +287,5 @@ Slice 5, mega auction and market (partly done):
 - Real player names and near-real team names without a license. Get the legal check done before any public pitch.
 - Crowd and stand visuals cost performance. Keep them instanced and simple.
 - Avatars can look repetitive. Needs enough part combinations and the 100-avatar check.
-- **Shrinking player pool.** Real names only and no youth intake: about 10–15 players retire each year. Squads stay full for about three seasons, then free agents run out and weaker clubs shrink (safety nets keep matches playable). Needs one of: a yearly real-player data update, an academy with generated players, or smaller squads.
+- **Shrinking player pool (resolved).** About 10–15 players retire each year; the youth intake replaces them with generated prospects, so squads and the free-agent list stay full.
 - Scope creep from the deferred list. Resist until v1 is playable end to end.

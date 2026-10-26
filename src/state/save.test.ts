@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { continueCareer, startCareer } from '@/sim/game'
+import { FREE_AGENT_MAX } from '@/sim/market'
 import { migrate, parseSave, SAVE_VERSION, serializeSave, type Migration } from './save'
 import { DAMAGED_KEY, readSave, SAVE_KEY, writeSave, type KeyValueStore } from './storage'
 
@@ -34,7 +35,7 @@ describe('save format', () => {
     expect(parsed.ok && parsed.save.career.achievements).toEqual({})
   })
 
-  it('upgrades a v5 save: no auction under way, at most 14 free agents on offer', () => {
+  it('upgrades a v5 save: no auction under way, at most one season of free agents on offer', () => {
     const { mega: _m, ...rest } = career()
     void _m
     const old = { ...rest, market: { talks: {}, log: [] } }
@@ -44,7 +45,7 @@ describe('save format', () => {
     expect(parsed.save.career.mega).toBeNull()
     const ids = parsed.save.career.market.freeAgentIds
     expect(ids.length).toBeGreaterThan(0)
-    expect(ids.length).toBeLessThanOrEqual(14)
+    expect(ids.length).toBeLessThanOrEqual(FREE_AGENT_MAX)
   })
 
   it('upgrades a v7 save: an empty transfer list, talks without the old single ask', () => {
@@ -60,6 +61,18 @@ describe('save format', () => {
     if (!parsed.ok) return
     expect(parsed.save.career.market.listed).toEqual([])
     expect(parsed.save.career.market.talks.x).toEqual({ rounds: 2, walkedAway: true })
+  })
+
+  it('upgrades a v8 save: every club starts with funds, an empty ledger', () => {
+    const { funds: _f, ledger: _l, ...old } = career()
+    void _f
+    void _l
+    const parsed = migrate({ version: 8, savedAt: '', career: old })
+    expect(parsed.ok && parsed.save.version).toBe(SAVE_VERSION)
+    if (!parsed.ok) return
+    expect(parsed.save.career.funds.mum).toBe(500)
+    expect(Object.keys(parsed.save.career.funds)).toHaveLength(10)
+    expect(parsed.save.career.ledger).toEqual([])
   })
 
   it('upgrades a v6 auction in progress: starred ids become a shortlist', () => {

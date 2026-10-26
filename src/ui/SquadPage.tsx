@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import type { CareerPlayer } from '@/sim/career'
+import { contractOutlook } from '@/sim/contracts'
+import { TEAM_IDS } from '@/sim/game'
 import { squadOf } from '@/sim/market'
 import { useGame } from '@/state/store'
 import { FilterBar } from './FilterBar'
+import { OwnPlayerActions } from './ContractsPage'
 import { Chip, Screen } from './kit/kit'
 import { applyFilters, DEFAULT_FILTERS, type PlayerFilters } from './playerFilters'
 import { PlayerRow, PlayerSheet } from './PlayerRow'
@@ -13,12 +16,14 @@ export function SquadPage() {
   const next = useNextAction()
   const [filters, setFilters] = useState<PlayerFilters>(DEFAULT_FILTERS)
   const [open, setOpen] = useState<CareerPlayer | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
   if (!career) return null
   const all = squadOf(career.players, career.manager.teamId)
   const squad = applyFilters(all, filters)
   return (
     <Screen primary={next}>
       <h1>Squad</h1>
+      {message && <p className="good">{message}</p>}
       <FilterBar
         value={filters}
         onChange={setFilters}
@@ -42,7 +47,24 @@ export function SquadPage() {
           </li>
         ))}
       </ul>
-      {open && <PlayerSheet p={open} onClose={() => setOpen(null)} />}
+      {open && career && (
+        <PlayerSheet
+          p={open}
+          onClose={() => setOpen(null)}
+          actions={
+            <OwnPlayerActions
+              career={career}
+              p={open}
+              row={contractOutlook(career, TEAM_IDS).expiring.find((r) => r.p.id === open.id)}
+              listed={(career.market.listed ?? []).includes(open.id)}
+              onDone={(m) => {
+                setMessage(m)
+                setOpen(null)
+              }}
+            />
+          }
+        />
+      )}
     </Screen>
   )
 }

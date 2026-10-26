@@ -4,8 +4,9 @@ import type { CareerPlayer } from '@/sim/career'
 import { askingSalary } from '@/sim/market'
 import { mergeStats } from '@/sim/game'
 import type { SeasonStat } from '@/sim/league'
-import { overallRating } from '@/sim/player'
+import { overallRating, STREAK_STEP } from '@/sim/player'
 import { useGame } from '@/state/store'
+import { StreakChip } from './StreakChip'
 import { crore, roleLabel, TRAIT_INFO, TRAIT_LABEL } from './format'
 import { Avatar } from './identity/Avatar'
 import { ringStatus } from './identity/avatarSpec'
@@ -71,6 +72,8 @@ export function PlayerRow({
             </Chip>
           ))}
           {p.injury && <Chip tone="bad">Injured {p.injury.matchesOut}</Chip>}
+          {p.prospect && p.age <= 23 && <Chip tone="blue">Prospect</Chip>}
+          <StreakChip p={p} />
         </span>
         {extra && <span className="prow-meta">{extra}</span>}
       </span>
@@ -151,6 +154,7 @@ export function PlayerSheet({
         <span className="prow-meta">
           {roleLabel(p)} · {p.age} · {p.nationality}
           {p.overseas && <Chip tone="blue">Overseas</Chip>}
+          <StreakChip p={p} />
         </span>
         <RatingRing value={overallRating(p)} size={56} />
       </div>
@@ -164,6 +168,12 @@ export function PlayerSheet({
             </Fragment>
           ))}
         </div>
+        {!!p.streak && (
+          <span className={p.streak > 0 ? 'good' : 'warn'}>
+            {p.streak > 0 ? 'On a hot streak' : 'In a cold spell'}: plays {p.streak > 0 ? '+' : '−'}
+            {Math.abs(p.streak) * STREAK_STEP} rating for the next few matches.
+          </span>
+        )}
         {p.morale < 35 && (
           <span className="warn">Unhappy — he wants more game time or a move.</span>
         )}

@@ -1326,7 +1326,7 @@ select.input {
   outline: 2px solid var(--warn);
 }
 
-/* --- Pick XI on the field (mockup H) --------------------------------------------------- */
+/* --- Pick XI team sheet ----------------------------------------------------------------- */
 
 .xi-intent {
   display: flex;
@@ -1357,172 +1357,190 @@ select.input {
   font-weight: 600;
 }
 
-.xi-strip {
-  min-height: 52px;
+/* Team sheet: numbered rows like a printed "Playing XI" card. */
+.ts-head {
   display: flex;
-  align-items: center;
-}
-
-.xi-strip p {
-  margin: 0;
-  font-size: 14px;
-}
-
-.xi-tools {
-  display: flex;
-  gap: 6px;
-}
-
-.xi-glove {
-  position: absolute;
-  top: -7px;
-  right: -5px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--money);
-  color: #11131a;
-}
-
-.xi-tools button {
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
+  flex-direction: column;
   gap: 4px;
-  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.ts-head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 34px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ts-auto {
+  min-height: 30px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.team-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-row {
+  --ts-mark: #d6246e;
+
+  display: flex;
+  align-items: stretch;
+  min-height: 52px;
+  border-radius: 8px;
+  overflow: hidden;
   background: var(--surface-2);
 }
 
-.xi-field {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 358 / 440;
+.ts-row.bench {
+  --ts-mark: var(--line);
+
+  background: var(--surface);
 }
 
-.xi-oval {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: #26272b;
-  border: 2px solid var(--surface-2);
+.ts-row.out {
+  opacity: 0.55;
 }
 
-.xi-oval.inner {
-  inset: 18% 22%;
+.ts-row.empty {
+  border: 1px dashed var(--line);
   background: transparent;
-  border: 2px dashed var(--line);
 }
 
-.xi-pitch {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 6%;
-  height: 22%;
-  transform: translate(-50%, -50%);
-  background: #4a4234;
-  border-radius: 3px;
+.ts-n {
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  background: var(--ts-mark);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 24px;
 }
 
-.xi-card {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  width: 25%;
-  min-width: 84px;
-  min-height: 48px;
-  padding: 4px 6px;
+.ts-name {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  gap: 10px;
+  padding: 4px 8px;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
   text-align: left;
   font-weight: 400;
 }
 
-.xi-card.open {
-  border-color: var(--accent);
-}
-
-.xi-card.sel {
-  background: var(--primary);
-  border-color: #fff;
-  z-index: 2;
-}
-
-.xi-n {
-  flex: 0 0 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: var(--primary);
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.xi-card.sel .xi-n {
-  background: #fff;
-  color: var(--primary);
-}
-
-.xi-info {
+.ts-text {
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  line-height: 1.1;
+  gap: 2px;
 }
 
-.xi-info strong {
-  font-size: 14px;
-  white-space: nowrap;
+.ts-name strong {
   overflow: hidden;
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.xi-info span {
-  font-size: 11px;
+.ts-name strong em {
+  color: var(--gold);
+  font-style: normal;
+}
+
+.ts-name small {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
   color: var(--text-dim);
-}
-
-.xi-card.sel .xi-info span {
-  color: #fff;
-}
-
-.xi-bench {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding: 8px 0 12px;
-}
-
-.bench-card {
-  flex: 0 0 auto;
-  min-height: 52px;
-  padding: 6px 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  background: var(--surface);
-  text-align: left;
-  font-weight: 400;
-}
-
-.bench-card strong {
-  font-size: 15px;
-}
-
-.bench-card span {
   font-size: 12px;
 }
 
-.bench-card.sel {
+.ts-row.sel {
+  outline: 2px solid var(--primary-bright);
+  outline-offset: -2px;
+  background: rgb(61 220 122 / 14%);
+}
+
+.ts-stats {
+  align-self: center;
+  min-height: 32px;
+  margin-right: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg-deep);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.ts-hint {
+  margin: 0 0 8px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.ts-hint.on {
+  color: var(--primary-bright);
+  font-weight: 600;
+}
+
+.ts-icon {
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  background: var(--ts-mark);
+  color: #fff;
+}
+
+.ts-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.ts-actions button.on {
   background: var(--primary);
+  color: #fff;
+}
+
+.ts-actions .danger {
+  grid-column: 1 / -1;
+}
+
+.ts-swap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.ts-swap button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 0 10px;
+  font-size: 14px;
+}
+
+.streak-chip {
+  display: inline-flex;
 }
 
 /* --- Bowling controls ------------------------------------------------------------------- */
@@ -4400,28 +4418,6 @@ select.input {
   padding: 10px 14px;
 }
 
-/* Pick XI: the team sheet sits on a cricket field. */
-.xi-oval {
-  background: radial-gradient(ellipse at 50% 45%, #1d6b3c 0%, #145430 60%, #0f4226 100%);
-  border: 2px solid rgb(61 220 122 / 35%);
-  box-shadow: inset 0 0 40px rgb(0 0 0 / 35%);
-}
-
-.xi-oval.inner {
-  border: 2px dashed rgb(255 255 255 / 25%);
-}
-
-.xi-pitch {
-  background: #c9b582;
-  box-shadow: 0 0 0 1px rgb(0 0 0 / 25%);
-}
-
-.xi-card {
-  border-color: var(--line);
-  background: rgb(11 19 34 / 92%);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 35%);
-}
-
 /* Daily Challenge record as stat tiles. */
 .daily-stats {
   display: grid;
@@ -4473,109 +4469,9 @@ select.input {
   color: #dff5e6;
 }
 
-.nego-stepper {
-  display: grid;
-  grid-template-columns: var(--tap) 1fr var(--tap);
-  align-items: center;
-  gap: 8px;
-}
-
-.nego-stepper > button {
-  font-size: 26px;
-  font-weight: 700;
-  border-radius: 50%;
-  padding: 0;
-}
-
-.nego-stepper > span {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.nego-stepper small {
-  color: var(--text-dim);
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
-.nego-stepper b {
-  font-family: var(--font-display);
-  font-size: 30px;
-  line-height: 1.1;
-}
-
 .nego-slider {
   width: 100%;
   accent-color: var(--primary-hi);
-}
-
-.nego-meter {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  --zone: var(--warn);
-}
-
-.nego-meter.good {
-  --zone: var(--money);
-}
-
-.nego-meter.bad {
-  --zone: var(--danger);
-}
-
-.nego-meter small:first-child {
-  color: var(--zone);
-  font-weight: 600;
-}
-
-.nego-track {
-  position: relative;
-  display: block;
-  height: 10px;
-  border-radius: 5px;
-  background: var(--bg-deep);
-  overflow: hidden;
-}
-
-.nego-fill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  background: var(--zone);
-  transition: width 0.15s ease-out;
-}
-
-.nego-mark {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--line);
-  z-index: 1;
-}
-
-.nego-mark.ask {
-  background: var(--gold);
-}
-
-.nego-patience > span {
-  display: inline-flex;
-  gap: 4px;
-}
-
-.nego-patience i {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-}
-
-.nego-patience i.on {
-  background: var(--gold);
-  border-color: var(--gold);
 }
 
 .nego-counter {
@@ -4706,6 +4602,30 @@ select.input {
   font-size: 14px;
 }
 
+.trade-chip.cash {
+  display: inline-flex;
+  align-items: center;
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.trade-cash {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0 4px;
+  border-top: 1px solid var(--line);
+}
+
+.seg.two {
+  grid-template-columns: 1fr 1fr;
+  min-width: 180px;
+}
+
+.seg.two button {
+  min-height: 34px;
+}
+
 .trade-balance {
   display: flex;
   flex-direction: column;
@@ -4786,4 +4706,287 @@ select.input {
   color: var(--accent);
   text-decoration: underline;
   font: inherit;
+}
+
+/* DRS: how the call looks from the middle. */
+.review-feel {
+  font-weight: 600;
+}
+
+.review-feel.confident {
+  color: var(--money);
+}
+
+.review-feel.unsure {
+  color: var(--warn);
+}
+
+.review-feel.doubtful {
+  color: var(--danger);
+}
+
+/* Top bar: cap room and club funds, kept on one line on a phone. */
+.pill.money,
+.pill.funds {
+  gap: 4px;
+  padding: 0 8px 0 6px;
+  font-size: 17px;
+  white-space: nowrap;
+}
+
+.pill small {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.pill.funds {
+  color: var(--gold);
+}
+
+@media (width <= 400px) {
+  .pill small {
+    display: none;
+  }
+}
+
+.pill.funds svg {
+  color: var(--gold);
+}
+
+.ledger {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.win-bonus {
+  margin: 8px 0;
+  padding: 8px 12px;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  color: var(--gold);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Market › My squad: the moves for each player under his row. */
+.squad-moves > li {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.squad-move-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.squad-move-row button {
+  min-height: 36px;
+  font-size: 14px;
+}
+
+/* --- Market: the PA's room ------------------------------------------------------------- */
+
+.market-head h1 {
+  margin: 0;
+}
+
+.pa-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--primary-bright);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pa-hub .pa-center {
+  inset: 24%;
+  gap: 2px;
+}
+
+.pa-hub .hub-center svg.pa {
+  width: 132px;
+  height: 132px;
+}
+
+.pa-center strong {
+  font-size: 16px;
+}
+
+.pa {
+  overflow: visible;
+  animation: pa-bob 3.2s ease-in-out infinite;
+}
+
+.pa-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pa-blink 4.5s infinite;
+}
+
+.pa-wave {
+  transform-box: fill-box;
+  transform-origin: 20% 100%;
+  animation: pa-wave 2.6s ease-in-out infinite;
+}
+
+@keyframes pa-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes pa-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes pa-wave {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  15%,
+  45% {
+    transform: rotate(-14deg);
+  }
+
+  30% {
+    transform: rotate(10deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pa,
+  .pa-eyes,
+  .pa-wave {
+    animation: none;
+  }
+}
+
+.pa-says {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 14px 12px 12px;
+  border: 1px solid rgb(61 220 122 / 35%);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+/* A speech-bubble tail pointing up at the PA. */
+.pa-says::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  border-top: 1px solid rgb(61 220 122 / 35%);
+  border-left: 1px solid rgb(61 220 122 / 35%);
+  background: var(--surface);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.pa-says-head {
+  color: var(--primary-bright);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pa-tip {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.pa-tip-icon {
+  flex: 0 0 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  color: var(--primary-bright);
+}
+
+.pa-tip-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.pa-tip-body > span:not(.button-row) {
+  color: var(--text-dim);
+}
+
+.pa-tip-body .button-row button {
+  min-height: 36px;
+  font-size: 14px;
+}
+
+.pa-handle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 10px 0;
+  padding: 8px 12px;
+  border: 1px solid rgb(61 220 122 / 45%);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, rgb(31 191 95 / 16%), var(--surface) 70%);
+  text-align: left;
+}
+
+.pa-handle small {
+  display: block;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.pa-plan li,
+.pa-report li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }

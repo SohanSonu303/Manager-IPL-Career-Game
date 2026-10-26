@@ -141,25 +141,6 @@ export function transferNeeds(career: Career, teamIds: string[]): NeedCard[] {
     : []
 }
 
-export interface TradeBalance {
-  /** Trade value you send. */
-  give: number
-  /** Trade value you get. */
-  get: number
-  /** What they need to receive (5% more than they give up). */
-  target: number
-}
-
-export function tradeBalance(career: Career, give: string[], get: string[]): TradeBalance {
-  const value = (ids: string[]) =>
-    ids.reduce((s, id) => {
-      const p = career.players.find((x) => x.id === id)
-      return s + (p ? tradeValue(p) : 0)
-    }, 0)
-  const getV = value(get)
-  return { give: value(give), get: getV, target: getV * 1.05 }
-}
-
 /**
  * The cheapest set of your players (one, two or three) that the other club would take
  * for `get`. Players outside your best XI are tried first. Null if nothing works.

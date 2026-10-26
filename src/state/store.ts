@@ -18,6 +18,7 @@ import {
 } from '@/sim/auction'
 import { today } from '@/sim/calendar'
 import type { Career, Lineup } from '@/sim/career'
+import { autoRenew } from '@/sim/contracts'
 import {
   continueCareer,
   ensureEleven,
@@ -35,8 +36,8 @@ import type { Fixture } from '@/sim/league'
 import {
   aiTradeOffers,
   answerTradeOffer,
-  evaluateTrade,
-  executeTrade,
+  declineCounter,
+  proposeDeal,
   isWindowOpen,
   makeOffer,
   releaseBlocker,
@@ -45,7 +46,8 @@ import {
   setListed,
   type Offer,
   type OfferAnswer,
-  type TradeAnswer,
+  type TradeDeal,
+  type TradeReply,
 } from '@/sim/market'
 import type { Match } from '@/sim/match/engine'
 import { applyPostMatch, type PlayerReport } from '@/sim/match/postMatch'
@@ -173,6 +175,15 @@ export function offerContract(playerId: string, offer: Offer): OfferAnswer {
   return answer
 }
 
+/** Let the PA settle every undecided final-year contract; returns her report. */
+export function autoRenewContracts(): string[] {
+  const c = current()
+  if (!c) return []
+  const { career, lines } = autoRenew(c, TEAM_IDS)
+  commit(career)
+  return lines
+}
+
 export function release(playerId: string): string | null {
   const c = current()
   if (!c) return 'No career.'
@@ -180,6 +191,12 @@ export function release(playerId: string): string | null {
   if (blocked) return blocked
   commit(releasePlayer(c, playerId))
   return null
+}
+
+/** Turn down a player's counter: he ends talks for a fortnight. */
+export function declineTerms(playerId: string) {
+  const c = current()
+  if (c) commit(declineCounter(c, playerId))
 }
 
 /** Decide not to renew a final-year player (or change your mind). */
@@ -221,12 +238,13 @@ export function talkTo(newsId: string) {
   if (c) commit(talkToPlayer(c, newsId))
 }
 
-export function proposeTrade(give: string[], get: string[]): TradeAnswer {
+/** Put a trade (players and cash) to another club; returns its answer. */
+export function proposeTrade(deal: TradeDeal): TradeReply {
   const c = current()
-  if (!c) return { ok: false, reason: 'No career.' }
-  const answer = evaluateTrade(c, give, get)
-  if (answer.ok) commit(executeTrade(c, give, get))
-  return answer
+  if (!c) return { kind: 'reject', message: 'No career.' }
+  const { career, reply } = proposeDeal(c, deal)
+  if (career !== c) commit(career)
+  return reply
 }
 
 // --- Mega auction -----------------------------------------------------------------

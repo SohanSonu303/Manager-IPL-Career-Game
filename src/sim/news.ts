@@ -25,6 +25,8 @@ export interface TradeOffer {
   give: string[]
   /** The players offered in return. */
   get: string[]
+  /** Lakh, as in a trade deal: negative when the club pays the manager. */
+  cash?: number
   status: 'pending' | 'accepted' | 'declined' | 'expired'
 }
 

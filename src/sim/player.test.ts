@@ -10,6 +10,7 @@ import {
   formAfterMatch,
   overallRating,
   potentialFor,
+  streakAfterMatch,
   recoverFitness,
 } from './player'
 import { createRng } from './rng'
@@ -103,11 +104,24 @@ describe('fitness and form', () => {
     expect(driftForm(80, 30)).toBeGreaterThan(50)
   })
 
-  it('effective rating: form about ±6, fatigue penalty below 70 fitness', () => {
+  it('effective rating: form ±10, streak ±1.5 a step, fatigue penalty below 70 fitness', () => {
     expect(effectiveRating(70, { fitness: 100, form: 50 })).toBe(70)
-    expect(effectiveRating(70, { fitness: 100, form: 100 })).toBe(76.25)
-    expect(effectiveRating(70, { fitness: 100, form: 0 })).toBe(63.75)
+    expect(effectiveRating(70, { fitness: 100, form: 100 })).toBe(80)
+    expect(effectiveRating(70, { fitness: 100, form: 0 })).toBe(60)
     expect(effectiveRating(70, { fitness: 40, form: 50 })).toBe(64)
     expect(effectiveRating(99, { fitness: 100, form: 100 })).toBe(99)
+    expect(effectiveRating(70, { fitness: 100, form: 50, streak: 2 })).toBe(73)
+    expect(effectiveRating(70, { fitness: 100, form: 50, streak: -3 })).toBe(65.5)
+  })
+
+  it('streak: big games heat it up, poor ones cool it, it fades back to level', () => {
+    let s = 0
+    for (let i = 0; i < 5; i++) s = streakAfterMatch(s, 80)
+    expect(s).toBe(3)
+    expect(streakAfterMatch(3, 50)).toBe(2)
+    expect(streakAfterMatch(2, 20)).toBe(-1)
+    expect(streakAfterMatch(-3, 10)).toBe(-3)
+    expect(streakAfterMatch(-1, 60)).toBe(0)
+    expect(streakAfterMatch(0, 50)).toBe(0)
   })
 })

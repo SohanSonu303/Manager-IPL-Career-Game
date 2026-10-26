@@ -208,10 +208,37 @@ describe('DRS', () => {
         const overturned = (p.call === 'out') !== p.truthOut
         expect(e.review?.overturned).toBe(overturned)
         expect(!!e.wicket).toBe(p.truthOut)
-        expect(inn.reviews?.hyd).toBe(overturned ? left : left - 1)
+        expect(inn.reviews?.hyd).toBe(overturned || p.umpiresCall ? left : left - 1)
+        expect(!!e.review?.umpiresCall).toBe(p.umpiresCall)
       }
     }
     expect(reviewed).toBeGreaterThan(0)
+  })
+
+  it('reviewing on a confident feel wins about 40-50% of the time; blind, about 20%', () => {
+    const tally = { confident: [0, 0], all: [0, 0] }
+    for (let s = 0; s < 400; s++) {
+      const { state, rng } = humanMatch(deriveSeed(13, s))
+      while (!state.result) {
+        if (atInningsBreak(state)) startNextInnings(state)
+        else simBall(state, rng)
+        const p = state.pendingReview
+        if (!p) continue
+        const won = (p.call === 'out') !== p.truthOut || p.umpiresCall
+        for (const k of p.feel === 'confident'
+          ? (['confident', 'all'] as const)
+          : ['all' as const]) {
+          tally[k][0]! += won ? 1 : 0
+          tally[k][1]! += 1
+        }
+        resolveReview(state, false)
+      }
+    }
+    const rate = (k: keyof typeof tally) => tally[k][0]! / tally[k][1]!
+    expect(tally.confident[1]).toBeGreaterThan(40)
+    expect(rate('confident')).toBeGreaterThan(0.38)
+    expect(rate('confident')).toBeLessThan(0.6)
+    expect(rate('all')).toBeLessThan(0.35)
   })
 
   it('AI sides review on their own and never pause the match', () => {

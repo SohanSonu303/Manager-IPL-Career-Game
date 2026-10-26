@@ -1,5 +1,6 @@
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { teamById } from '@/data'
+import { fundsOf } from '@/sim/finance'
 import { capRoom } from '@/sim/market'
 import { dismissNotice, useGame } from '@/state/store'
 import { crore, newsLine } from './format'
@@ -34,7 +35,13 @@ export function Shell() {
             <span className="grow" />
             <span className="pill money" title="Room under the salary cap">
               <Icon name="wallet" size={20} />
+              <small>Cap</small>
               {crore(capRoom(career.players, career.manager.teamId))}
+            </span>
+            <span className="pill funds" title="Club funds: win bonuses and prize money">
+              <Icon name="finance" size={20} />
+              <small>Funds</small>
+              {crore(fundsOf(career, career.manager.teamId))}
             </span>
             <span className="pill rep" title="Manager reputation">
               <Icon name="star" size={20} />

@@ -1,7 +1,8 @@
-import { players as basePlayers } from '../data'
+import { players as basePlayers, teams } from '../data'
 import type { Player } from '../data/types'
 import type { Awards, FixtureResult, SeasonStat, StandingRow } from './league'
 import type { NewsItem } from './news'
+import { startingFunds, type LedgerEntry } from './finance'
 import { START_CONFIDENCE, START_REPUTATION, type Finish, type Objective } from './board'
 import type { CalendarState } from './calendar'
 import type { MegaState } from './auction'
@@ -26,6 +27,8 @@ export interface CareerPlayer extends Player, Condition {
   morale: number
   /** Rating change from match grades this season (capped; reset at rollover). */
   seasonDev: { batting: number; bowling: number }
+  /** A generated youth prospect (from the yearly intake), not a real player. */
+  prospect?: boolean
 }
 
 export interface TransferLog {
@@ -97,6 +100,8 @@ export interface Career {
     freeAgentIds: string[]
     /** The manager's players on the transfer list: AI clubs make offers for them. */
     listed: string[]
+    /** Trade counters each club has made this season (they stop at three). */
+    tradeTalks?: Record<string, number>
   }
   /** The mega auction in progress (retention, then the auction), or null. */
   mega: MegaState | null
@@ -109,6 +114,10 @@ export interface Career {
   careerStats: Record<string, SeasonStat>
   /** Achievements unlocked, by id, with when. */
   achievements: Record<string, { year: number; day: number }>
+  /** Club funds per team (lakh): win bonuses and prize money, spent as cash in trades. */
+  funds: Record<string, number>
+  /** The manager's club's recent income and spending. */
+  ledger: LedgerEntry[]
 }
 
 export interface Lineup {
@@ -116,6 +125,8 @@ export interface Lineup {
   battingOrder: string[]
   keeperId: string
   aggression: Aggression
+  /** The captain (optional: the most senior good player otherwise). */
+  captainId?: string
 }
 
 export function newCareer(opts: {
@@ -150,6 +161,8 @@ export function newCareer(opts: {
     news: [],
     careerStats: {},
     achievements: {},
+    funds: startingFunds(teams.map((t) => t.id)),
+    ledger: [],
   }
 }
 
@@ -175,6 +188,7 @@ export function agePlayer(p: CareerPlayer, seed: number, endedYear: number): Car
     fitness: 100,
     // Half of a player's form carries into the new season.
     form: 50 + (p.form - 50) * 0.5,
+    streak: 0,
     // The off-season is months long; everyone starts the new season healed.
     injury: null,
     seasonDev: { batting: 0, bowling: 0 },

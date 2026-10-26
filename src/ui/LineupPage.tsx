@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import type { Career, CareerPlayer } from '@/sim/career'
-import { managerSheet } from '@/sim/game'
+import { managerSheet, userFixtureToday } from '@/sim/game'
 import { squadOf } from '@/sim/market'
 import {
   autoTeamSheet,
@@ -14,30 +14,133 @@ import {
 import { AGGRESSION, type TeamSheet } from '@/sim/match/types'
 import { overallRating } from '@/sim/player'
 import { setLineup, useGame } from '@/state/store'
-import { Icon } from './kit/Icon'
+import { teamName } from './format'
+import { teamById } from '@/data'
+import { Avatar } from './identity/Avatar'
+import { ringStatus } from './identity/avatarSpec'
+import { Icon, type IconName } from './kit/Icon'
 import { Chip, Screen } from './kit/kit'
 import { INTENT_LABEL } from './match/MatchView'
+import { PlayerSheet } from './PlayerRow'
+import { StreakChip } from './StreakChip'
 
-const ROLE_SHORT = { batter: 'BAT', wicketkeeper: 'WK', allrounder: 'AR', bowler: 'BWL' } as const
+/** The icon for what a player does: bat, keep, bowl, or both. */
+export function roleIcon(p: Pick<CareerPlayer, 'role'>, keeper = false): IconName {
+  if (keeper || p.role === 'wicketkeeper') return 'gloves'
+  if (p.role === 'bowler') return 'ball'
+  if (p.role === 'allrounder') return 'allround'
+  return 'bat'
+}
 
-/** Where each batting position sits on the field diagram, as [left %, top %]. */
-const SPOTS: [number, number][] = [
-  [27, 10],
-  [73, 10],
-  [16, 28],
-  [84, 28],
-  [16, 47],
-  [84, 47],
-  [18, 66],
-  [82, 66],
-  [24, 85],
-  [50, 94],
-  [76, 85],
-]
+/**
+ * One team-sheet line: number, photo and name with (C)/(WK), a STATS button and the role
+ * icon. `n` null is a bench line. Tapping the player picks him for a swap.
+ */
+export function SheetRow({
+  p,
+  n,
+  captain,
+  keeper,
+  selected,
+  onTap,
+  onStats,
+}: {
+  p: CareerPlayer
+  n: number | null
+  captain?: boolean
+  keeper?: boolean
+  selected?: boolean
+  onTap?: () => void
+  onStats?: () => void
+}) {
+  const team = p.teamId ? teamById.get(p.teamId) : undefined
+  const body = (
+    <>
+      <Avatar
+        seed={p.id}
+        nationality={p.nationality}
+        age={p.age}
+        kit={team?.colors ?? { primary: '#5b6070', secondary: '#c9ccd6' }}
+        size={44}
+        ring={ringStatus(p.fitness)}
+        title={p.name}
+      />
+      <span className="ts-text">
+        <strong>
+          {p.name.toUpperCase()}
+          {captain && <em> (C)</em>}
+          {keeper && <em> (WK)</em>}
+        </strong>
+        <small>
+          {overallRating(p)} OVR · form {Math.round(p.form)}
+          {p.overseas && ' · overseas'}
+          {p.injury && <span className="bad"> · injured {p.injury.matchesOut}</span>}
+          <StreakChip p={p} />
+        </small>
+      </span>
+    </>
+  )
+  return (
+    <li
+      className={`ts-row ${n === null ? 'bench' : ''} ${p.injury ? 'out' : ''} ${selected ? 'sel' : ''}`}
+    >
+      <span className="ts-n">{n ?? '–'}</span>
+      {onTap ? (
+        <button
+          className="ts-name"
+          onClick={onTap}
+          aria-pressed={selected}
+          aria-label={`${p.name}: tap to swap`}
+        >
+          {body}
+        </button>
+      ) : (
+        <span className="ts-name">{body}</span>
+      )}
+      {onStats && (
+        <button className="ts-stats" onClick={onStats} aria-label={`Stats: ${p.name}`}>
+          STATS
+        </button>
+      )}
+      <span className="ts-icon" aria-label={p.role}>
+        <Icon name={roleIcon(p, keeper)} size={22} />
+      </span>
+    </li>
+  )
+}
 
-const lastName = (name: string) => name.split(' ').slice(1).join(' ') || name
+/** The batting order as a team sheet (read-only), e.g. on the match-day screen. */
+export function TeamSheetRows({
+  sheet,
+  players,
+  onOpen,
+}: {
+  sheet: TeamSheet
+  players: Map<string, CareerPlayer>
+  onOpen?: (id: string) => void
+}) {
+  return (
+    <ol className="team-sheet">
+      {sheet.battingOrder.map((id, i) => {
+        const p = players.get(id)
+        return (
+          p && (
+            <SheetRow
+              key={id}
+              p={p}
+              n={i + 1}
+              captain={id === sheet.captainId}
+              keeper={id === sheet.keeperId}
+              onStats={onOpen && (() => onOpen(id))}
+            />
+          )
+        )
+      })}
+    </ol>
+  )
+}
 
-/** Pick XI: eleven players on the field by batting order. Tap one, then another to swap. */
+/** Pick XI: the playing XI as a numbered team sheet, the bench below; tap anyone for stats. */
 export function LineupPage() {
   const career = useGame((s) => s.career)
   if (!career) return null
@@ -49,52 +152,61 @@ function LineupEditor({ career }: { career: Career }) {
   const me = career.manager.teamId
   const squad = squadOf(career.players, me)
   const [sheet, setSheet] = useState<TeamSheet>(() => managerSheet(career))
-  const [sel, setSel] = useState<string | null>(null)
+  const [params] = useSearchParams()
+  const [openId, setOpenId] = useState<string | null>(params.get('open'))
+  const [picked, setPicked] = useState<string | null>(null)
+  const [note, setNote] = useState<string | null>(null)
   const byId = new Map(squad.map((p) => [p.id, p]))
   const order = sheet.battingOrder
   const xi = order.map((id) => byId.get(id)).filter((p): p is CareerPlayer => !!p)
   const bench = squad
     .filter((p) => !order.includes(p.id))
-    .sort((a, b) => overallRating(b) - overallRating(a))
+    .sort((a, b) => Number(!!a.injury) - Number(!!b.injury) || overallRating(b) - overallRating(a))
   const errors = validateSheet(sheet, squad)
   const overseas = xi.filter((p) => p.overseas).length
   const bowlers = xi.filter((p) => p.role === 'bowler' || p.role === 'allrounder').length
-  const setOrder = (battingOrder: string[]) => setSheet((s) => ({ ...s, battingOrder }))
-  const selInXi = !!sel && order.includes(sel)
+  const fixture = userFixtureToday(career)
+  const opp = fixture && (fixture.homeId === me ? fixture.awayId : fixture.homeId)
+  const open = openId ? byId.get(openId) : undefined
+  const inXi = !!openId && order.includes(openId)
 
-  const tapXi = (id: string) => {
-    if (sel && sel !== id && selInXi) {
-      const o = [...order]
-      const i = o.indexOf(sel)
-      const j = o.indexOf(id)
-      ;[o[i], o[j]] = [o[j] as string, o[i] as string]
-      setOrder(o)
-      setSel(null)
-    } else if (sel && !selInXi) {
-      // A bench player was selected: he takes this player's place.
-      setOrder(order.map((x) => (x === id ? sel : x)))
-      if (sheet.keeperId === id) setSheet((s) => ({ ...s, keeperId: sel }))
-      setSel(null)
-    } else setSel(sel === id ? null : id)
+  const setOrder = (battingOrder: string[]) => setSheet((s) => ({ ...s, battingOrder }))
+  /** Bring a bench player in for someone in the XI (he takes over the gloves/captaincy). */
+  const swapIn = (benchId: string, outId: string) => {
+    setSheet((s) => ({
+      ...s,
+      battingOrder: s.battingOrder.map((x) => (x === outId ? benchId : x)),
+      keeperId: s.keeperId === outId ? benchId : s.keeperId,
+      captainId: s.captainId === outId ? benchId : s.captainId,
+    }))
+    setOpenId(null)
   }
-  const tapBench = (id: string) => {
-    if (selInXi) {
-      setOrder(order.map((x) => (x === sel ? id : x)))
-      if (sheet.keeperId === sel) setSheet((s) => ({ ...s, keeperId: id }))
-      setSel(null)
-    } else if (order.length < XI_SIZE && isAvailable(byId.get(id) as CareerPlayer))
-      setOrder([...order, id])
-    else setSel(sel === id ? null : id)
+  /** Tap one player, then another: two in the XI swap batting places; XI and bench swap in. */
+  const tap = (id: string) => {
+    setNote(null)
+    if (!picked || picked === id) return setPicked(picked === id ? null : id)
+    const a = picked
+    setPicked(null)
+    const aIn = order.includes(a)
+    const bIn = order.includes(id)
+    if (aIn && bIn) {
+      setOrder(order.map((x) => (x === a ? id : x === id ? a : x)))
+    } else if (aIn !== bIn) {
+      const benchId = aIn ? id : a
+      const bench = byId.get(benchId)
+      if (bench && !isAvailable(bench)) return setNote(`${bench.name} is injured.`)
+      swapIn(benchId, aIn ? a : id)
+    } else setPicked(id)
   }
-  const move = (d: number) => {
-    if (!sel) return
-    const o = [...order]
-    const i = o.indexOf(sel)
-    const j = i + d
-    if (i < 0 || j < 0 || j >= o.length) return
-    ;[o[i], o[j]] = [o[j] as string, o[i] as string]
-    setOrder(o)
+  /** Tap an empty slot with a bench player picked: he joins the XI. */
+  const fillSlot = () => {
+    const p = picked ? byId.get(picked) : undefined
+    if (!p || order.includes(p.id)) return
+    if (!isAvailable(p)) return setNote(`${p.name} is injured.`)
+    setOrder([...order, p.id])
+    setPicked(null)
   }
+  const pickedName = picked ? byId.get(picked)?.name : undefined
 
   return (
     <Screen
@@ -105,87 +217,66 @@ function LineupEditor({ career }: { career: Career }) {
           setLineup({
             battingOrder: sheet.battingOrder,
             keeperId: sheet.keeperId,
+            captainId: sheet.captainId,
             aggression: sheet.aggression,
           })
           navigate(-1)
         },
       }}
     >
-      <div className="row-between">
-        <h1>Your XI</h1>
-        <button onClick={() => setSheet(autoTeamSheet(me, squad, false))}>Auto-pick</button>
-      </div>
-      <div className="prow-meta">
-        <Chip tone={xi.length === XI_SIZE ? 'good' : 'warn'}>
-          {xi.length}/{XI_SIZE}
-        </Chip>
-        <Chip tone={overseas <= MAX_OVERSEAS_IN_XI ? 'good' : 'bad'}>
-          {overseas}/{MAX_OVERSEAS_IN_XI} overseas
-        </Chip>
-        <Chip tone={bowlers >= MIN_BOWLING_OPTIONS ? 'good' : 'warn'}>{bowlers} bowlers</Chip>
-      </div>
-      <div className="xi-strip">
-        {selInXi ? (
-          <div className="xi-tools">
-            <button className="icon-btn" onClick={() => move(-1)} aria-label="Bat higher">
-              <Icon name="up" />
-            </button>
-            <button className="icon-btn" onClick={() => move(1)} aria-label="Bat lower">
-              <Icon name="down" />
-            </button>
-            <button onClick={() => sel && setSheet((s) => ({ ...s, keeperId: sel }))}>
-              <Icon name="gloves" size={18} /> Keeper
-            </button>
-            <button
-              onClick={() => {
-                setOrder(order.filter((x) => x !== sel))
-                setSel(null)
-              }}
-            >
-              Bench
-            </button>
-          </div>
-        ) : (
-          <p className="dim">
-            {sel
-              ? 'Tap a player in the XI to swap him in.'
-              : 'Batting order: 1–2 open, 11 last. Tap a player to move or swap.'}
-          </p>
-        )}
+      <div className="ts-head">
+        <span className="eyebrow">{opp ? `Against ${teamName(opp)}` : 'Your team sheet'}</span>
+        <h1>Playing XI</h1>
+        <div className="prow-meta">
+          <Chip tone={xi.length === XI_SIZE ? 'good' : 'warn'}>
+            {xi.length}/{XI_SIZE}
+          </Chip>
+          <Chip tone={overseas <= MAX_OVERSEAS_IN_XI ? 'good' : 'bad'}>
+            {overseas}/{MAX_OVERSEAS_IN_XI} overseas
+          </Chip>
+          <Chip tone={bowlers >= MIN_BOWLING_OPTIONS ? 'good' : 'warn'}>
+            {bowlers} bowling options
+          </Chip>
+          <button className="ts-auto" onClick={() => setSheet(autoTeamSheet(me, squad, false))}>
+            Auto-pick
+          </button>
+        </div>
       </div>
 
-      <div className="xi-field" role="group" aria-label="Playing XI by batting order">
-        <span className="xi-oval" />
-        <span className="xi-oval inner" />
-        <span className="xi-pitch" />
-        {xi.map((p, i) => {
-          const [left, top] = SPOTS[i] ?? [50, 50]
-          return (
-            <button
-              key={p.id}
-              className={`xi-card ${sel === p.id ? 'sel' : ''} ${i < 2 ? 'open' : ''}`}
-              style={{ left: `${left}%`, top: `${top}%` }}
-              onClick={() => tapXi(p.id)}
-              aria-label={`${i + 1}. ${p.name}`}
-              aria-pressed={sel === p.id}
-            >
-              <span className="xi-n">{i + 1}</span>
-              {sheet.keeperId === p.id && (
-                <span className="xi-glove" aria-hidden="true">
-                  <Icon name="gloves" size={14} />
-                </span>
-              )}
-              <span className="xi-info">
-                <strong>{lastName(p.name)}</strong>
-                <span>
-                  {ROLE_SHORT[p.role]} · {overallRating(p)}
-                  {p.overseas && ' · OS'}
-                </span>
-              </span>
+      <p className={`ts-hint ${picked ? 'on' : ''}`} aria-live="polite">
+        {pickedName
+          ? `${pickedName} picked: tap another player to swap them.`
+          : 'Tap a player, then another, to swap them (XI or bench).'}
+      </p>
+      {note && <p className="warn">{note}</p>}
+      <ol className="team-sheet" aria-label="Playing XI in batting order">
+        {xi.map((p, i) => (
+          <SheetRow
+            key={p.id}
+            p={p}
+            n={i + 1}
+            captain={p.id === sheet.captainId}
+            keeper={p.id === sheet.keeperId}
+            selected={picked === p.id}
+            onTap={() => tap(p.id)}
+            onStats={() => setOpenId(p.id)}
+          />
+        ))}
+        {Array.from({ length: Math.max(0, XI_SIZE - xi.length) }, (_, i) => (
+          <li key={`empty-${i}`} className="ts-row empty">
+            <span className="ts-n">{xi.length + i + 1}</span>
+            <button className="ts-name" onClick={fillSlot}>
+              <small>Empty: pick a bench player, then tap here</small>
             </button>
-          )
-        })}
-      </div>
+          </li>
+        ))}
+      </ol>
+
+      {errors.map((e) => (
+        <p key={e} className="warn">
+          {e}
+        </p>
+      ))}
 
       <div className="xi-intent">
         <span className="dim">Batting intent</span>
@@ -202,37 +293,79 @@ function LineupEditor({ career }: { career: Career }) {
         </div>
       </div>
 
-      {errors.map((e) => (
-        <p key={e} className="warn">
-          {e}
-        </p>
-      ))}
-
-      <div className="row-between" style={{ marginTop: 12 }}>
-        <h2 className="section" style={{ margin: 0 }}>
-          Bench · {bench.length}
-        </h2>
-        <span className="dim" style={{ fontSize: 13 }}>
-          Tap to add or swap in
-        </span>
-      </div>
-      <div className="xi-bench">
+      <h2 className="section">Bench · {bench.length}</h2>
+      <ol className="team-sheet bench" aria-label="Bench">
         {bench.map((p) => (
-          <button
+          <SheetRow
             key={p.id}
-            className={`bench-card ${sel === p.id ? 'sel' : ''}`}
-            onClick={() => tapBench(p.id)}
-            disabled={!isAvailable(p) && !selInXi}
-          >
-            <strong>{p.name}</strong>
-            <span className={p.injury ? 'bad' : p.morale < 35 ? 'warn' : 'dim'}>
-              {p.injury
-                ? `Injured · ${p.injury.matchesOut}`
-                : `${ROLE_SHORT[p.role]} · ${overallRating(p)}${p.morale < 35 ? ' · unhappy' : ''}`}
-            </span>
-          </button>
+            p={p}
+            n={null}
+            selected={picked === p.id}
+            onTap={() => tap(p.id)}
+            onStats={() => setOpenId(p.id)}
+          />
         ))}
-      </div>
+      </ol>
+
+      {open && (
+        <PlayerSheet
+          p={open}
+          onClose={() => setOpenId(null)}
+          actions={
+            inXi ? (
+              <div className="ts-actions">
+                <button
+                  className={sheet.captainId === open.id ? 'on' : ''}
+                  onClick={() => setSheet((s) => ({ ...s, captainId: open.id }))}
+                >
+                  {sheet.captainId === open.id ? 'Captain ✓' : 'Make captain'}
+                </button>
+                <button
+                  className={sheet.keeperId === open.id ? 'on' : ''}
+                  onClick={() => setSheet((s) => ({ ...s, keeperId: open.id }))}
+                >
+                  <Icon name="gloves" size={16} />{' '}
+                  {sheet.keeperId === open.id ? 'Keeper ✓' : 'Make keeper'}
+                </button>
+                <button
+                  className="danger"
+                  onClick={() => {
+                    setOrder(order.filter((x) => x !== open.id))
+                    setOpenId(null)
+                  }}
+                >
+                  Drop to bench
+                </button>
+              </div>
+            ) : !isAvailable(open) ? (
+              <p className="warn">Injured: he can't be picked.</p>
+            ) : (
+              <div className="card">
+                <strong>Bring him in for…</strong>
+                {xi.length < XI_SIZE && (
+                  <button
+                    className="primary"
+                    onClick={() => {
+                      setOrder([...order, open.id])
+                      setOpenId(null)
+                    }}
+                  >
+                    Add to the XI (no. {xi.length + 1})
+                  </button>
+                )}
+                <div className="ts-swap">
+                  {xi.map((q, i) => (
+                    <button key={q.id} onClick={() => swapIn(open.id, q.id)}>
+                      {i + 1}. {q.name.split(' ').slice(-1)[0]}
+                      <Icon name={roleIcon(q, q.id === sheet.keeperId)} size={14} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )
+          }
+        />
+      )}
     </Screen>
   )
 }

@@ -9,6 +9,7 @@ import { quickSimMyMatch, startMyMatch, useGame } from '@/state/store'
 import { Crest } from './identity/Crest'
 import { Screen } from './kit/kit'
 import { INTENT_LABEL } from './match/MatchView'
+import { TeamSheetRows } from './LineupPage'
 import { PlayerRow } from './PlayerRow'
 
 /** A plain-words read of the pitch. */
@@ -86,21 +87,7 @@ export function PreMatchPage() {
         </button>
       </div>
       <h2 className="section">Your XI · intent {INTENT_LABEL[sheet.aggression]}</h2>
-      <ol className="list">
-        {sheet.battingOrder.map((id, i) => {
-          const p = byId.get(id)
-          return (
-            p && (
-              <li key={id} className="row-between">
-                <span>
-                  {i + 1}. {p.name} {id === sheet.keeperId && <span className="dim">(wk)</span>}
-                </span>
-                <span className="dim">{overallRating(p)}</span>
-              </li>
-            )
-          )
-        })}
-      </ol>
+      <TeamSheetRows sheet={sheet} players={byId} onOpen={(id) => navigate(`/lineup?open=${id}`)} />
       <h2 className="section">Danger men</h2>
       <ul className="plist">
         {theirBest.map((p) => (

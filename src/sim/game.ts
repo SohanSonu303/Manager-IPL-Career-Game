@@ -8,6 +8,7 @@ import {
   type Objective,
 } from './board'
 import { fillSquad, isMegaYear, startMega } from './auction'
+import { credit, PRIZES, WIN_BONUS } from './finance'
 import { nextDay, SEASON, today, type PlayoffStage } from './calendar'
 import { agePlayer, newCareer, restDay, type Career, type CareerPlayer } from './career'
 import {
@@ -38,6 +39,7 @@ import {
 } from './market'
 import { simMatch, type Match } from './match/engine'
 import { applyPostMatch } from './match/postMatch'
+import { aiYouthSignings, generateProspects, prospectCount } from './youth'
 import { autoTeamSheet, isAvailable, validateSheet, type Selectable } from './match/selection'
 import { setupMatch } from './match/setup'
 import type { MatchState, TeamSheet } from './match/types'
@@ -60,10 +62,10 @@ export function objectiveFor(career: Career): Objective {
 }
 
 export function startCareer(opts: { seed: number; managerName: string; teamId: string }): Career {
-  const draft = rerollFreeAgents(
-    newCareer({ ...opts, objective: { targetPosition: 6, text: '' } }),
-    'start',
-  )
+  const fresh = newCareer({ ...opts, objective: { targetPosition: 6, text: '' } })
+  // A first youth intake, so young prospects are on the market from day one.
+  const intake = generateProspects(opts.seed, fresh.calendar.year, prospectCount(0), fresh.players)
+  const draft = rerollFreeAgents({ ...fresh, players: [...fresh.players, ...intake] }, 'start')
   return { ...draft, season: { ...draft.season, objective: objectiveFor(draft) } }
 }
 
@@ -171,6 +173,7 @@ export function managerSheet(career: Career): TeamSheet {
     ...auto,
     battingOrder: l.battingOrder,
     keeperId: l.keeperId,
+    captainId: l.captainId && l.battingOrder.includes(l.captainId) ? l.captainId : auto.captainId,
     aggression: l.aggression,
   }
   return validateSheet(sheet, squad).length === 0 ? sheet : auto
@@ -188,12 +191,45 @@ export function recordFixture(career: Career, f: Fixture, state: MatchState): Ca
       stats: addMatchStats(career.season.stats, state),
     },
   }
-  const withNews = addNews(
-    after,
-    ...matchNews(career, after, f, state, createRng(deriveSeed(career.seed, 'news', f.id))),
+  const withNews = winBonus(
+    addNews(
+      after,
+      ...matchNews(career, after, f, state, createRng(deriveSeed(career.seed, 'news', f.id))),
+    ),
+    f,
+    after.season.results.at(-1)?.winnerId ?? null,
   )
   const me = career.manager.teamId
   return involves(f, me) ? unlock(withNews, matchAchievements(state, me)) : withNews
+}
+
+/** The winner's bonus for a match. */
+function winBonus(career: Career, f: Fixture, winnerId: string | null): Career {
+  if (!winnerId) return career
+  const opp = winnerId === f.homeId ? f.awayId : f.homeId
+  return credit(
+    career,
+    winnerId,
+    WIN_BONUS,
+    `Win vs ${teams.find((t) => t.id === opp)?.short ?? opp}`,
+  )
+}
+
+/** Prize money at the end of the season, by final standing. */
+function payPrizes(career: Career, championId: string, runnerUpId: string): Career {
+  const results = career.season.results
+  const loser = (stage: string) => {
+    const r = results.find((x) => x.stage === stage)
+    return r?.winnerId ? (r.teams[0] === r.winnerId ? r.teams[1] : r.teams[0]) : null
+  }
+  const year = career.calendar.year
+  let c = credit(career, championId, PRIZES.champion, `${year} champions`)
+  c = credit(c, runnerUpId, PRIZES.runnerUp, `${year} runners-up`)
+  const third = loser('qualifier2')
+  const fourth = loser('eliminator')
+  if (third) c = credit(c, third, PRIZES.third, `${year}: third place`)
+  if (fourth) c = credit(c, fourth, PRIZES.fourth, `${year}: fourth place`)
+  return c
 }
 
 /** A word with an unhappy player: lifts his morale (once per complaint). */
@@ -234,13 +270,17 @@ export function quickSim(career: Career, f: Fixture): Career {
   const conceded = walkoverLoser(c, f)
   if (conceded) {
     const winner = conceded === f.homeId ? f.awayId : f.homeId
-    return {
-      ...c,
-      season: {
-        ...c.season,
-        results: [...c.season.results, walkover(f, winner, fixtureSeed(c, f))],
+    return winBonus(
+      {
+        ...c,
+        season: {
+          ...c.season,
+          results: [...c.season.results, walkover(f, winner, fixtureSeed(c, f))],
+        },
       },
-    }
+      f,
+      winner,
+    )
   }
   const { state, rng } = setupMatch({
     seed: fixtureSeed(c, f),
@@ -326,16 +366,19 @@ export function finishSeason(career: Career): Career {
   const confidence = clampScore(career.manager.boardConfidence + verdict.confidenceChange)
   const sacked = confidence < SACK_BELOW
   const ages = Object.fromEntries(career.players.map((p) => [p.id, p.age]))
+  const championId = final?.champion ?? table[0]?.teamId ?? ''
+  const runnerUpId = final?.runnerUp ?? table[1]?.teamId ?? ''
+  const paid = payPrizes(career, championId, runnerUpId)
   return {
-    ...career,
+    ...paid,
     manager: { ...career.manager, reputation, boardConfidence: confidence },
     status: sacked ? 'sacked' : 'active',
     season: {
       ...career.season,
       review: {
         year: career.calendar.year,
-        championId: final?.champion ?? table[0]?.teamId ?? '',
-        runnerUpId: final?.runnerUp ?? table[1]?.teamId ?? '',
+        championId,
+        runnerUpId,
         table: table.map(({ teamId, points, nrr }) => ({ teamId, points, nrr })),
         position,
         finish,
@@ -370,10 +413,17 @@ export function rollover(career: Career, endedYear: number): Career {
     const underpaid = p.contract && askingSalary(p) > p.contract.salary * 1.6
     return { ...p, morale: 65 + (p.morale - 65) * 0.5 - (underpaid ? 10 : 0) }
   })
+  // Youth intake: new young players join the unsigned pool to replace the retirees.
+  const prospects = generateProspects(
+    career.seed,
+    endedYear + 1,
+    prospectCount(retired.length),
+    aged,
+  )
   const me = career.manager.teamId
   let c: Career = expireOffers({
     ...career,
-    players: settled,
+    players: [...settled, ...prospects],
     careerStats: mergeStats(career.careerStats, career.season.stats),
   })
   c = addNews(
@@ -386,6 +436,13 @@ export function rollover(career: Career, endedYear: number): Career {
         playerId: p.id,
         text: `${p.name} retires from T20 cricket.`,
       })),
+    {
+      kind: 'transfer' as const,
+      teamIds: [me],
+      text: `Youth intake: ${prospects.length} young prospects join the player pool${
+        prospects.some((p) => p.potential >= 80) ? ', one or two with real star potential' : ''
+      }.`,
+    },
     ...settled
       .filter((p) => p.teamId === me && p.contract && askingSalary(p) > p.contract.salary * 1.6)
       .map((p) => ({
@@ -401,6 +458,7 @@ export function rollover(career: Career, endedYear: number): Career {
   } else {
     c = expireContracts(c, createRng(deriveSeed(career.seed, 'expire', endedYear)))
     c = aiSignings(c, TEAM_IDS, createRng(deriveSeed(career.seed, 'ai-sign', endedYear)))
+    c = aiYouthSignings(c, TEAM_IDS, createRng(deriveSeed(career.seed, 'ai-youth', endedYear)))
     for (const id of TEAM_IDS) c = ensureEleven(c, id)
     c = rerollFreeAgents(c, endedYear + 1)
     c = windowBusiness(c, `${endedYear + 1}-pre`)
@@ -415,6 +473,7 @@ export function rollover(career: Career, endedYear: number): Career {
     market: {
       ...c.market,
       talks: {},
+      tradeTalks: {},
       listed: (c.market.listed ?? []).filter(
         (id) => c.players.find((p) => p.id === id)?.teamId === me,
       ),

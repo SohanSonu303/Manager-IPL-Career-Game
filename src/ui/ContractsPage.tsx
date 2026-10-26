@@ -7,7 +7,10 @@ import { TEAM_IDS } from '@/sim/game'
 import { capRoom, SQUAD_MIN, squadOf } from '@/sim/market'
 import { continueGame, letGo, listPlayer, release, useGame } from '@/state/store'
 import { bidPrice, crore } from './format'
+import { teamById } from '@/data'
+import { Assistant } from './identity/Assistant'
 import { Chip, Screen } from './kit/kit'
+import { RenewalPlanSheet } from './PAPlan'
 import { AGENT_TONE } from './Negotiation'
 import { Negotiation } from './Negotiation'
 import { PlayerRow, PlayerSheet } from './PlayerRow'
@@ -62,6 +65,7 @@ export function ContractsPanel({ career }: { career: Career }) {
   const me = career.manager.teamId
   const [openId, setOpenId] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [planOpen, setPlanOpen] = useState(false)
   const open = career.players.find((p) => p.id === openId)
   const row = o.expiring.find((r) => r.p.id === openId)
   const ending = o.expiring.filter((r) => r.status !== 'retiring')
@@ -115,6 +119,19 @@ export function ContractsPanel({ career }: { career: Career }) {
           )}
         </div>
       )}
+      {!o.megaYear && !career.mega && o.undecided.length > 0 && (
+        <button className="pa-handle" onClick={() => setPlanOpen(true)}>
+          <Assistant
+            kit={teamById.get(me)?.colors ?? { primary: '#14904a', secondary: '#f5c542' }}
+            size={44}
+          />
+          <span className="grow2">
+            <strong>Let PA handle it</strong>
+            <small>She decides who to keep and negotiates the renewals for you</small>
+          </span>
+        </button>
+      )}
+      {planOpen && <RenewalPlanSheet career={career} onClose={() => setPlanOpen(false)} />}
       {message && <p className="good">{message}</p>}
 
       {!o.megaYear && (
